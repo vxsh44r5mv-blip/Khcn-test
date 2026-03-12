@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KHCN TASK - Quản lý công việc</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+        input[type="date"]::-webkit-calendar-picker-indicator {
+          opacity: 0;
+          position: absolute;
+          width: 100%;
+          height: 100%;
+          cursor: pointer;
+        }
+        @keyframes ping { 75%, 100% { transform: scale(2); opacity: 0; } }
+        .animate-ping { animation: ping 1s cubic-bezier(0, 0, 0.2, 1) infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .animate-spin { animation: spin 1s linear infinite; }
+        @keyframes pulse { 50% { opacity: .5; } }
+        .animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+
+    <script>
+        // SVG Icons as functions
+        const Icons = {
+            Zap: (size = 24, className = '') => `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${className}"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>`,
+            Calendar: (size = 24, className = '') => `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${className}"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>`,
+            UserPlus: (size = 24, className = '') => `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${className}"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>`,
+            Layout: (size = 24, className = '') => `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${className}"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>`,
+            Wand2: (size = 24, className = '') => `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${className}"><path d="M15 4V2"></path><path d="M15 16v-2"></path><path d="M8 9h2"></path><path d="M20 9h2"></path><path d="M17.8 11.8 19 13"></path><path d="M15 9h0"></path><path d="M17.8 6.2 19 5"></path><path d="m3 21 9-9"></path><path d="M12.2 6.2 11 5"></path></svg>`,
+            Sparkles: (size = 24, className = '') => `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${className}"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"></path><path d="M5 3v4"></path><path d="M19 17v4"></path><path d="M3 5h4"></path><path d="M17 19h4"></path></svg>`,
+            Loader2: (size = 24, className = '') => `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${className}"><path d="M21 12a9 9 0 1 1-6.219-8.56"></path></svg>`,
+            User: (size = 24, className = '') => `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${className}"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`,
+            CheckCircle: (size = 24, className = '') => `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${className}"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`,
+            ChevronRight: (size = 24, className = '') => `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${className}"><polyline points="9 18 15 12 9 6"></polyline></svg>`,
+            Trash2: (size = 24, className = '') => `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${className}"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>`,
+            ArrowRight: (size = 24, className = '') => `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${className}"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>`,
+            Copy: (size = 24, className = '') => `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${className}"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`,
+            Check: (size = 24, className = '') => `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${className}"><polyline points="20 6 9 17 4 12"></polyline></svg>`,
+            Download: (size = 24, className = '') => `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="${className}"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>`
+        };
+
+        // App State
+        class AppState {
+            constructor() {
+                this.activeTab = 'input';
+                this.selectedDate = new Date().toISOString().split('T')[0];
+                this.tasks = [];
+                this.options = [];
+                this.name = '';
+                this.selectedTask = '';
+                this.newOption = '';
+                this.aiInput = '';
+                this.isAiLoading = false;
+                this.copySuccess = false;
+                
+                this.loadFromStorage();
+                this.initializeDefaultOptions();
+            }
+
+            loadFromStorage() {
+                const stored = localStorage.getItem('khcn-task-data');
+                if (stored) {
+                    const data = JSON.parse(stored);
+                    this.tasks = data.tasks || [];
+                    this.options = data.options || [];
+                }
+            }
+
+            saveToStorage() {
+                localStorage.setItem('khcn-task-data', JSON.stringify({
+                    tasks: this.tasks,
+                    options: this.options
+                }));
+            }
+
+            initializeDefaultOptions() {
+                if (this.options.length === 0) {
+                    this.options = ['Trực nhật', 'Tiếp khách', 'Mua đồ ăn', 'Soạn tài liệu'];
+                    this.saveToStorage();
+                }
+                if (!this.selectedTask) {
+                    this.selectedTask = this.options[0];
+                }
+            }
+
+            addTask() {
+                if (!this.name.trim() || !this.selectedTask) return;
+                
+                const task = {
+                    id: Date.now().toString(),
+                    name: this.name.trim(),
+                    task: this.selectedTask,
+                    date: this.selectedDate,
+                    createdAt: Date.now()
+                };
+                
+                this.tasks.push(task);
+                this.saveToStorage();
+                this.name = '';
+                this.activeTab = 'summary';
+                render();
+            }
+
+            deleteTask(id) {
+                this.tasks = this.tasks.filter(t => t.id !== id);
+                this.saveToStorage();
+                render();
+            }
+
+            addOption() {
+                if (!this.newOption.trim() || this.options.includes(this.newOption.trim())) return;
+                
+                const trimmed = this.newOption.trim();
+                this.options.push(trimmed);
+                this.selectedTask = trimmed;
+                this.newOption = '';
+                this.saveToStorage();
+                render();
+            }
+
+            removeOption(option) {
+                this.options = this.options.filter(o => o !== option);
+                if (this.selectedTask === option) {
+                    this.selectedTask = this.options[0] || '';
+                }
+                this.saveToStorage();
+                render();
+            }
+
+            getFilteredTasks() {
+                return this.tasks
+                    .filter(t => t.date === this.selectedDate)
+                    .sort((a, b) => a.createdAt - b.createdAt);
+            }
+
+            async mockAI() {
+                this.isAiLoading = true;
+                render();
+
+                // Simulate AI processing delay
+                await new Promise(resolve => setTimeout(resolve, 1500));
+
+                // Simple mock AI logic
+                const input = this.aiInput.toLowerCase();
+                
+                // Extract name (first words before task keywords)
+                const nameMatch = input.match(/^([a-zA-ZÀ-ỹ\s]+?)(?=\s+(?:trực|tiếp|mua|soạn|làm|viết|chuẩn bị))/i);
+                if (nameMatch) {
+                    this.name = nameMatch[1].trim();
+                }
+
+                // Match task
+                for (const option of this.options) {
+                    if (input.includes(option.toLowerCase())) {
+                        this.selectedTask = option;
+                        break;
+                    }
+                }
+
+                // If no match found, try to extract task keywords
+                if (!this.selectedTask && input.includes('tiếp khách')) {
+                    this.selectedTask = 'Tiếp khách';
+                } else if (!this.selectedTask && input.includes('trực nhật')) {
+                    this.selectedTask = 'Trực nhật';
+                }
+
+                this.aiInput = '';
+                this.isAiLoading = false;
+                render();
+            }
+
+            exportCSV() {
+                const filtered = this.getFilteredTasks();
+                if (filtered.length === 0) return;
+
+                const headers = ["STT", "Họ và tên", "Nhiệm vụ", "Ngày"];
+                const rows = filtered.map((t, i) => [
+                    i + 1,
+                    t.name,
+                    t.task,
+                    t.date
+                ]);
+
+                const csvContent = [
+                    headers.join(","),
+                    ...rows.map(row => row.join(","))
+                ].join("\n");
+
+                const blob = new Blob(["\ufeff" + csvContent], { type: 'text/csv;charset=utf-8;' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.setAttribute("href", url);
+                link.setAttribute("download", `khcn-task-${this.selectedDate}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+            copyToZalo() {
+                const filtered = this.getFilteredTasks();
+                if (filtered.length === 0) return;
+
+                let text = `⚡ KHCN TASK - TỔNG HỢP (${this.selectedDate})\n`;
+                text += `--------------------------\n`;
+                filtered.forEach((t, i) => {
+                    text += `${i + 1}. ${t.name} » ${t.task}\n`;
+                });
+                text += `--------------------------\n`;
+                text += `Cập nhật lúc: ${new Date().toLocaleTimeString('vi-VN')}`;
+
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-9999px';
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+
+                this.copySuccess = true;
+                render();
+                setTimeout(() => {
+                    this.copySuccess = false;
+                    render();
+                }, 2000);
+            }
+        }
+
+        const state = new AppState();
+
+        // Render Function
+        function render() {
+            const app = document.getElementById('app');
+            const filteredTasks = state.getFilteredTasks();
+
+            app.innerHTML = `
+                <div class="min-h-screen bg-[#F8FAFC] flex flex-col max-w-md mx-auto shadow-2xl font-sans relative overflow-hidden border-x border-emerald-100/50">
+                    
+                    <!-- Background Decor -->
+                    <div class="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-emerald-100/40 to-transparent -z-10"></div>
+
+                    <header class="bg-white/80 backdrop-blur-xl p-5 sticky top-0 z-20 border-b border-emerald-50 shadow-sm">
+                        <div class="flex items-center justify-between mb-5">
+                            <div class="flex items-center gap-3">
+                                <div class="bg-emerald-600 p-2.5 rounded-2xl shadow-lg shadow-emerald-200 transition-transform active:scale-90">
+                                    ${Icons.Zap(22, 'text-white fill-white')}
+                                </div>
+                                <div>
+                                    <h1 class="text-xl font-black text-slate-900 tracking-tight leading-none">
+                                        KHCN <span class="text-emerald-600">TASK</span>
+                                    </h1>
+                                    <p class="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">Internal Operations</p>
+                                </div>
+                            </div>
+                            <div class="flex flex-col items-end">
+                                <div class="flex items-center gap-1.5 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-100">
+                                    ${Icons.Calendar(12, 'text-emerald-600')}
+                                    <input 
+                                        type="date" 
+                                        class="bg-transparent text-emerald-700 text-[11px] font-black outline-none appearance-none"
+                                        value="${state.selectedDate}"
+                                        onchange="state.selectedDate = this.value; render();"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex bg-slate-100/50 p-1.5 rounded-2xl border border-slate-200/50">
+                            <button 
+                                onclick="state.activeTab = 'input'; render();" 
+                                class="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-[11px] font-black transition-all ${state.activeTab === 'input' ? 'bg-white text-emerald-700 shadow-md shadow-slate-200/50' : 'text-slate-400'}"
+                            >
+                                ${Icons.UserPlus(16)} NHẬP VIỆC
+                            </button>
+                            <button 
+                                onclick="state.activeTab = 'summary'; render();" 
+                                class="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-[11px] font-black transition-all ${state.activeTab === 'summary' ? 'bg-white text-emerald-700 shadow-md shadow-slate-200/50' : 'text-slate-400'}"
+                            >
+                                ${Icons.Layout(16)} TỔNG HỢP <span class="ml-1 px-1.5 rounded-md ${state.activeTab === 'summary' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-200 text-slate-500'}">${filteredTasks.length}</span>
+                            </button>
+                        </div>
+                    </header>
+
+                    <main class="flex-1 overflow-y-auto p-5 pb-12 space-y-6 z-10">
+                        ${state.activeTab === 'input' ? renderInputTab() : renderSummaryTab(filteredTasks)}
+                    </main>
+
+                    <footer class="p-6 bg-white border-t border-slate-100 text-center z-10 relative">
+                        <p class="text-[9px] text-slate-400 font-black uppercase tracking-[0.3em]">Version 2.5 &bull; Demo Mode (LocalStorage)</p>
+                    </footer>
+                </div>
+            `;
+        }
+
+        function renderInputTab() {
+            return `
+                <div class="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
+                    <!-- AI Assistant Card -->
+                    <div class="bg-emerald-600 p-5 rounded-[2.5rem] shadow-2xl shadow-emerald-200 text-white space-y-4 relative overflow-hidden group">
+                        <div class="absolute -right-4 -top-4 w-24 h-24 bg-white/10 rounded-full blur-2xl group-hover:bg-white/20 transition-all"></div>
+                        <div class="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-emerald-100">
+                            ${Icons.Wand2(14, 'animate-pulse')}
+                            <span>Trợ lý AI Thông minh (Demo)</span>
+                        </div>
+                        <div class="flex gap-2 relative z-10">
+                            <input 
+                                type="text" 
+                                placeholder="VD: Chị Lan tiếp khách..." 
+                                class="flex-1 bg-white/15 border border-white/20 rounded-2xl px-5 py-3.5 text-sm focus:outline-none focus:bg-white/20 transition-all placeholder:text-emerald-100/40 text-white font-medium shadow-inner" 
+                                value="${state.aiInput}" 
+                                oninput="state.aiInput = this.value;"
+                                onkeypress="if(event.key === 'Enter') state.mockAI();"
+                            />
+                            <button 
+                                onclick="state.mockAI()" 
+                                ${state.isAiLoading || !state.aiInput.trim() ? 'disabled' : ''}
+                                class="bg-white text-emerald-700 p-3.5 rounded-2xl shadow-lg active:scale-90 disabled:opacity-50 transition-all hover:shadow-white/20"
+                            >
+                                ${state.isAiLoading ? Icons.Loader2(20, 'animate-spin') : Icons.Sparkles(20)}
+                            </button>
+                        </div>
+                        <p class="text-[9px] text-emerald-100/60 font-medium italic pl-1">AI tự bóc tách Tên và Công việc từ câu nói của bạn</p>
+                    </div>
+
+                    <!-- Manual Form -->
+                    <div class="bg-white p-7 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 space-y-7">
+                        <div class="space-y-2.5">
+                            <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] ml-1">Người thực hiện</label>
+                            <div class="relative group">
+                                ${Icons.User(18, 'absolute left-4 top-1/2 -translate-y-1/2 text-emerald-600 transition-transform group-focus-within:scale-110')}
+                                <input 
+                                    type="text" 
+                                    placeholder="Tên thành viên..." 
+                                    class="w-full bg-slate-50 border border-slate-200 rounded-2xl py-4 pl-12 pr-5 focus:ring-4 focus:ring-emerald-500/5 focus:border-emerald-500 outline-none transition-all font-bold text-slate-700" 
+                                    value="${state.name}" 
+                                    oninput="state.name = this.value; render();"
+                                />
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between ml-1">
+                                <label class="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em]">Nhiệm vụ</label>
+                                <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-md">Yêu cầu</span>
+                            </div>
+                            
+                            <div class="flex gap-2 p-1.5 bg-slate-50 rounded-2xl border border-slate-200 focus-within:border-emerald-500 transition-all shadow-inner">
+                                <input 
+                                    type="text" 
+                                    placeholder="Việc mới..." 
+                                    class="flex-1 bg-transparent px-4 py-2 text-sm outline-none font-bold text-slate-600 placeholder:font-normal" 
+                                    value="${state.newOption}" 
+                                    oninput="state.newOption = this.value; render();"
+                                    onkeypress="if(event.key === 'Enter') { state.addOption(); }"
+                                />
+                                <button onclick="state.addOption();" class="bg-emerald-600 text-white px-5 py-2 rounded-xl text-[10px] font-black hover:bg-emerald-700 active:scale-95 transition-all shadow-md">THÊM</button>
+                            </div>
+
+                            <div class="grid grid-cols-1 gap-2.5 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
+                                ${state.options.map(opt => `
+                                    <div class="flex items-center gap-2 group p-0.5 rounded-2xl transition-all ${state.selectedTask === opt ? 'bg-emerald-50' : 'hover:bg-slate-50'}">
+                                        <button 
+                                            onclick="state.selectedTask = '${opt}'; render();" 
+                                            class="flex-1 p-4 rounded-xl text-sm font-bold text-left flex items-center justify-between border-2 transition-all ${state.selectedTask === opt ? 'border-emerald-600 bg-white text-emerald-700 shadow-lg shadow-emerald-100' : 'border-slate-100 bg-white text-slate-400'}"
+                                        >
+                                            ${opt}
+                                            ${state.selectedTask === opt ? Icons.CheckCircle(18, 'text-emerald-600') : Icons.ChevronRight(16, 'text-slate-300 opacity-0 group-hover:opacity-100 transition-all')}
+                                        </button>
+                                        <button 
+                                            onclick="state.removeOption('${opt}');" 
+                                            class="p-3 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                                        >
+                                            ${Icons.Trash2(18)}
+                                        </button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+
+                        <button 
+                            onclick="state.addTask();" 
+                            ${!state.name.trim() || !state.selectedTask ? 'disabled' : ''}
+                            class="w-full bg-emerald-600 text-white font-black py-5 rounded-[1.5rem] shadow-2xl shadow-emerald-200 active:scale-[0.97] transition-all disabled:opacity-20 disabled:shadow-none uppercase tracking-[0.2em] text-[11px] flex items-center justify-center gap-3 group"
+                        >
+                            XÁC NHẬN CÔNG VIỆC ${Icons.ArrowRight(18, 'group-hover:translate-x-1 transition-transform')}
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSummaryTab(filteredTasks) {
+            return `
+                <div class="animate-in fade-in duration-500 space-y-6">
+                    <div class="flex gap-3">
+                        <button 
+                            onclick="state.copyToZalo();" 
+                            ${filteredTasks.length === 0 ? 'disabled' : ''}
+                            class="flex-1 flex items-center justify-center gap-2 py-4.5 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl transition-all active:scale-95 disabled:opacity-30 ${state.copySuccess ? 'bg-emerald-100 text-emerald-700 shadow-none' : 'bg-emerald-600 text-white shadow-emerald-200'}"
+                        >
+                            ${state.copySuccess ? Icons.Check(16) : Icons.Copy(16)}
+                            ${state.copySuccess ? "ĐÃ SAO CHÉP" : "SAO CHÉP ZALO"}
+                        </button>
+                        <button 
+                            onclick="state.exportCSV();" 
+                            ${filteredTasks.length === 0 ? 'disabled' : ''}
+                            class="flex-1 flex items-center justify-center gap-2 bg-white text-slate-700 border border-slate-200 py-4.5 rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-slate-200/50 active:scale-95 transition-all disabled:opacity-30"
+                        >
+                            ${Icons.Download(16)} TẢI FILE CSV
+                        </button>
+                    </div>
+
+                    <div class="bg-white rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
+                        <div class="p-6 border-b border-slate-50 flex items-center justify-between">
+                            <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest">Danh sách công việc</h3>
+                            <span class="text-[10px] font-bold text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full">${filteredTasks.length} mục</span>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left">
+                                <thead>
+                                    <tr class="bg-slate-50/50 text-[9px] font-black text-slate-500 uppercase tracking-widest">
+                                        <th class="px-6 py-4 w-12 text-center">#</th>
+                                        <th class="px-6 py-4">Thành viên</th>
+                                        <th class="px-6 py-4">Nhiệm vụ</th>
+                                        <th class="px-6 py-4 w-12"></th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-50">
+                                    ${filteredTasks.length === 0 ? `
+                                        <tr>
+                                            <td colspan="4" class="py-24 text-center">
+                                                <div class="flex flex-col items-center gap-4 opacity-20">
+                                                    ${Icons.Layout(48, 'text-slate-400')}
+                                                    <p class="text-[10px] font-black uppercase tracking-widest italic">Chưa có dữ liệu hôm nay</p>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ` : filteredTasks.map((task, index) => `
+                                        <tr class="hover:bg-emerald-50/30 transition-colors group">
+                                            <td class="px-6 py-5 text-xs font-black text-slate-300 text-center">${index + 1}</td>
+                                            <td class="px-6 py-5">
+                                                <div class="text-sm font-black text-slate-800 tracking-tight">${task.name}</div>
+                                            </td>
+                                            <td class="px-6 py-5">
+                                                <span class="bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider shadow-sm border border-emerald-100/50">
+                                                    ${task.task}
+                                                </span>
+                                            </td>
+                                            <td class="px-6 py-5 text-center">
+                                                <button 
+                                                    onclick="state.deleteTask('${task.id}');" 
+                                                    class="text-slate-300 hover:text-red-500 p-2 rounded-lg hover:bg-red-50 transition-all opacity-0 group-hover:opacity-100"
+                                                >
+                                                    ${Icons.Trash2(18)}
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="flex justify-center items-center py-6 opacity-40">
+                        <div class="h-[1px] w-8 bg-emerald-200"></div>
+                        <p class="px-4 text-[9px] text-emerald-800 font-black uppercase tracking-[0.4em]">KHCN Standard</p>
+                        <div class="h-[1px] w-8 bg-emerald-200"></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Initialize app
+        render();
+    </script>
+</body>
+</html>
