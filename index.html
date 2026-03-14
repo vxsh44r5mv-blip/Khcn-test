@@ -527,14 +527,16 @@
         const task = parts.slice(1).join(' ');
         const timestampId = Date.now();
 
+        // Đặt lại UI ngay lập tức để tạo cảm giác mượt mà
+        inputEl.value = ''; 
+
         try {
             const taskRef = doc(db_firestore, 'artifacts', appId, 'public', 'data', 'khcn_tasks', timestampId.toString());
             await setDoc(taskRef, { id: timestampId, date: currentDate, name, task });
-            
-            inputEl.value = ''; // Reset khung nhập liệu nhanh
         } catch (error) {
             console.error(error);
             alert("⚠️ Lỗi lưu dữ liệu: Kiểm tra quyền Firebase");
+            inputEl.value = val; // Khôi phục lại nếu lỗi
         }
     }
 
@@ -549,16 +551,21 @@
 
         const timestampId = Date.now();
         
+        // Đặt lại UI ngay lập tức
+        inputEl.value = ''; 
+        selectedPerson = null; 
+        window.renderPeopleButtons();
+
         try {
             const taskRef = doc(db_firestore, 'artifacts', appId, 'public', 'data', 'khcn_tasks', timestampId.toString());
             await setDoc(taskRef, { id: timestampId, date: currentDate, name, task });
-            
-            inputEl.value = ''; // Xóa sạch khung nhập nhiệm vụ
-            selectedPerson = null; // Reset bỏ chọn thẻ người
-            window.renderPeopleButtons();
         } catch (error) {
             console.error(error);
             alert("⚠️ Lỗi lưu dữ liệu: Kiểm tra quyền Firebase");
+            // Khôi phục nếu lỗi
+            inputEl.value = task;
+            selectedPerson = name;
+            window.renderPeopleButtons();
         }
     }
 
@@ -604,11 +611,12 @@
 
         if(!n || !t) return alert("⚠️ Vui lòng nhập đầy đủ thông tin");
 
+        // Đóng modal ngay lập tức
+        window.closeTaskEditModal(); 
+
         try {
             const taskRef = doc(db_firestore, 'artifacts', appId, 'public', 'data', 'khcn_tasks', docId);
             await setDoc(taskRef, { name: n, task: t }, { merge: true });
-            
-            window.closeTaskEditModal(); // Tắt bảng chỉnh sửa ngay sau khi lưu
         } catch(error) {
             console.error(error);
             alert("⚠️ Lỗi cập nhật dữ liệu");
@@ -648,24 +656,30 @@
     }
 
     window.saveModal = async function() {
-        const newListStr = document.getElementById('modalInput').value.trim();
+        const inputEl = document.getElementById('modalInput');
+        const newListStr = inputEl.value.trim();
         const names = newListStr.split(',').map(n => n.trim()).filter(n => n);
         if(names.length === 0) return alert('⚠️ Vui lòng nhập ít nhất một tên');
+        
+        // Đóng modal và reset trạng thái ngay lập tức
+        window.closeModal();
+        selectedPerson = null;
+        
+        const oldPeople = [...people];
+        people = names;
+        window.renderPeopleButtons();
         
         try {
             if (userAuth) {
                 const ref = doc(db_firestore, 'artifacts', appId, 'public', 'data', 'khcn_settings', 'people_list');
                 await setDoc(ref, { list: names });
-            } else {
-                people = names;
-                window.renderPeopleButtons();
             }
-            
-            selectedPerson = null;
-            window.closeModal(); // Tắt bảng chỉnh sửa danh sách người
         } catch(error) {
             console.error(error);
             alert("⚠️ Lỗi cập nhật danh sách");
+            // Khôi phục nếu lỗi
+            people = oldPeople;
+            window.renderPeopleButtons();
         }
     }
 
@@ -777,5 +791,6 @@
 </script>
 </body>
 </html>
+
 
 
