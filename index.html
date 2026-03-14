@@ -788,21 +788,20 @@
     window.exportCSV = function() {
         if(db.length === 0) return window.showToast("⚠️ Không có dữ liệu để xuất");
         
-        // Không dùng \uFEFF ở dạng chuỗi nữa, giữ lệnh chia cột của Excel
-        let csv = "sep=,\nSTT,Họ Tên,Nhiệm Vụ\n";
+        // Dùng \uFEFF ở dạng chuỗi nguyên bản để Excel nhận chuẩn UTF-8 Tiếng Việt
+        // Dùng dấu chấm phẩy (;) để chia cột do hệ thống VN mặc định hiểu (;) là phân cách cột
+        let csv = "\uFEFFSTT;Họ Tên;Nhiệm Vụ\n";
         
         db.forEach((item, index) => { 
             // Xử lý chuỗi an toàn
             const safeName = item.name ? String(item.name).replace(/"/g, '""') : "";
             const safeTask = item.task ? String(item.task).replace(/"/g, '""') : "";
-            csv += `${index + 1},"${safeName}","${safeTask}"\n`; 
+            
+            // Chia cột bằng dấu chấm phẩy (;)
+            csv += `${index + 1};"${safeName}";"${safeTask}"\n`; 
         });
         
-        // Tạo BOM (Byte Order Mark) chuẩn cho UTF-8 bằng mảng Byte thô
-        const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
-        
-        // Gộp BOM và nội dung CSV vào file
-        const blob = new Blob([bom, csv], { type: 'text/csv;charset=utf-8;' });
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a'); a.href = url; a.download = `KHCN_${currentCategory}_${currentDate}.csv`;
         a.click();
@@ -878,6 +877,7 @@
 </script>
 </body>
 </html>
+
 
 
 
