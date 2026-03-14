@@ -504,7 +504,12 @@
             // Sắp xếp theo id (timestamp)
             allTasks.sort((a, b) => a.id - b.id);
             filterData();
-        }, (err) => console.error("Snapshot error tasks:", err));
+        }, (err) => {
+            console.error("Snapshot error tasks:", err);
+            if(err.message.includes('permission') || err.message.includes('Missing or insufficient permissions')) {
+                window.showToast("⚠️ Lỗi phân quyền Firebase. Vui lòng cấp quyền Database rules!");
+            }
+        });
 
         // Listen to Settings (People List)
         const settingsRef = collection(db_firestore, 'artifacts', appId, 'public', 'data', 'khcn_settings');
@@ -662,6 +667,11 @@
     // Modal Task Edit
     window.editItem = function(docId) {
         if (!userAuth) return window.showToast("⚠️ Chưa kết nối đám mây");
+        
+        // Khôi phục lại biến item (Lỗi do bản trước xóa nhầm)
+        const item = db.find(i => i.docId === docId);
+        if(!item) return;
+
         document.getElementById('editTaskId').value = docId;
         document.getElementById('editTaskName').value = item.name;
         document.getElementById('editTaskContent').value = item.task;
@@ -877,6 +887,7 @@
 </script>
 </body>
 </html>
+
 
 
 
