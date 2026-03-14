@@ -246,7 +246,6 @@
         .btn-edit { background: #dcfce7; color: #15803d; } .btn-edit:hover { background: #bbf7d0; }
         .btn-del { background: #fee2e2; color: #b91c1c; } .btn-del:hover { background: #fecaca; }
 
-        /* Sửa lại CSS của Toast: Đưa xuống dưới cùng để không bị che trên Vercel/Mobile */
         #toast {
             position: fixed; 
             bottom: 30px; 
@@ -265,7 +264,7 @@
             align-items: center; 
             gap: 8px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            pointer-events: none; /* Không cản trở khi nhấn click */
+            pointer-events: none;
             width: max-content;
             max-width: 90vw;
         }
@@ -417,7 +416,7 @@
     }
 
     /* ===================================================================
-       Cấu hình Firebase cho Web Vercel
+       Cấu hình Firebase cho Web
        =================================================================== */
     let firebaseConfig = {
         apiKey: "AIzaSyDQ9lzZ6bcJ1mDCUYDVT53gukoqOJ1hLx4",
@@ -430,6 +429,7 @@
 
     let appId = 'khcn-app-123';
 
+    // Override bằng config của môi trường (nếu có)
     if (typeof __firebase_config !== 'undefined') {
         firebaseConfig = JSON.parse(__firebase_config);
         appId = typeof __app_id !== 'undefined' ? __app_id : appId;
@@ -447,6 +447,7 @@
         auth = getAuth(app);
         db_firestore = getFirestore(app);
 
+        // Khởi tạo Auth
         const initAuth = async () => {
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -479,16 +480,19 @@
     function setupRealtimeListener() {
         if (!userAuth) return;
         
+        // Listen to Tasks (Lấy toàn bộ document và filter in-memory để đáp ứng quy tắc Không dùng Query Phức Tạp)
         const tasksRef = collection(db_firestore, 'artifacts', appId, 'public', 'data', 'khcn_tasks');
         onSnapshot(tasksRef, (snapshot) => {
             allTasks = [];
             snapshot.forEach(doc => {
                 allTasks.push({ docId: doc.id, ...doc.data() });
             });
+            // Sắp xếp theo id (timestamp)
             allTasks.sort((a, b) => a.id - b.id);
             filterCurrentDate();
-        }, (err) => console.error(err));
+        }, (err) => console.error("Snapshot error tasks:", err));
 
+        // Listen to Settings (People List)
         const settingsRef = collection(db_firestore, 'artifacts', appId, 'public', 'data', 'khcn_settings');
         onSnapshot(settingsRef, (snapshot) => {
             snapshot.forEach(doc => {
@@ -497,7 +501,7 @@
                     window.renderPeopleButtons();
                 }
             });
-        }, (err) => console.error(err));
+        }, (err) => console.error("Snapshot error settings:", err));
     }
 
     function filterCurrentDate() {
@@ -730,6 +734,7 @@
 
         navigator.clipboard.writeText(str).then(() => window.showToast("Đã sao chép vào bộ nhớ tạm"))
         .catch(() => {
+            // Fallback dành cho các trình duyệt không hỗ trợ Clipboard API trực tiếp
             const el = document.createElement('textarea');
             el.value = str; document.body.appendChild(el); el.select();
             document.execCommand('copy'); document.body.removeChild(el);
@@ -738,7 +743,7 @@
     }
 
     window.exportCSV = function() {
-        if(db.length === 0) return;
+        if(db.length === 0) return window.showToast("⚠️ Không có dữ liệu để xuất");
         let csv = "\uFEFFSTT,Họ Tên,Nhiệm Vụ\n";
         db.forEach((item, index) => { csv += `${index + 1},"${item.name}","${item.task}"\n`; });
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
@@ -816,5 +821,4 @@
 </script>
 </body>
 </html>
-
 
