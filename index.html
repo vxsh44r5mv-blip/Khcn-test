@@ -246,12 +246,31 @@
         .btn-edit { background: #dcfce7; color: #15803d; } .btn-edit:hover { background: #bbf7d0; }
         .btn-del { background: #fee2e2; color: #b91c1c; } .btn-del:hover { background: #fecaca; }
 
+        /* Sửa lại CSS của Toast: Đưa xuống dưới cùng để không bị che trên Vercel/Mobile */
         #toast {
-            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px);
-            background: #1f2937; color: white; padding: 12px 28px; border-radius: 30px; font-size: 14px; font-weight: 500;
-            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); z-index: 9999; opacity: 0; display: flex; align-items: center; gap: 8px;
+            position: fixed; 
+            bottom: 30px; 
+            left: 50%; 
+            transform: translateX(-50%) translateY(100px);
+            background: #1f2937; 
+            color: white; 
+            padding: 12px 24px; 
+            border-radius: 30px; 
+            font-size: 14px; 
+            font-weight: 500;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); 
+            z-index: 999999; 
+            opacity: 0; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            pointer-events: none; /* Không cản trở khi nhấn click */
+            width: max-content;
+            max-width: 90vw;
         }
         #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        
         .empty { text-align: center; padding: 50px 20px; color: #9ca3af; font-size: 0.95rem; display: flex; flex-direction: column; align-items: center; gap: 10px; }
 
         .modal { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(17, 24, 39, 0.6); backdrop-filter: blur(4px); animation: fadeIn 0.2s ease; }
@@ -339,7 +358,7 @@
     </div>
 </div>
 
-<!-- Modal Chỉnh sửa nhiệm vụ (Thay thế hàm prompt) -->
+<!-- Modal Chỉnh sửa nhiệm vụ -->
 <div id="taskEditModal" class="modal">
     <div class="modal-content">
         <div class="modal-title">Chỉnh sửa nhiệm vụ</div>
@@ -359,7 +378,7 @@
     </div>
 </div>
 
-<!-- Modal Xác nhận (Thay thế hàm confirm) -->
+<!-- Modal Xác nhận -->
 <div id="confirmModal" class="modal">
     <div class="modal-content">
         <div class="modal-title" id="confirmTitle">Xác nhận</div>
@@ -382,10 +401,23 @@
     import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+    // Khởi tạo hàm Toast an toàn nằm trọn trong module chính
+    let toastTimeout;
+    window.showToast = function(msg) {
+        const t = document.getElementById('toast');
+        document.getElementById('toastMsg').innerText = msg;
+        const iconSpan = t.querySelector('span:first-child');
+        if(msg.includes('Xóa') || msg.includes('⚠️') || msg.includes('Lỗi')) iconSpan.innerText = '⚠️';
+        else iconSpan.innerText = '✅';
+        
+        t.classList.add('show');
+        
+        if (toastTimeout) clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
     /* ===================================================================
-       HƯỚNG DẪN DÀNH CHO BẠN KHI DEPLOY LÊN VERCEL:
-       Nếu bạn tự tải code này lên Vercel của riêng bạn, bạn CẦN thay thế 
-       đoạn firebaseConfig bên dưới bằng thông tin dự án Firebase của bạn.
+       Cấu hình Firebase cho Web Vercel
        =================================================================== */
     let firebaseConfig = {
         apiKey: "AIzaSyDQ9lzZ6bcJ1mDCUYDVT53gukoqOJ1hLx4",
@@ -416,10 +448,15 @@
         db_firestore = getFirestore(app);
 
         const initAuth = async () => {
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                await signInWithCustomToken(auth, __initial_auth_token);
-            } else {
-                await signInAnonymously(auth);
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch(error) {
+                console.error("Auth Error:", error);
+                window.showToast("⚠️ Vui lòng bật 'Anonymous Login' trong Firebase Authentication!");
             }
         };
         
@@ -468,17 +505,6 @@
         window.render();
     }
 
-    // UI Helpers
-    window.showToast = function(msg) {
-        const t = document.getElementById('toast');
-        document.getElementById('toastMsg').innerText = msg;
-        const iconSpan = t.querySelector('span:first-child');
-        if(msg.includes('Xóa') || msg.includes('⚠️') || msg.includes('Lỗi')) iconSpan.innerText = '⚠️';
-        else iconSpan.innerText = '✅';
-        t.classList.add('show');
-        setTimeout(() => t.classList.remove('show'), 2500);
-    }
-
     window.updateDate = function() {
         const input = document.getElementById('dateInput');
         if(input.value) {
@@ -509,7 +535,7 @@
         document.getElementById('taskInput').focus();
     }
 
-    // Modal Xác Nhận (Thay cho confirm)
+    // Modal Xác Nhận
     let currentConfirmAction = null;
     window.openConfirmModal = function(title, message, action) {
         document.getElementById('confirmTitle').innerText = title;
@@ -531,9 +557,11 @@
         if (!userAuth) return window.showToast("⚠️ Chưa kết nối đám mây");
         const inputEl = document.getElementById('quickInput');
         const val = inputEl.value.trim();
-        if(!val) return;
+        
+        if(!val) return window.showToast("⚠️ Bạn chưa nhập thông tin!");
+        
         const parts = val.split(/\s+/);
-        if(parts.length < 2) return window.showToast("⚠️ Vui lòng nhập: [Tên] [Nhiệm vụ]");
+        if(parts.length < 2) return window.showToast("⚠️ Vui lòng nhập: [Tên] [Khoảng trắng] [Nhiệm vụ]");
 
         const name = parts[0];
         const task = parts.slice(1).join(' ');
@@ -543,7 +571,6 @@
             const taskRef = doc(db_firestore, 'artifacts', appId, 'public', 'data', 'khcn_tasks', timestampId.toString());
             await setDoc(taskRef, { id: timestampId, date: currentDate, name, task });
             
-            // Xóa rỗng form sau khi thêm thành công
             inputEl.value = '';
             window.showToast("Đã thêm nhanh thành công!");
         } catch (error) {
@@ -567,7 +594,6 @@
             const taskRef = doc(db_firestore, 'artifacts', appId, 'public', 'data', 'khcn_tasks', timestampId.toString());
             await setDoc(taskRef, { id: timestampId, date: currentDate, name, task });
             
-            // Reset dữ liệu UI
             inputEl.value = '';
             selectedPerson = null; 
             window.renderPeopleButtons();
@@ -597,7 +623,7 @@
         );
     }
 
-    // Modal Task Edit (Thay thế hàm prompt)
+    // Modal Task Edit
     window.editItem = function(docId) {
         if (!userAuth) return window.showToast("⚠️ Chưa kết nối đám mây");
         const item = db.find(i => i.docId === docId);
@@ -790,4 +816,5 @@
 </script>
 </body>
 </html>
+
 
