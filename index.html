@@ -6,26 +6,50 @@
     <link rel="stylesheet" href="styles.css">
     <title>Parallax Background Example</title>
     <style>
-        body {
+        * {
             margin: 0;
-            height: 100vh;
-            background: url('your-background-image-url.jpg') no-repeat fixed;
-            background-size: cover;
-            overflow: hidden;
+            padding: 0;
         }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+        }
+        
         .parallax {
-            background-image: url('your-parallax-image-url.jpg');
+            background-image: url('https://via.placeholder.com/1200x800?text=Parallax+Background');
             height: 100vh;
             width: 100%;
             background-attachment: fixed;
             background-position: center;
             background-repeat: no-repeat;
             background-size: cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .parallax h1 {
+            color: white;
+            font-size: 48px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+        }
+        
+        .content {
+            padding: 50px;
+            background-color: white;
+            line-height: 1.6;
         }
     </style>
 </head>
 <body>
-    <div class="parallax"></div>
-    <h1>Your Content Here</h1>
+    <div class="parallax">
+        <h1>Your Content Here</h1>
+    </div>
+    
+    <div class="content">
+        <h2>More Content Below</h2>
+        <p>This section scrolls normally while the parallax background stays fixed.</p>
+    </div>
 </body>
 </html>
