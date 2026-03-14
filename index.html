@@ -130,6 +130,12 @@
             opacity: 0;
         }
 
+        .tabs-wrapper { display: flex; justify-content: center; margin-bottom: 30px; }
+        .tabs { background: rgba(255,255,255,0.15); padding: 6px; border-radius: 40px; display: inline-flex; gap: 8px; backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.25); box-shadow: 0 4px 15px rgba(0,0,0,0.1); flex-wrap: wrap; justify-content: center; }
+        .tab-btn { background: transparent; border: none; padding: 10px 24px; color: white; font-size: 0.95rem; font-weight: 700; border-radius: 30px; cursor: pointer; transition: var(--transition); }
+        .tab-btn:hover { background: rgba(255,255,255,0.1); }
+        .tab-btn.active { background: white; color: var(--primary); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+
         .layout-2col {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -246,6 +252,30 @@
         .btn-edit { background: #dcfce7; color: #15803d; } .btn-edit:hover { background: #bbf7d0; }
         .btn-del { background: #fee2e2; color: #b91c1c; } .btn-del:hover { background: #fecaca; }
 
+        #toast {
+            position: fixed; 
+            bottom: 30px; 
+            left: 50%; 
+            transform: translateX(-50%) translateY(100px);
+            background: #1f2937; 
+            color: white; 
+            padding: 12px 24px; 
+            border-radius: 30px; 
+            font-size: 14px; 
+            font-weight: 500;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); 
+            z-index: 999999; 
+            opacity: 0; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            pointer-events: none;
+            width: max-content;
+            max-width: 90vw;
+        }
+        #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
         .empty { text-align: center; padding: 50px 20px; color: #9ca3af; font-size: 0.95rem; display: flex; flex-direction: column; align-items: center; gap: 10px; }
 
         .modal { display: none; position: fixed; z-index: 10000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(17, 24, 39, 0.6); backdrop-filter: blur(4px); animation: fadeIn 0.2s ease; }
@@ -266,15 +296,22 @@
 
 <div class="container">
     <header>
-        <h1>⚡ KHCN Quản lý nhập liệu</h1>
+        <div style="display: flex; justify-content: center; align-items: center; gap: 15px; flex-wrap: wrap; margin-bottom: 8px;">
+            <h1 style="margin-bottom: 0;">⚡ KHCN Quản lý</h1>
+            <div class="date-badge" title="Nhấn để chọn ngày khác" style="padding: 8px 20px; font-size: 0.95rem; margin: 0;">
+                <span id="dateDisplay">📅 Chọn ngày</span>
+                <input type="date" id="dateInput" onchange="window.updateDate()">
+            </div>
+        </div>
         <p style="opacity: 0.85; font-size: 0.95rem; font-weight: 500;">Hệ thống lưu trữ và tổng hợp dữ liệu</p>
         <div id="sync-status">⏳ Đang kết nối đám mây...</div>
     </header>
 
-    <div class="date-wrapper">
-        <div class="date-badge" title="Nhấn để chọn ngày khác">
-            <span id="dateDisplay">📅 Chọn ngày</span>
-            <input type="date" id="dateInput" onchange="window.updateDate()">
+    <div class="tabs-wrapper">
+        <div class="tabs">
+            <button class="tab-btn active" onclick="window.switchTab('Niềm vui')">Niềm vui</button>
+            <button class="tab-btn" onclick="window.switchTab('RBT')">RBT</button>
+            <button class="tab-btn" onclick="window.switchTab('Báo cáo')">Báo cáo</button>
         </div>
     </div>
 
@@ -365,11 +402,31 @@
     </div>
 </div>
 
+<div id="toast">
+    <span>✅</span>
+    <span id="toastMsg">Thông báo</span>
+</div>
+
 <!-- KẾT NỐI CLOUD DATABASE (FIREBASE) -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+    // Khởi tạo hàm Toast an toàn
+    let toastTimeout;
+    window.showToast = function(msg) {
+        const t = document.getElementById('toast');
+        document.getElementById('toastMsg').innerText = msg;
+        const iconSpan = t.querySelector('span:first-child');
+        if(msg.includes('Xóa') || msg.includes('⚠️') || msg.includes('Lỗi')) iconSpan.innerText = '⚠️';
+        else iconSpan.innerText = '✅';
+        
+        t.classList.add('show');
+        
+        if (toastTimeout) clearTimeout(toastTimeout);
+        toastTimeout = setTimeout(() => t.classList.remove('show'), 2500);
+    }
 
     /* ===================================================================
        Cấu hình Firebase cho Web
@@ -397,6 +454,7 @@
     let people = ['Nam', 'Trực', 'Đạt', 'Tùng'];
     let selectedPerson = null;
     let currentDate = new Date().toISOString().split('T')[0];
+    let currentCategory = 'Niềm vui';
 
     try {
         const app = initializeApp(firebaseConfig);
@@ -413,7 +471,7 @@
                 }
             } catch(error) {
                 console.error("Auth Error:", error);
-                alert("⚠️ Vui lòng bật 'Anonymous Login' trong Firebase Authentication!");
+                window.showToast("⚠️ Vui lòng bật 'Anonymous Login' trong Firebase Authentication!");
             }
         };
         
@@ -445,7 +503,7 @@
             });
             // Sắp xếp theo id (timestamp)
             allTasks.sort((a, b) => a.id - b.id);
-            filterCurrentDate();
+            filterData();
         }, (err) => console.error("Snapshot error tasks:", err));
 
         // Listen to Settings (People List)
@@ -460,8 +518,11 @@
         }, (err) => console.error("Snapshot error settings:", err));
     }
 
-    function filterCurrentDate() {
-        db = allTasks.filter(item => item.date === currentDate);
+    function filterData() {
+        db = allTasks.filter(item => 
+            item.date === currentDate && 
+            (item.category === currentCategory || (!item.category && currentCategory === 'Niềm vui'))
+        );
         window.render();
     }
 
@@ -473,8 +534,17 @@
             const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
             const formatted = dateObj.toLocaleDateString('vi-VN', options);
             document.getElementById('dateDisplay').textContent = '📅 ' + formatted;
-            filterCurrentDate();
+            filterData();
         }
+    }
+
+    window.switchTab = function(cat) {
+        currentCategory = cat;
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            if(btn.innerText.trim() === cat) btn.classList.add('active');
+            else btn.classList.remove('active');
+        });
+        filterData();
     }
 
     window.renderPeopleButtons = function() {
@@ -514,14 +584,14 @@
 
     // Các hàm tương tác Database
     window.quickAdd = async function() {
-        if (!userAuth) return alert("⚠️ Chưa kết nối đám mây");
+        if (!userAuth) return window.showToast("⚠️ Chưa kết nối đám mây");
         const inputEl = document.getElementById('quickInput');
         const val = inputEl.value.trim();
         
-        if(!val) return alert("⚠️ Bạn chưa nhập thông tin!");
+        if(!val) return window.showToast("⚠️ Bạn chưa nhập thông tin!");
         
         const parts = val.split(/\s+/);
-        if(parts.length < 2) return alert("⚠️ Vui lòng nhập: [Tên] [Khoảng trắng] [Nhiệm vụ]");
+        if(parts.length < 2) return window.showToast("⚠️ Vui lòng nhập: [Tên] [Khoảng trắng] [Nhiệm vụ]");
 
         const name = parts[0];
         const task = parts.slice(1).join(' ');
@@ -532,22 +602,23 @@
 
         try {
             const taskRef = doc(db_firestore, 'artifacts', appId, 'public', 'data', 'khcn_tasks', timestampId.toString());
-            await setDoc(taskRef, { id: timestampId, date: currentDate, name, task });
+            await setDoc(taskRef, { id: timestampId, date: currentDate, category: currentCategory, name, task });
+            window.showToast("Đã thêm nhanh thành công!");
         } catch (error) {
             console.error(error);
-            alert("⚠️ Lỗi lưu dữ liệu: Kiểm tra quyền Firebase");
+            window.showToast("⚠️ Lỗi lưu dữ liệu: Kiểm tra quyền Firebase");
             inputEl.value = val; // Khôi phục lại nếu lỗi
         }
     }
 
     window.manualAdd = async function() {
-        if (!userAuth) return alert("⚠️ Chưa kết nối đám mây");
+        if (!userAuth) return window.showToast("⚠️ Chưa kết nối đám mây");
         const name = selectedPerson;
         const inputEl = document.getElementById('taskInput');
         const task = inputEl.value.trim();
 
-        if(!name) return alert("⚠️ Vui lòng chọn người trước!");
-        if(!task) return alert("⚠️ Vui lòng nhập nhiệm vụ!");
+        if(!name) return window.showToast("⚠️ Vui lòng chọn người trước!");
+        if(!task) return window.showToast("⚠️ Vui lòng nhập nhiệm vụ!");
 
         const timestampId = Date.now();
         
@@ -558,10 +629,11 @@
 
         try {
             const taskRef = doc(db_firestore, 'artifacts', appId, 'public', 'data', 'khcn_tasks', timestampId.toString());
-            await setDoc(taskRef, { id: timestampId, date: currentDate, name, task });
+            await setDoc(taskRef, { id: timestampId, date: currentDate, category: currentCategory, name, task });
+            window.showToast("Đã lưu thành công!");
         } catch (error) {
             console.error(error);
-            alert("⚠️ Lỗi lưu dữ liệu: Kiểm tra quyền Firebase");
+            window.showToast("⚠️ Lỗi lưu dữ liệu: Kiểm tra quyền Firebase");
             // Khôi phục nếu lỗi
             inputEl.value = task;
             selectedPerson = name;
@@ -570,7 +642,7 @@
     }
 
     window.deleteItem = function(docId) {
-        if (!userAuth) return alert("⚠️ Chưa kết nối đám mây");
+        if (!userAuth) return window.showToast("⚠️ Chưa kết nối đám mây");
         window.openConfirmModal(
             "Xóa nhiệm vụ",
             "Bạn có chắc chắn muốn xóa nhiệm vụ này? Hành động không thể hoàn tác.",
@@ -578,9 +650,10 @@
                 try {
                     const taskRef = doc(db_firestore, 'artifacts', appId, 'public', 'data', 'khcn_tasks', docId);
                     await deleteDoc(taskRef);
+                    window.showToast("Đã xóa nhiệm vụ");
                 } catch(error) {
                     console.error(error);
-                    alert("⚠️ Lỗi khi xóa dữ liệu");
+                    window.showToast("⚠️ Lỗi khi xóa dữ liệu");
                 }
             }
         );
@@ -588,10 +661,7 @@
 
     // Modal Task Edit
     window.editItem = function(docId) {
-        if (!userAuth) return alert("⚠️ Chưa kết nối đám mây");
-        const item = db.find(i => i.docId === docId);
-        if(!item) return;
-
+        if (!userAuth) return window.showToast("⚠️ Chưa kết nối đám mây");
         document.getElementById('editTaskId').value = docId;
         document.getElementById('editTaskName').value = item.name;
         document.getElementById('editTaskContent').value = item.task;
@@ -609,7 +679,7 @@
         const n = document.getElementById('editTaskName').value.trim();
         const t = document.getElementById('editTaskContent').value.trim();
 
-        if(!n || !t) return alert("⚠️ Vui lòng nhập đầy đủ thông tin");
+        if(!n || !t) return window.showToast("⚠️ Vui lòng nhập đầy đủ thông tin");
 
         // Đóng modal ngay lập tức
         window.closeTaskEditModal(); 
@@ -617,15 +687,16 @@
         try {
             const taskRef = doc(db_firestore, 'artifacts', appId, 'public', 'data', 'khcn_tasks', docId);
             await setDoc(taskRef, { name: n, task: t }, { merge: true });
+            window.showToast("Đã cập nhật thông tin");
         } catch(error) {
             console.error(error);
-            alert("⚠️ Lỗi cập nhật dữ liệu");
+            window.showToast("⚠️ Lỗi cập nhật dữ liệu");
         }
     }
 
     window.clearData = function() {
-        if (!userAuth) return alert("⚠️ Chưa kết nối đám mây");
-        if(db.length === 0) return alert("⚠️ Không có dữ liệu để xóa");
+        if (!userAuth) return window.showToast("⚠️ Chưa kết nối đám mây");
+        if(db.length === 0) return window.showToast("⚠️ Không có dữ liệu để xóa");
         
         window.openConfirmModal(
             "Xóa toàn bộ dữ liệu",
@@ -636,9 +707,10 @@
                         const taskRef = doc(db_firestore, 'artifacts', appId, 'public', 'data', 'khcn_tasks', item.docId);
                         await deleteDoc(taskRef);
                     }
+                    window.showToast("Đã xóa hết dữ liệu");
                 } catch (error) {
                     console.error(error);
-                    alert("⚠️ Lỗi khi xóa dữ liệu");
+                    window.showToast("⚠️ Lỗi khi xóa dữ liệu");
                 }
             }
         );
@@ -659,7 +731,7 @@
         const inputEl = document.getElementById('modalInput');
         const newListStr = inputEl.value.trim();
         const names = newListStr.split(',').map(n => n.trim()).filter(n => n);
-        if(names.length === 0) return alert('⚠️ Vui lòng nhập ít nhất một tên');
+        if(names.length === 0) return window.showToast('⚠️ Vui lòng nhập ít nhất một tên');
         
         // Đóng modal và reset trạng thái ngay lập tức
         window.closeModal();
@@ -674,9 +746,10 @@
                 const ref = doc(db_firestore, 'artifacts', appId, 'public', 'data', 'khcn_settings', 'people_list');
                 await setDoc(ref, { list: names });
             }
+            window.showToast('Đã cập nhật danh sách người');
         } catch(error) {
             console.error(error);
-            alert("⚠️ Lỗi cập nhật danh sách");
+            window.showToast("⚠️ Lỗi cập nhật danh sách");
             // Khôi phục nếu lỗi
             people = oldPeople;
             window.renderPeopleButtons();
@@ -685,11 +758,11 @@
 
     // Utils
     window.copyTable = function(btn) {
-        if(db.length === 0) return alert("⚠️ Không có dữ liệu để sao chép");
+        if(db.length === 0) return window.showToast("⚠️ Không có dữ liệu để sao chép");
         const now = new Date();
         const timeString = now.toLocaleTimeString('vi-VN', { hour12: false });
         
-        let str = `⚡ KHCN TASK - TỔNG HỢP (${currentDate})\n--------------------------\n`;
+        let str = `⚡ KHCN TASK - ${currentCategory.toUpperCase()} (${currentDate})\n--------------------------\n`;
         db.forEach((item, index) => {
             str += `${index + 1}. ${item.name} » ${item.task}\n`;
         });
@@ -713,13 +786,27 @@
     }
 
     window.exportCSV = function() {
-        if(db.length === 0) return alert("⚠️ Không có dữ liệu để xuất");
-        let csv = "\uFEFFSTT,Họ Tên,Nhiệm Vụ\n";
-        db.forEach((item, index) => { csv += `${index + 1},"${item.name}","${item.task}"\n`; });
-        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        if(db.length === 0) return window.showToast("⚠️ Không có dữ liệu để xuất");
+        
+        // Không dùng \uFEFF ở dạng chuỗi nữa, giữ lệnh chia cột của Excel
+        let csv = "sep=,\nSTT,Họ Tên,Nhiệm Vụ\n";
+        
+        db.forEach((item, index) => { 
+            // Xử lý chuỗi an toàn
+            const safeName = item.name ? String(item.name).replace(/"/g, '""') : "";
+            const safeTask = item.task ? String(item.task).replace(/"/g, '""') : "";
+            csv += `${index + 1},"${safeName}","${safeTask}"\n`; 
+        });
+        
+        // Tạo BOM (Byte Order Mark) chuẩn cho UTF-8 bằng mảng Byte thô
+        const bom = new Uint8Array([0xEF, 0xBB, 0xBF]);
+        
+        // Gộp BOM và nội dung CSV vào file
+        const blob = new Blob([bom, csv], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
-        const a = document.createElement('a'); a.href = url; a.download = `KHCN_DuLieu_${currentDate}.csv`;
+        const a = document.createElement('a'); a.href = url; a.download = `KHCN_${currentCategory}_${currentDate}.csv`;
         a.click();
+        window.showToast("Đã tải xuống file CSV");
     }
 
     // Render Table
@@ -791,6 +878,10 @@
 </script>
 </body>
 </html>
+
+
+
+
 
 
 
