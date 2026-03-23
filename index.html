@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>KHCN Quản lý nhập liệu</title>
     <style>
         :root {
@@ -24,25 +24,115 @@
             --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.3); border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.5); }
 
-        body { background: var(--bg-gradient); min-height: 100vh; padding: 20px; color: var(--gray-800); display: flex; justify-content: center; }
-        .container { width: 100%; max-width: 1200px; animation: fadeIn 0.4s ease-out; position: relative; }
-        header { text-align: center; margin-bottom: 20px; color: var(--white); text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        header h1 { font-size: 2.2rem; font-weight: 800; margin-bottom: 5px; letter-spacing: -0.5px; }
+        body {
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            padding: 20px;
+            color: var(--gray-800);
+            display: flex;
+            justify-content: center;
+        }
 
-        #sync-status { display: inline-flex; align-items: center; gap: 5px; font-size: 0.8rem; font-weight: 600; background: rgba(255,255,255,0.2); padding: 4px 10px; border-radius: 20px; margin-top: 8px; transition: var(--transition); }
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            animation: fadeIn 0.4s ease-out;
+            position: relative;
+        }
 
-        .date-wrapper { display: flex; justify-content: center; margin-bottom: 30px; }
-        .date-badge { position: relative; background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); color: var(--white); padding: 10px 28px; border-radius: 30px; font-size: 1.05rem; font-weight: 600; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 1px solid rgba(255,255,255,0.25); transition: var(--transition); display: inline-flex; align-items: center; gap: 8px; overflow: hidden; }
-        .date-badge:hover { background: rgba(255, 255, 255, 0.25); transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--white);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 5px;
+            letter-spacing: -0.5px;
+        }
+
+        .sync-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background: rgba(255,255,255,0.2);
+            padding: 4px 10px;
+            border-radius: 20px;
+            margin-top: 8px;
+            transition: var(--transition);
+        }
+        .sync-status-success { background: rgba(16, 185, 129, 0.2); color: #059669; }
+        .sync-status-warning { background: rgba(251, 191, 36, 0.2); color: #b45309; }
+        .sync-status-error { background: rgba(239, 68, 68, 0.25); color: #dc2626; }
+        .sync-status-default { background: rgba(255,255,255,0.2); color: var(--white); }
+
+        .date-wrapper {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .date-badge {
+            position: relative;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            color: var(--white);
+            padding: 10px 28px;
+            border-radius: 30px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border: 1px solid rgba(255,255,255,0.25);
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            overflow: hidden;
+        }
+
+        .date-badge:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
         .date-badge:active { transform: scale(0.96); }
-        .date-badge input[type="date"] { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; box-sizing: border-box; }
-        .date-badge input[type="date"]::-webkit-calendar-picker-indicator { position: absolute; top: 0; left: 0; width: 100%; height: 100%; cursor: pointer; opacity: 0; }
+
+        .date-badge input[type="date"] {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            opacity: 0;
+            cursor: pointer;
+            box-sizing: border-box;
+        }
+        
+        .date-badge input[type="date"]::-webkit-calendar-picker-indicator {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            cursor: pointer;
+            opacity: 0;
+        }
 
         .tabs-wrapper { display: flex; justify-content: center; margin-bottom: 30px; }
         .tabs { background: rgba(255,255,255,0.15); padding: 6px; border-radius: 40px; display: inline-flex; gap: 8px; backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.25); box-shadow: 0 4px 15px rgba(0,0,0,0.1); flex-wrap: wrap; justify-content: center; }
@@ -50,62 +140,151 @@
         .tab-btn:hover { background: rgba(255,255,255,0.1); }
         .tab-btn.active { background: white; color: var(--primary); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
 
-        .layout-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-        @media (max-width: 900px) { .layout-2col { grid-template-columns: 1fr; } }
+        .layout-2col {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
 
-        .section-title { font-size: 1.1rem; font-weight: 700; color: var(--white); margin-bottom: 16px; padding-bottom: 12px; border-bottom: 2px solid rgba(255, 255, 255, 0.2); display: flex; align-items: center; gap: 8px; }
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--white);
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
 
-        .input-card, .people-section, .table-wrapper { background: var(--white); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); }
+        .input-card, .people-section, .table-wrapper {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+        }
+        
         .input-card { padding: 20px; margin-bottom: 20px; border: 1px solid rgba(255,255,255,0.8); }
         .people-section { padding: 20px; margin-bottom: 15px; }
         .table-wrapper { padding: 20px; box-shadow: var(--shadow-lg); }
 
         .form-group { margin-bottom: 16px; }
-        label { display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: var(--gray-800); }
 
-        input[type="text"], .modal-input { width: 100%; padding: 12px 16px; background-color: var(--gray-50); border: 2px solid transparent; border-radius: var(--radius-md); font-size: 14px; color: var(--gray-800); transition: var(--transition); }
-        input[type="text"]:focus, .modal-input:focus { outline: none; background-color: var(--white); border-color: var(--primary); box-shadow: 0 0 0 4px var(--primary-light); }
+        label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--gray-800);
+        }
 
-        .btn { padding: 12px 20px; border: none; border-radius: var(--radius-md); font-weight: 600; cursor: pointer; transition: var(--transition); display: inline-flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; }
-        .btn:disabled { opacity: 0.7; cursor: not-allowed; transform: none !important; }
-        .btn:active:not(:disabled) { transform: scale(0.97); }
+        /* Chỉnh font-size 16px trên input để chống auto-zoom trên iOS */
+        input[type="text"], .modal-input {
+            width: 100%;
+            padding: 12px 16px;
+            background-color: var(--gray-50);
+            border: 2px solid transparent;
+            border-radius: var(--radius-md);
+            font-size: 16px; 
+            color: var(--gray-800);
+            transition: var(--transition);
+        }
+
+        input[type="text"]:focus, .modal-input:focus {
+            outline: none;
+            background-color: var(--white);
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--primary-light);
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: var(--radius-md);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .btn:active { transform: scale(0.97); }
 
         .btn-primary { background: var(--primary); color: white; width: 100%; box-shadow: 0 4px 6px rgba(5, 150, 105, 0.2); }
-        .btn-primary:hover:not(:disabled) { background: var(--primary-hover); transform: translateY(-1px); }
+        .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
 
         .btn-outline { background: white; border: 1.5px solid var(--gray-200); color: var(--gray-600); }
-        .btn-outline:hover:not(:disabled) { border-color: var(--primary); color: var(--primary); background: var(--gray-50); }
+        .btn-outline:hover { border-color: var(--primary); color: var(--primary); background: var(--gray-50); }
 
         .controls-grid { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
         .controls-grid .btn { flex: 1; min-width: 120px; }
 
+        .attach-wrapper { display: flex; align-items: center; gap: 12px; margin-top: 12px; flex-wrap: wrap; }
+        .attach-wrapper .btn { padding: 10px 18px; }
+        .attach-preview { font-size: 0.85rem; color: var(--gray-600); }
+        .attach-preview strong { color: var(--primary); }
+
+        .attachment-list { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 6px; }
+        .attachment-pill { font-size: 12px; padding: 4px 10px; border-radius: 999px; background: #eef2ff; color: #1e3a8a; display: inline-flex; align-items: center; gap: 6px; }
+
         .people-label { font-size: 0.9rem; font-weight: 600; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
         .people-buttons { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
-        .btn-person { padding: 8px 16px; border: 1.5px solid var(--gray-200); background: var(--white); color: var(--gray-600); border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 13px; transition: var(--transition); }
+
+        .btn-person {
+            padding: 8px 16px; border: 1.5px solid var(--gray-200); background: var(--white); color: var(--gray-600);
+            border-radius: 20px; cursor: pointer; font-weight: 600; font-size: 13px; transition: var(--transition);
+        }
         .btn-person:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-light); }
         .btn-person.selected { background: var(--primary); border-color: var(--primary); color: white; box-shadow: 0 4px 10px rgba(5, 150, 105, 0.2); transform: translateY(-1px); }
         .btn-person:active { transform: scale(0.95); }
 
-        .btn-edit-people { padding: 6px 12px; font-size: 12px; background: #f59e0b; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: var(--transition); }
+        .btn-edit-people {
+            padding: 6px 12px; font-size: 12px; background: #f59e0b; color: white; border: none;
+            border-radius: 8px; cursor: pointer; font-weight: 600; transition: var(--transition);
+        }
         .btn-edit-people:hover { background: #d97706; transform: translateY(-1px); }
 
-        .table-container { overflow-x: auto; border-radius: var(--radius-md); border: 1px solid var(--gray-200); max-height: 500px; }
+        .table-container { overflow-x: auto; border-radius: var(--radius-md); border: 1px solid var(--gray-200); max-height: 500px; -webkit-overflow-scrolling: touch; }
         table { width: 100%; border-collapse: collapse; text-align: left; }
-        th { background: var(--gray-50); padding: 14px 16px; font-size: 12px; text-transform: uppercase; font-weight: 700; color: var(--gray-600); border-bottom: 2px solid var(--gray-200); position: sticky; top: 0; z-index: 10; }
+        th { background: var(--gray-50); padding: 14px 16px; font-size: 12px; text-transform: uppercase; font-weight: 700; color: var(--gray-600); border-bottom: 2px solid var(--gray-200); position: sticky; top: 0; z-index: 10; white-space: nowrap; }
         td { padding: 14px 16px; border-bottom: 1px solid var(--gray-100); font-size: 14px; color: var(--gray-800); }
         tr { animation: fadeInRow 0.3s ease-out; }
         tr:hover td { background: var(--gray-50); }
         tr:last-child td { border-bottom: none; }
 
         .action-btns { display: flex; gap: 6px; justify-content: flex-end; }
-        .btn-sm { padding: 6px 12px; font-size: 12px; font-weight: 600; border-radius: 6px; border: none; cursor: pointer; transition: var(--transition); text-decoration: none; }
+        .btn-sm { padding: 6px 12px; font-size: 12px; font-weight: 600; border-radius: 6px; border: none; cursor: pointer; transition: var(--transition); }
         .btn-sm:active { transform: scale(0.92); }
         .btn-edit { background: #dcfce7; color: #15803d; } .btn-edit:hover { background: #bbf7d0; }
         .btn-del { background: #fee2e2; color: #b91c1c; } .btn-del:hover { background: #fecaca; }
-        .btn-attach { background: #e0f2fe; color: #0369a1; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; } 
+        .btn-attach { background: #e0f2fe; color: #0369a1; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; text-decoration: none; }
         .btn-attach:hover { background: #bae6fd; }
 
-        #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: #1f2937; color: white; padding: 12px 24px; border-radius: 30px; font-size: 14px; font-weight: 500; transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); z-index: 999999; opacity: 0; display: flex; align-items: center; gap: 8px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); pointer-events: none; width: max-content; max-width: 90vw; }
+        #toast {
+            position: fixed; 
+            bottom: 30px; 
+            left: 50%; 
+            transform: translateX(-50%) translateY(100px);
+            background: #1f2937; 
+            color: white; 
+            padding: 12px 24px; 
+            border-radius: 30px; 
+            font-size: 14px; 
+            font-weight: 500;
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55); 
+            z-index: 999999; 
+            opacity: 0; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            pointer-events: none;
+            width: max-content;
+            max-width: 90vw;
+        }
         #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
         .empty { text-align: center; padding: 50px 20px; color: #9ca3af; font-size: 0.95rem; display: flex; flex-direction: column; align-items: center; gap: 10px; }
@@ -117,15 +296,92 @@
         .modal-title { font-size: 1.25rem; font-weight: 700; color: var(--gray-800); margin-bottom: 20px; }
         .modal-buttons { display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px; }
         .modal-btn { padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; transition: var(--transition); }
-        .modal-btn:disabled { opacity: 0.7; cursor: not-allowed; }
-        .modal-btn-primary { background: var(--primary); color: white; } .modal-btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
-        .modal-btn-cancel { background: var(--gray-100); color: var(--gray-800); } .modal-btn-cancel:hover:not(:disabled) { background: var(--gray-200); }
+        .modal-btn-primary { background: var(--primary); color: white; } .modal-btn-primary:hover { background: var(--primary-hover); }
+        .modal-btn-cancel { background: var(--gray-100); color: var(--gray-800); } .modal-btn-cancel:hover { background: var(--gray-200); }
 
-        .file-label { display: flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; }
-        .skeleton-box { background: #e2e8f0; background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%); background-size: 200% 100%; animation: skeletonLoading 1.5s infinite ease-in-out; border-radius: 4px; }
-        @keyframes skeletonLoading { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        /* Skeleton Loading Animation */
+        .skeleton-box {
+            background: #e2e8f0;
+            background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+            background-size: 200% 100%;
+            animation: skeletonLoading 1.5s infinite ease-in-out;
+            border-radius: 4px;
+        }
+        
+        @keyframes skeletonLoading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         @keyframes fadeInRow { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+
+        .quick-add-collapse {
+            width: 100%;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, margin-top 0.3s ease;
+        }
+        .quick-add-collapse.expanded {
+            max-height: 400px;
+            opacity: 1;
+            margin-top: 12px;
+        }
+
+        /* ==============================================================
+           TỐI ƯU HÓA DI ĐỘNG (MOBILE RESPONSIVE)
+           ============================================================== */
+        @media (max-width: 900px) {
+            .layout-2col { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 12px; }
+            
+            header h1 { font-size: 1.7rem; }
+            .date-badge { padding: 8px 16px; font-size: 0.95rem; }
+            
+            /* Cấu trúc lại Tabs cho vừa màn hình nhỏ */
+            .tabs { width: 100%; justify-content: space-between; border-radius: 20px; padding: 4px; }
+            .tab-btn { flex: 1; padding: 10px 8px; font-size: 0.85rem; text-align: center; border-radius: 16px; }
+            
+            /* Tăng độ lớn chạm và giãn cách */
+            .layout-2col { gap: 16px; }
+            .input-card, .people-section, .table-wrapper { padding: 16px; }
+            
+            /* Chỉnh khung Thêm nhanh */
+            .quick-add-group { flex-direction: column; align-items: stretch; gap: 0 !important; }
+            .quick-add-group > input { width: 100% !important; min-width: unset !important; margin: 0 !important; }
+            
+            .quick-add-extras-inner { flex-direction: column; align-items: stretch; gap: 12px !important; }
+            .quick-add-extras-inner > div:last-child { display: flex; width: 100%; }
+            .quick-add-extras-inner .btn-primary { flex: 1; }
+            
+            .attach-wrapper { justify-content: flex-start; }
+            .attach-wrapper .btn { width: 100%; }
+
+            /* Nút thao tác tổng (Copy, Xuất CSV, Xóa) */
+            .controls-grid { flex-direction: column; gap: 8px; margin-bottom: 16px; }
+            .controls-grid .btn { width: 100%; }
+            
+            /* Bố cục người thực hiện thành dạng lưới */
+            .people-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+            .btn-person { padding: 12px 10px; width: 100%; display: flex; justify-content: center; font-size: 14px; }
+            
+            /* Tối ưu hóa bảng cho màn hình hẹp */
+            th, td { padding: 12px 10px; font-size: 13px; }
+            .action-btns { flex-direction: column; gap: 6px; }
+            .action-btns .btn-sm { width: 100%; text-align: center; padding: 8px; }
+            
+            /* Thông báo Toast tràn ngang để dễ đọc */
+            #toast { width: 90vw; max-width: none; justify-content: center; bottom: 20px; }
+            
+            /* Modal tràn viền hơn trên mobile */
+            .modal-content { padding: 20px; width: 95%; }
+            .modal-buttons { flex-direction: column; gap: 8px; }
+            .modal-buttons .modal-btn { width: 100%; padding: 12px; }
+        }
     </style>
 </head>
 <body>
@@ -140,7 +396,7 @@
             </div>
         </div>
         <p style="opacity: 0.85; font-size: 0.95rem; font-weight: 500;">Hệ thống lưu trữ và tổng hợp dữ liệu</p>
-        <div id="sync-status">⏳ Đang kết nối đám mây...</div>
+        <div id="sync-status" class="sync-status sync-status-default" role="status" aria-live="polite">⏳ Đang kết nối đám mây...</div>
     </header>
 
     <div class="tabs-wrapper">
@@ -156,15 +412,28 @@
             <div class="section-title">✍️ Nhập Liệu</div>
             <div class="input-card">
                 <label>Nhập nhanh (Tên + Nhiệm vụ)</label>
-                <div style="display: flex; gap: 8px; align-items: stretch;">
-                    <input type="text" id="quickInput" placeholder="VD: Đạt trà đào cam sả" style="flex: 1;" onkeypress="if(event.key==='Enter') window.quickAdd()">
+                <!-- Đã thêm class quick-add-group cho giao diện mobile -->
+                <div class="quick-add-group" style="display: flex; flex-wrap: wrap; align-items: center;">
+                    <input type="text" id="quickInput" placeholder="Nhấp để nhập nhanh (VD: Đạt dọn vệ sinh)..." onfocus="window.expandQuickAdd()" onkeypress="if(event.key==='Enter') window.quickAdd()" style="flex: 1; width: 100%; transition: all 0.25s;">
                     
-                    <input type="file" id="quickFile" style="display:none" onchange="window.handleFileSelect(this, 'quickFileLabel', false)">
-                    <button class="btn btn-outline file-label" id="quickFileLabel" style="width: auto; padding: 0 12px;" onclick="document.getElementById('quickFile').click()" title="Đính kèm file, ảnh">📎</button>
-                    
-                    <button id="btnQuickAdd" class="btn btn-primary" style="width: auto; padding: 0 24px;" onclick="window.quickAdd()">Thêm</button>
+                    <div id="quickAddExtras" class="quick-add-collapse">
+                        <div class="quick-add-extras-inner" style="display: flex; gap: 8px; justify-content: space-between; flex-wrap: wrap;">
+                            <div class="attach-wrapper" style="margin-top: 0;">
+                                <label class="btn btn-outline" for="attachInput" style="position: relative; overflow: hidden;">
+                                    📎 Đính kèm
+                                    <input type="file" id="attachInput" style="position: absolute; left:0; top:0; width:100%; height:100%; opacity:0; cursor:pointer;" multiple onchange="window.handleAttachments(event)">
+                                </label>
+                                <span class="attach-preview" id="attachPreview">Không có tập tin nào.</span>
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <button class="btn btn-outline" style="padding: 0 16px;" onclick="window.collapseQuickAdd()" title="Thu gọn khung nhập">▲</button>
+                                <button class="btn btn-primary" style="width: auto; padding: 0 24px;" onclick="window.quickAdd()">Thêm</button>
+                            </div>
+                        </div>
+                        <div class="attachment-list" id="attachmentList"></div>
+                        <p style="font-size: 11px; color: var(--gray-600); margin-top: 10px; font-weight: 500;">* Gõ phím Enter để thêm nhanh. Định dạng: [Tên] [Khoảng cách] [Nhiệm vụ]</p>
+                    </div>
                 </div>
-                <p style="font-size: 11px; color: var(--gray-600); margin-top: 10px; font-weight: 500;">* Định dạng: [Tên] [Khoảng cách] [Nhiệm vụ]</p>
             </div>
 
             <div style="padding: 0 2px;">
@@ -179,12 +448,15 @@
                         <label>Nhiệm vụ / Ghi chú</label>
                         <input type="text" id="taskInput" placeholder="Nhập chi tiết nhiệm vụ..." onkeypress="if(event.key==='Enter') window.manualAdd()">
                     </div>
-                    
-                    <div style="display: flex; gap: 8px;">
-                        <input type="file" id="manualFile" style="display:none" onchange="window.handleFileSelect(this, 'manualFileLabel', true)">
-                        <button class="btn btn-outline file-label" id="manualFileLabel" style="width: auto; padding: 0 16px;" onclick="document.getElementById('manualFile').click()">📎 File đính kèm</button>
-                        <button id="btnManualAdd" class="btn btn-primary" style="flex: 1;" onclick="window.manualAdd()">Lưu vào danh sách</button>
+                    <div class="attach-wrapper" style="margin-bottom: 12px;">
+                        <label class="btn btn-outline" for="manualAttachInput" style="position: relative; overflow: hidden;">
+                            📎 File đính kèm
+                            <input type="file" id="manualAttachInput" style="position: absolute; left:0; top:0; width:100%; height:100%; opacity:0; cursor:pointer;" multiple onchange="window.handleManualAttachment(event)">
+                        </label>
+                        <span class="attach-preview" id="manualAttachPreview">Không có tập tin nào.</span>
                     </div>
+                    <div class="attachment-list" id="manualAttachmentList" style="margin-bottom: 12px;"></div>
+                    <button class="btn btn-primary" onclick="window.manualAdd()">Lưu vào danh sách</button>
                 </div>
             </div>
         </div>
@@ -203,11 +475,11 @@
     </div>
 </div>
 
-<!-- Modal Chỉnh sửa -->
+<!-- Modal Chỉnh sửa danh sách người -->
 <div id="editModal" class="modal">
     <div class="modal-content">
         <div class="modal-title">Chỉnh sửa danh sách người</div>
-        <input type="text" id="modalInput" class="modal-input" placeholder="Nhập danh sách tên (cách nhau bởi dấu phẩy)">
+        <input type="text" id="modalInput" class="modal-input" placeholder="Nhập danh sách tên (cách nhau bởi phẩy)">
         <div class="modal-buttons">
             <button class="modal-btn modal-btn-cancel" onclick="window.closeModal()">Hủy</button>
             <button class="modal-btn modal-btn-primary" onclick="window.saveModal()">Lưu</button>
@@ -219,20 +491,30 @@
 <div id="taskEditModal" class="modal">
     <div class="modal-content">
         <div class="modal-title">Chỉnh sửa nhiệm vụ</div>
-        <div class="form-group"><label>Người thực hiện</label><input type="text" id="editTaskName" class="modal-input" placeholder="Tên người thực hiện"></div>
-        <div class="form-group"><label>Nhiệm vụ</label><input type="text" id="editTaskContent" class="modal-input" placeholder="Chi tiết nhiệm vụ"></div>
         <div class="form-group">
-            <label>Đính kèm file (Thay thế file cũ nếu có)</label>
-            <div style="display: flex; gap: 8px;">
-                <input type="file" id="editFile" style="display:none" onchange="window.handleFileSelect(this, 'editFileLabel', true)">
-                <button class="btn btn-outline file-label" id="editFileLabel" style="width: 100%; justify-content: center;" onclick="document.getElementById('editFile').click()">📎 Chọn file mới...</button>
+            <label>Người thực hiện</label>
+            <input type="text" id="editTaskName" class="modal-input" placeholder="Tên người thực hiện">
+        </div>
+        <div class="form-group">
+            <label>Nhiệm vụ</label>
+            <input type="text" id="editTaskContent" class="modal-input" placeholder="Chi tiết nhiệm vụ" onkeypress="if(event.key==='Enter') window.saveTaskEdit()">
+        </div>
+        <div class="form-group">
+            <label>Đính kèm file (thay file cũ nếu chọn file mới)</label>
+            <div class="attach-wrapper">
+                <label class="btn btn-outline" for="editAttachInput" style="position: relative; overflow: hidden; width: 100%; justify-content:center;">
+                    📎 Chọn file mới
+                    <input type="file" id="editAttachInput" style="position: absolute; left:0; top:0; width:100%; height:100%; opacity:0; cursor:pointer;" multiple onchange="window.handleEditAttachment(event)">
+                </label>
             </div>
+            <span class="attach-preview" id="editAttachPreview">Không có tập tin nào được chọn.</span>
+            <div class="attachment-list" id="editAttachmentList"></div>
             <p id="currentAttachment" style="font-size: 12px; margin-top: 6px; color: var(--gray-600);"></p>
         </div>
         <input type="hidden" id="editTaskId">
         <div class="modal-buttons">
             <button class="modal-btn modal-btn-cancel" onclick="window.closeTaskEditModal()">Hủy</button>
-            <button id="btnSaveTask" class="modal-btn modal-btn-primary" onclick="window.saveTaskEdit()">Lưu thay đổi</button>
+            <button class="modal-btn modal-btn-primary" onclick="window.saveTaskEdit()">Lưu</button>
         </div>
     </div>
 </div>
@@ -249,55 +531,66 @@
     </div>
 </div>
 
-<div id="toast"><span>✅</span><span id="toastMsg">Thông báo</span></div>
+<div id="toast">
+    <span>✅</span>
+    <span id="toastMsg">Thông báo</span>
+</div>
 
-<!-- KẾT NỐI -->
+<!-- KẾT NỐI CLOUD DATABASE (FIREBASE) -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
     import { getFirestore, collection, onSnapshot, doc, setDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-    /* =======================================================
-       🔥 COPY LINK GOOGLE APPS SCRIPT VÀ DÁN VÀO ĐÂY 🔥
-       ======================================================= */
     const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzoPY7AYB15XQtPZUQ6RlKOMp-AdHJNz5E5yOCyocrxTAW8fO_N6LhNYibq8p_hKg/exec";
 
-
-    // Khởi tạo Toast
+    // Khởi tạo hàm Toast an toàn
     let toastTimeout;
     window.showToast = function(msg) {
         const t = document.getElementById('toast');
         document.getElementById('toastMsg').innerText = msg;
         const iconSpan = t.querySelector('span:first-child');
         if(msg.includes('Xóa') || msg.includes('⚠️') || msg.includes('Lỗi')) iconSpan.innerText = '⚠️';
-        else if (msg.includes('⏳')) iconSpan.innerText = '⏳';
         else iconSpan.innerText = '✅';
         
         t.classList.add('show');
+        
         if (toastTimeout) clearTimeout(toastTimeout);
-        toastTimeout = setTimeout(() => t.classList.remove('show'), 3000);
+        toastTimeout = setTimeout(() => t.classList.remove('show'), 2500);
     }
 
+    /* ===================================================================
+       Cấu hình Firebase cho Web
+       =================================================================== */
     let firebaseConfig = {
         apiKey: "AIzaSyDQ9lzZ6bcJ1mDCUYDVT53gukoqOJ1hLx4",
         authDomain: "khcn-nhap-lieu.firebaseapp.com",
         projectId: "khcn-nhap-lieu",
+        storageBucket: "khcn-nhap-lieu.firebasestorage.app",
         messagingSenderId: "1029001526815",
         appId: "1:1029001526815:web:bca9e014764c13b59b1f2a"
     };
 
     let appId = 'khcn-app-123';
+
+    // Override bằng config của môi trường (nếu có)
     if (typeof __firebase_config !== 'undefined') {
         firebaseConfig = JSON.parse(__firebase_config);
         appId = typeof __app_id !== 'undefined' ? __app_id : appId;
     }
 
     let db_firestore, auth, userAuth = null;
-    let allTasks = [], db = []; 
+    let allTasks = [];
+    let db = []; 
     let people = ['Nam', 'Trực', 'Đạt', 'Tùng'];
     let selectedPerson = null;
     let currentDate = new Date().toISOString().split('T')[0];
     let currentCategory = 'Niềm vui';
+    window.pendingQuickFiles = [];
+    window.pendingManualFiles = [];
+    window.pendingEditFiles = [];
+    
+    // Cờ trạng thái tải dữ liệu
     let isDataLoaded = false;
 
     try {
@@ -305,52 +598,91 @@
         auth = getAuth(app);
         db_firestore = getFirestore(app);
 
+        // Khởi tạo Auth
         const initAuth = async () => {
-            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) await signInWithCustomToken(auth, __initial_auth_token);
-            else await signInAnonymously(auth);
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+            } catch(error) {
+                console.error("Auth Error:", error);
+                window.showToast("⚠️ Vui lòng bật 'Anonymous Login' trong Firebase Authentication!");
+            }
         };
+        
         initAuth();
 
         onAuthStateChanged(auth, (user) => {
             userAuth = user;
             if (user) {
-                document.getElementById('sync-status').innerHTML = '☁️ Đã đồng bộ Database';
-                document.getElementById('sync-status').style.background = 'rgba(16, 185, 129, 0.2)';
+                const syncStatus = document.getElementById('sync-status');
+                syncStatus.innerHTML = '☁️ Đã đồng bộ';
+                syncStatus.className = 'sync-status sync-status-success';
                 setupRealtimeListener();
             }
         });
     } catch (error) {
-        document.getElementById('sync-status').innerHTML = '⚠️ Lỗi kết nối đám mây';
-        document.getElementById('sync-status').style.background = 'rgba(239, 68, 68, 0.2)';
+        console.error("Lỗi kết nối Đám mây", error);
+        const syncStatus = document.getElementById('sync-status');
+        syncStatus.innerHTML = '⚠️ Lỗi kết nối đám mây';
+        syncStatus.className = 'sync-status sync-status-error';
     }
 
     function setupRealtimeListener() {
         if (!userAuth) return;
+        
+        // Listen to Tasks
         const tasksRef = collection(db_firestore, 'artifacts', appId, 'public', 'data', 'khcn_tasks');
         onSnapshot(tasksRef, (snapshot) => {
             allTasks = [];
-            snapshot.forEach(doc => { allTasks.push({ docId: doc.id, ...doc.data() }); });
+            snapshot.forEach(doc => {
+                allTasks.push({ docId: doc.id, ...doc.data() });
+            });
+            // Sắp xếp theo id (timestamp)
             allTasks.sort((a, b) => a.id - b.id);
-            isDataLoaded = true; filterData();
-        }, (err) => { isDataLoaded = true; filterData(); });
+            
+            // Đánh dấu đã tải dữ liệu xong
+            isDataLoaded = true;
+            filterData();
+        }, (err) => {
+            console.error("Snapshot error tasks:", err);
+            isDataLoaded = true; // Thoát trạng thái loading để hiển thị lỗi
+            filterData();
+            if(err.message.includes('permission') || err.message.includes('Missing or insufficient permissions')) {
+                window.showToast("⚠️ Lỗi phân quyền Firebase. Vui lòng cấp quyền Database rules!");
+            }
+        });
 
+        // Listen to Settings (People List)
         const settingsRef = collection(db_firestore, 'artifacts', appId, 'public', 'data', 'khcn_settings');
         onSnapshot(settingsRef, (snapshot) => {
             snapshot.forEach(doc => {
-                if (doc.id === 'people_list' && doc.data().list) { people = doc.data().list; window.renderPeopleButtons(); }
+                if (doc.id === 'people_list' && doc.data().list) {
+                    people = doc.data().list;
+                    window.renderPeopleButtons();
+                }
             });
-        });
+        }, (err) => console.error("Snapshot error settings:", err));
     }
 
     function filterData() {
-        db = allTasks.filter(item => item.date === currentDate && (item.category === currentCategory || (!item.category && currentCategory === 'Niềm vui')));
+        db = allTasks.filter(item => 
+            item.date === currentDate && 
+            (item.category === currentCategory || (!item.category && currentCategory === 'Niềm vui'))
+        );
         window.render();
     }
 
     window.updateDate = function() {
-        if(document.getElementById('dateInput').value) {
-            currentDate = document.getElementById('dateInput').value;
-            document.getElementById('dateDisplay').textContent = '📅 ' + new Date(currentDate + 'T00:00:00').toLocaleDateString('vi-VN', { year: 'numeric', month: '2-digit', day: '2-digit' });
+        const input = document.getElementById('dateInput');
+        if(input.value) {
+            currentDate = input.value;
+            const dateObj = new Date(currentDate + 'T00:00:00');
+            const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+            const formatted = dateObj.toLocaleDateString('vi-VN', options);
+            document.getElementById('dateDisplay').textContent = '📅 ' + formatted;
             filterData();
         }
     }
@@ -358,13 +690,15 @@
     window.switchTab = function(cat) {
         currentCategory = cat;
         document.querySelectorAll('.tab-btn').forEach(btn => {
-            if(btn.innerText.trim() === cat) btn.classList.add('active'); else btn.classList.remove('active');
+            if(btn.innerText.trim() === cat) btn.classList.add('active');
+            else btn.classList.remove('active');
         });
         filterData();
     }
 
     window.renderPeopleButtons = function() {
-        const container = document.getElementById('peopleButtons'); container.innerHTML = '';
+        const container = document.getElementById('peopleButtons');
+        container.innerHTML = '';
         people.forEach(person => {
             const btn = document.createElement('button');
             btn.className = 'btn-person' + (selectedPerson === person ? ' selected' : '');
@@ -375,56 +709,90 @@
     }
 
     window.selectPerson = function(person) {
-        selectedPerson = person; window.renderPeopleButtons(); document.getElementById('taskInput').focus();
+        selectedPerson = person;
+        window.renderPeopleButtons();
+        document.getElementById('taskInput').focus();
     }
 
-    // Modal Utils
+    // Modal Xác Nhận
     let currentConfirmAction = null;
-    window.openConfirmModal = function(title, message, action) { document.getElementById('confirmTitle').innerText = title; document.getElementById('confirmMessage').innerText = message; currentConfirmAction = action; document.getElementById('confirmModal').classList.add('show'); }
-    window.closeConfirmModal = function() { document.getElementById('confirmModal').classList.remove('show'); currentConfirmAction = null; }
-    window.executeConfirm = async function() { if(currentConfirmAction) await currentConfirmAction(); window.closeConfirmModal(); }
-
-    /* --- XỬ LÝ GỬI FILE QUA GOOGLE DRIVE --- */
-    window.handleFileSelect = function(inputEl, labelId, isFullText) {
-        const label = document.getElementById(labelId);
-        if (inputEl.files && inputEl.files.length > 0) {
-            label.innerHTML = `✅ ${inputEl.files[0].name}`;
-            label.style.borderColor = "var(--primary)"; label.style.color = "var(--primary)"; label.style.background = "var(--primary-light)";
-        } else {
-            label.innerHTML = isFullText ? "📎 File đính kèm" : "📎"; label.style = "";
-        }
+    window.openConfirmModal = function(title, message, action) {
+        document.getElementById('confirmTitle').innerText = title;
+        document.getElementById('confirmMessage').innerText = message;
+        currentConfirmAction = action;
+        document.getElementById('confirmModal').classList.add('show');
+    }
+    window.closeConfirmModal = function() {
+        document.getElementById('confirmModal').classList.remove('show');
+        currentConfirmAction = null;
+    }
+    window.executeConfirm = async function() {
+        if(currentConfirmAction) await currentConfirmAction();
+        window.closeConfirmModal();
     }
 
-    async function processUploadGoogleDrive(fileInputId, labelId, isFullText) {
-        const fileInput = document.getElementById(fileInputId);
-        if (!fileInput.files || fileInput.files.length === 0) return null;
+    function resetQuickAttachmentUi() {
+        const attachInput = document.getElementById('attachInput');
+        const previewEl = document.getElementById('attachPreview');
+        if(attachInput) attachInput.value = '';
+        window.pendingQuickFiles = [];
+        window.renderAttachmentList();
+        if(previewEl) previewEl.textContent = 'Không có tập tin nào.';
+    }
+
+    window.expandQuickAdd = function() {
+        document.getElementById('quickAddExtras').classList.add('expanded');
+    }
+
+    window.collapseQuickAdd = function() {
+        document.getElementById('quickAddExtras').classList.remove('expanded');
+    }
+
+    function resetManualAttachmentUi() {
+        const attachInput = document.getElementById('manualAttachInput');
+        const previewEl = document.getElementById('manualAttachPreview');
+        if(attachInput) attachInput.value = '';
+        window.pendingManualFiles = [];
+        window.renderManualAttachmentList();
+        if(previewEl) previewEl.textContent = 'Không có tập tin nào.';
+    }
+
+    function resetEditAttachmentUi() {
+        const attachInput = document.getElementById('editAttachInput');
+        const previewEl = document.getElementById('editAttachPreview');
+        const listEl = document.getElementById('editAttachmentList');
+        if(attachInput) attachInput.value = '';
+        window.pendingEditFiles = [];
+        if(previewEl) previewEl.textContent = 'Không có tập tin nào được chọn.';
+        if(listEl) listEl.innerHTML = '';
+    }
+
+    async function processUploadGoogleDrive(file) {
+        if (!file) return null;
+        if (GAS_WEB_APP_URL.includes('DÁN_LINK_APP_SCRIPT')) {
+            window.showToast('⚠️ Chưa cấu hình Google Apps Script');
+            throw new Error('Missing GAS URL');
+        }
         
-        if (GAS_WEB_APP_URL.includes("DÁN_LINK_APP_SCRIPT")) {
-            window.showToast("⚠️ Vui lòng dán link Google Apps Script vào mã nguồn trước!");
-            throw new Error("Missing GAS URL");
+        // Đã cập nhật giới hạn lên 100MB theo yêu cầu
+        if (file.size > 100 * 1024 * 1024) {
+            window.showToast('⚠️ File lớn hơn 100MB, không thể đính kèm.');
+            throw new Error('File too large');
         }
 
-        const file = fileInput.files[0];
-        if (file.size > 15 * 1024 * 1024) { 
-            window.showToast("⚠️ File lớn hơn 15MB, vui lòng nén lại.");
-            throw new Error("File too large");
-        }
+        window.showToast('⏳ Đang tải file lên Google Drive...');
 
-        window.showToast("⏳ Đang tải file lên Google Drive...");
-        
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
             reader.onload = async function() {
                 try {
-                    // Chuyển file sang base64 để gửi qua API
-                    const base64Data = reader.result.split(',')[1]; 
+                    const base64Data = reader.result.split(',')[1];
                     const payload = {
                         filename: file.name,
-                        mimeType: file.type || "application/octet-stream",
+                        mimeType: file.type || 'application/octet-stream',
                         base64: base64Data
                     };
 
-                    // Gửi request tới Google Apps Script dưới dạng plain text để tránh lỗi chặn CORS
                     const response = await fetch(GAS_WEB_APP_URL, {
                         method: 'POST',
                         body: JSON.stringify(payload),
@@ -432,186 +800,498 @@
                     });
 
                     const result = await response.json();
-
-                    if (result.status === "success") {
-                        fileInput.value = "";
-                        const label = document.getElementById(labelId);
-                        label.innerHTML = isFullText ? "📎 File đính kèm" : "📎"; label.style = "";
-                        resolve({ url: result.url, name: result.name });
+                    if (result.status === 'success') {
+                        resolve({ url: result.url, name: result.name || file.name });
                     } else {
-                        throw new Error(result.message);
+                        throw new Error(result.message || 'Upload failed');
                     }
-                } catch(err) {
-                    console.error("Upload failed", err);
-                    window.showToast("⚠️ Lỗi tải file: " + err.message);
+                } catch (err) {
+                    console.error('Upload failed', err);
+                    window.showToast('⚠️ Lỗi tải file: ' + err.message);
                     reject(err);
                 }
             };
-            reader.onerror = error => { window.showToast("⚠️ Lỗi đọc file!"); reject(error); };
+            reader.onerror = error => {
+                window.showToast('⚠️ Lỗi đọc file!');
+                reject(error);
+            };
             reader.readAsDataURL(file);
         });
     }
 
-    // CRUD
+    window.handleManualAttachment = function(e) {
+        const newFiles = Array.from(e.target.files || []);
+        if (window.pendingManualFiles.length + newFiles.length > 5) {
+            window.showToast("⚠️ Chỉ được đính kèm tối đa 5 tập tin!");
+            const allowed = 5 - window.pendingManualFiles.length;
+            window.pendingManualFiles.push(...newFiles.slice(0, allowed));
+        } else {
+            window.pendingManualFiles.push(...newFiles);
+        }
+        e.target.value = '';
+        const previewEl = document.getElementById('manualAttachPreview');
+        if(previewEl) previewEl.textContent = window.pendingManualFiles.length ? `${window.pendingManualFiles.length} tệp` : 'Không có tập tin nào.';
+        window.renderManualAttachmentList();
+    }
+
+    window.removeManualAttachment = function(index) {
+        window.pendingManualFiles.splice(index, 1);
+        window.renderManualAttachmentList();
+        const previewEl = document.getElementById('manualAttachPreview');
+        if(previewEl) previewEl.textContent = window.pendingManualFiles.length ? `${window.pendingManualFiles.length} tệp` : 'Không có tập tin nào.';
+    }
+
+    window.renderManualAttachmentList = function() {
+        const listEl = document.getElementById('manualAttachmentList');
+        if(!listEl) return;
+        if(window.pendingManualFiles.length === 0) {
+            listEl.innerHTML = '';
+            return;
+        }
+        listEl.innerHTML = window.pendingManualFiles.map((att, idx) => `
+            <span class="attachment-pill">
+                <span>${att.name}</span>
+                <button type="button" onclick="window.removeManualAttachment(${idx})" style="background:none;border:none;color:#1e3a8a;cursor:pointer;font-weight:600;padding: 0 4px;">×</button>
+            </span>
+        `).join('');
+    }
+
+    window.handleEditAttachment = function(e) {
+        const files = Array.from(e.target.files || []);
+        if (files.length > 5) {
+            window.showToast("⚠️ Chỉ được đính kèm tối đa 5 tập tin!");
+            window.pendingEditFiles = files.slice(0, 5);
+        } else {
+            window.pendingEditFiles = files;
+        }
+        const previewEl = document.getElementById('editAttachPreview');
+        const listEl = document.getElementById('editAttachmentList');
+        if(previewEl) previewEl.textContent = window.pendingEditFiles.length ? `Đã chọn ${window.pendingEditFiles.length} file mới:` : 'Không có tập tin nào được chọn.';
+        if(listEl) {
+            listEl.innerHTML = window.pendingEditFiles.map(att => `<span class="attachment-pill"><span>${att.name}</span></span>`).join('');
+        }
+    }
+
+    // Các hàm tương tác Database
     window.quickAdd = async function() {
         if (!userAuth) return window.showToast("⚠️ Chưa kết nối đám mây");
-        const val = document.getElementById('quickInput').value.trim();
+        const inputEl = document.getElementById('quickInput');
+        const val = inputEl.value.trim();
+        
         if(!val) return window.showToast("⚠️ Bạn chưa nhập thông tin!");
+        
         const parts = val.split(/\s+/);
         if(parts.length < 2) return window.showToast("⚠️ Vui lòng nhập: [Tên] [Khoảng trắng] [Nhiệm vụ]");
 
+        const name = parts[0];
+        const task = parts.slice(1).join(' ');
         const timestampId = Date.now();
-        const btn = document.getElementById('btnQuickAdd');
+
+        const selectedFiles = window.pendingQuickFiles;
+        const dataPayload = { id: timestampId, date: currentDate, category: currentCategory, name, task };
 
         try {
-            btn.disabled = true; btn.innerHTML = "⏳...";
-            const attachmentData = await processUploadGoogleDrive('quickFile', 'quickFileLabel', false);
-            
-            let data = { id: timestampId, date: currentDate, category: currentCategory, name: parts[0], task: parts.slice(1).join(' ') };
-            if (attachmentData) data.attachment = attachmentData;
+            if (selectedFiles.length) {
+                const uploaded = [];
+                for (const file of selectedFiles) {
+                    const uploadResult = await processUploadGoogleDrive(file);
+                    if (uploadResult) uploaded.push(uploadResult);
+                }
+                if (uploaded.length) dataPayload.attachments = uploaded;
+            }
 
-            await setDoc(doc(db_firestore, 'artifacts', appId, 'public', 'data', 'khcn_tasks', timestampId.toString()), data);
-            document.getElementById('quickInput').value = '';
+            const taskRef = doc(db_firestore, 'artifacts', appId, 'public', 'data', 'khcn_tasks', timestampId.toString());
+            await setDoc(taskRef, dataPayload);
+            inputEl.value = '';
+            resetQuickAttachmentUi();
+            window.collapseQuickAdd();
             window.showToast("Đã thêm nhanh thành công!");
-        } catch (error) { console.error(error); } 
-        finally { btn.disabled = false; btn.innerHTML = "Thêm"; }
+        } catch (error) {
+            console.error(error);
+            window.showToast("⚠️ Lỗi lưu dữ liệu: Kiểm tra quyền Firebase");
+            inputEl.value = val;
+        }
     }
 
+    window.handleAttachments = function(e) {
+        const newFiles = Array.from(e.target.files || []);
+        if (window.pendingQuickFiles.length + newFiles.length > 5) {
+            window.showToast("⚠️ Chỉ được đính kèm tối đa 5 tập tin!");
+            const allowed = 5 - window.pendingQuickFiles.length;
+            window.pendingQuickFiles.push(...newFiles.slice(0, allowed));
+        } else {
+            window.pendingQuickFiles.push(...newFiles);
+        }
+        e.target.value = '';
+        const previewEl = document.getElementById('attachPreview');
+        if(previewEl) {
+            previewEl.textContent = window.pendingQuickFiles.length ? `${window.pendingQuickFiles.length} tệp` : 'Không có tập tin nào.';
+        }
+        window.renderAttachmentList();
+    }
+
+    window.removeAttachment = function(index) {
+        window.pendingQuickFiles.splice(index, 1);
+        window.renderAttachmentList();
+        const previewEl = document.getElementById('attachPreview');
+        if(previewEl) {
+            previewEl.textContent = window.pendingQuickFiles.length ? `${window.pendingQuickFiles.length} tệp` : 'Không có tập tin nào.';
+        }
+    }
+
+    window.renderAttachmentList = function() {
+        const listEl = document.getElementById('attachmentList');
+        if(!listEl) return;
+        if(window.pendingQuickFiles.length === 0) {
+            listEl.innerHTML = '';
+            return;
+        }
+        listEl.innerHTML = window.pendingQuickFiles.map((att, idx) => `
+            <span class="attachment-pill">
+                <span>${att.name}</span>
+                <button type="button" onclick="window.removeAttachment(${idx})" style="background:none;border:none;color:#1e3a8a;cursor:pointer;font-weight:600;padding: 0 4px;">×</button>
+            </span>
+        `).join('');
+    }
+    
     window.manualAdd = async function() {
         if (!userAuth) return window.showToast("⚠️ Chưa kết nối đám mây");
-        const name = selectedPerson; const inputEl = document.getElementById('taskInput'); const task = inputEl.value.trim();
-        if(!name) return window.showToast("⚠️ Vui lòng chọn người trước!"); if(!task) return window.showToast("⚠️ Vui lòng nhập nhiệm vụ!");
+        const name = selectedPerson;
+        const inputEl = document.getElementById('taskInput');
+        const task = inputEl.value.trim();
 
-        const timestampId = Date.now(); const btn = document.getElementById('btnManualAdd');
+        if(!name) return window.showToast("⚠️ Vui lòng chọn người trước!");
+        if(!task) return window.showToast("⚠️ Vui lòng nhập nhiệm vụ!");
+
+        const timestampId = Date.now();
+        const dataPayload = { id: timestampId, date: currentDate, category: currentCategory, name, task };
+
         try {
-            btn.disabled = true; btn.innerHTML = "⏳ Đang xử lý...";
-            const attachmentData = await processUploadGoogleDrive('manualFile', 'manualFileLabel', true);
+            if (window.pendingManualFiles.length > 0) {
+                const uploaded = [];
+                for (const file of window.pendingManualFiles) {
+                    const uploadResult = await processUploadGoogleDrive(file);
+                    if (uploadResult) uploaded.push(uploadResult);
+                }
+                if (uploaded.length) dataPayload.attachments = uploaded;
+            }
 
-            let data = { id: timestampId, date: currentDate, category: currentCategory, name, task };
-            if (attachmentData) data.attachment = attachmentData;
-
-            await setDoc(doc(db_firestore, 'artifacts', appId, 'public', 'data', 'khcn_tasks', timestampId.toString()), data);
-            
-            inputEl.value = ''; selectedPerson = null; window.renderPeopleButtons();
+            const taskRef = doc(db_firestore, 'artifacts', appId, 'public', 'data', 'khcn_tasks', timestampId.toString());
+            await setDoc(taskRef, dataPayload);
+            inputEl.value = '';
+            selectedPerson = null;
+            window.renderPeopleButtons();
+            resetManualAttachmentUi();
             window.showToast("Đã lưu thành công!");
-        } catch (error) { console.error(error); } 
-        finally { btn.disabled = false; btn.innerHTML = "Lưu vào danh sách"; }
+        } catch (error) {
+            console.error(error);
+            window.showToast("⚠️ Lỗi lưu dữ liệu: Kiểm tra quyền Firebase");
+            inputEl.value = task;
+            selectedPerson = name;
+            window.renderPeopleButtons();
+        }
     }
 
     window.deleteItem = function(docId) {
         if (!userAuth) return window.showToast("⚠️ Chưa kết nối đám mây");
-        window.openConfirmModal("Xóa nhiệm vụ", "Bạn có chắc chắn muốn xóa nhiệm vụ này?", async () => {
-            try { await deleteDoc(doc(db_firestore, 'artifacts', appId, 'public', 'data', 'khcn_tasks', docId)); window.showToast("Đã xóa nhiệm vụ");
-            } catch(error) { window.showToast("⚠️ Lỗi khi xóa dữ liệu"); }
-        });
+        window.openConfirmModal(
+            "Xóa nhiệm vụ",
+            "Bạn có chắc chắn muốn xóa nhiệm vụ này? Hành động không thể hoàn tác.",
+            async () => {
+                try {
+                    const taskRef = doc(db_firestore, 'artifacts', appId, 'public', 'data', 'khcn_tasks', docId);
+                    await deleteDoc(taskRef);
+                    window.showToast("Đã xóa nhiệm vụ");
+                } catch(error) {
+                    console.error(error);
+                    window.showToast("⚠️ Lỗi khi xóa dữ liệu");
+                }
+            }
+        );
     }
 
+    // Modal Task Edit
     window.editItem = function(docId) {
-        const item = db.find(i => i.docId === docId); if(!item) return;
+        if (!userAuth) return window.showToast("⚠️ Chưa kết nối đám mây");
+        
+        // Khôi phục lại biến item (Lỗi do bản trước xóa nhầm)
+        const item = db.find(i => i.docId === docId);
+        if(!item) return;
+
         document.getElementById('editTaskId').value = docId;
         document.getElementById('editTaskName').value = item.name;
         document.getElementById('editTaskContent').value = item.task;
+        resetEditAttachmentUi();
+        const currentAttachment = document.getElementById('currentAttachment');
+        if (currentAttachment) {
+            const links = (item.attachments || []).map(att => `<a href="${att.url}" target="_blank" rel="noopener noreferrer">${att.name || 'Tệp đính kèm'}</a>`).join(', ');
+            currentAttachment.innerHTML = links ? `Hiện tại: ${links}` : 'Hiện tại: không có tệp đính kèm';
+        }
         
-        const attachStatus = document.getElementById('currentAttachment');
-        if (item.attachment && item.attachment.name) attachStatus.innerHTML = `Đang có file: <strong style="color:var(--primary)">${item.attachment.name}</strong>`;
-        else attachStatus.innerHTML = "Chưa có file đính kèm nào.";
-        
-        document.getElementById('editFile').value = ""; window.handleFileSelect(document.getElementById('editFile'), 'editFileLabel', true);
         document.getElementById('taskEditModal').classList.add('show');
+        setTimeout(() => document.getElementById('editTaskContent').focus(), 100);
     }
 
-    window.closeTaskEditModal = function() { document.getElementById('taskEditModal').classList.remove('show'); }
+    window.closeTaskEditModal = function() {
+        document.getElementById('taskEditModal').classList.remove('show');
+        resetEditAttachmentUi();
+    }
 
     window.saveTaskEdit = async function() {
         const docId = document.getElementById('editTaskId').value;
         const n = document.getElementById('editTaskName').value.trim();
         const t = document.getElementById('editTaskContent').value.trim();
-        if(!n || !t) return window.showToast("⚠️ Vui lòng nhập đầy đủ");
+        const item = db.find(i => i.docId === docId) || allTasks.find(i => i.docId === docId);
 
-        const btn = document.getElementById('btnSaveTask');
+        if(!n || !t) return window.showToast("⚠️ Vui lòng nhập đầy đủ thông tin");
+
         try {
-            btn.disabled = true; btn.innerHTML = "⏳ Đang lưu...";
-            const newAttachment = await processUploadGoogleDrive('editFile', 'editFileLabel', true);
-            let updateData = { name: n, task: t };
-            if (newAttachment) updateData.attachment = newAttachment;
+            const payload = { name: n, task: t };
+            if (window.pendingEditFiles.length > 0) {
+                const uploaded = [];
+                for (const file of window.pendingEditFiles) {
+                    const uploadResult = await processUploadGoogleDrive(file);
+                    if (uploadResult) uploaded.push(uploadResult);
+                }
+                if (uploaded.length) payload.attachments = uploaded;
+            } else if (item && item.attachments) {
+                payload.attachments = item.attachments;
+            }
 
-            await setDoc(doc(db_firestore, 'artifacts', appId, 'public', 'data', 'khcn_tasks', docId), updateData, { merge: true });
-            window.closeTaskEditModal(); window.showToast("Đã cập nhật thông tin");
-        } catch(error) { window.showToast("⚠️ Lỗi cập nhật dữ liệu"); } 
-        finally { btn.disabled = false; btn.innerHTML = "Lưu thay đổi"; }
+            const taskRef = doc(db_firestore, 'artifacts', appId, 'public', 'data', 'khcn_tasks', docId);
+            await setDoc(taskRef, payload, { merge: true });
+            window.closeTaskEditModal();
+            window.showToast("Đã cập nhật thông tin");
+        } catch(error) {
+            console.error(error);
+            window.showToast("⚠️ Lỗi cập nhật dữ liệu");
+        }
     }
 
     window.clearData = function() {
-        if (!userAuth) return window.showToast("⚠️ Chưa kết nối");
+        if (!userAuth) return window.showToast("⚠️ Chưa kết nối đám mây");
         if(db.length === 0) return window.showToast("⚠️ Không có dữ liệu để xóa");
-        window.openConfirmModal("Xóa toàn bộ", "Xóa toàn bộ danh sách ngày này?", async () => {
-            try { for (const item of db) await deleteDoc(doc(db_firestore, 'artifacts', appId, 'public', 'data', 'khcn_tasks', item.docId)); window.showToast("Đã xóa hết"); } 
-            catch (error) { window.showToast("⚠️ Lỗi khi xóa"); }
-        });
+        
+        window.openConfirmModal(
+            "Xóa toàn bộ dữ liệu",
+            "Bạn có chắc chắn muốn xóa toàn bộ danh sách trong ngày này? Dữ liệu bị xóa sẽ mất vĩnh viễn.",
+            async () => {
+                try {
+                    for (const item of db) {
+                        const taskRef = doc(db_firestore, 'artifacts', appId, 'public', 'data', 'khcn_tasks', item.docId);
+                        await deleteDoc(taskRef);
+                    }
+                    window.showToast("Đã xóa hết dữ liệu");
+                } catch (error) {
+                    console.error(error);
+                    window.showToast("⚠️ Lỗi khi xóa dữ liệu");
+                }
+            }
+        );
     }
 
-    // Modal Settings
-    window.editPeopleList = function() { document.getElementById('modalInput').value = people.join(', '); document.getElementById('editModal').classList.add('show'); }
-    window.closeModal = function() { document.getElementById('editModal').classList.remove('show'); }
+    // Modal People Edit
+    window.editPeopleList = function() {
+        document.getElementById('modalInput').value = people.join(', ');
+        document.getElementById('editModal').classList.add('show');
+        setTimeout(() => document.getElementById('modalInput').focus(), 100);
+    }
+
+    window.closeModal = function() {
+        document.getElementById('editModal').classList.remove('show');
+    }
+
     window.saveModal = async function() {
-        const names = document.getElementById('modalInput').value.trim().split(',').map(n => n.trim()).filter(n => n);
-        if(names.length === 0) return window.showToast('⚠️ Nhập ít nhất một tên');
-        window.closeModal(); selectedPerson = null; const oldPeople = [...people]; people = names; window.renderPeopleButtons();
-        try { if (userAuth) await setDoc(doc(db_firestore, 'artifacts', appId, 'public', 'data', 'khcn_settings', 'people_list'), { list: names }); window.showToast('Đã cập nhật');
-        } catch(error) { people = oldPeople; window.renderPeopleButtons(); }
+        const inputEl = document.getElementById('modalInput');
+        const newListStr = inputEl.value.trim();
+        const names = newListStr.split(',').map(n => n.trim()).filter(n => n);
+        if(names.length === 0) return window.showToast('⚠️ Vui lòng nhập ít nhất một tên');
+        
+        // Đóng modal và reset trạng thái ngay lập tức
+        window.closeModal();
+        selectedPerson = null;
+        
+        const oldPeople = [...people];
+        people = names;
+        window.renderPeopleButtons();
+        
+        try {
+            if (userAuth) {
+                const ref = doc(db_firestore, 'artifacts', appId, 'public', 'data', 'khcn_settings', 'people_list');
+                await setDoc(ref, { list: names });
+            }
+            window.showToast('Đã cập nhật danh sách người');
+        } catch(error) {
+            console.error(error);
+            window.showToast("⚠️ Lỗi cập nhật danh sách");
+            // Khôi phục nếu lỗi
+            people = oldPeople;
+            window.renderPeopleButtons();
+        }
     }
 
-    // Utils Render
+    // Utils
     window.copyTable = function(btn) {
-        if(db.length === 0) return window.showToast("⚠️ Không có dữ liệu");
+        if(db.length === 0) return window.showToast("⚠️ Không có dữ liệu để sao chép");
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('vi-VN', { hour12: false });
+        
         let str = `⚡ KHCN TASK - ${currentCategory.toUpperCase()} (${currentDate})\n--------------------------\n`;
         db.forEach((item, index) => {
-            let attachStr = item.attachment && item.attachment.url ? `\n   └─ Đính kèm: ${item.attachment.url}` : '';
-            str += `${index + 1}. ${item.name} » ${item.task}${attachStr}\n`;
+            str += `${index + 1}. ${item.name} » ${item.task}\n`;
         });
-        str += `--------------------------\nĐã cập nhật lúc: ${new Date().toLocaleTimeString('vi-VN', { hour12: false })}`;
-        navigator.clipboard.writeText(str).then(() => { if (btn) { const old = btn.innerHTML; btn.innerHTML = "✅ Đã chép"; setTimeout(() => btn.innerHTML = old, 2000); }});
+        str += `--------------------------\nĐã cập nhật lúc: ${timeString}`;
+
+        const onSuccess = () => {
+            if (btn) {
+                const oldText = btn.innerHTML;
+                btn.innerHTML = "✅ Đã chép";
+                setTimeout(() => btn.innerHTML = oldText, 2000);
+            }
+        };
+
+        navigator.clipboard.writeText(str).then(onSuccess)
+        .catch(() => {
+            const el = document.createElement('textarea');
+            el.value = str; document.body.appendChild(el); el.select();
+            document.execCommand('copy'); document.body.removeChild(el);
+            onSuccess();
+        });
     }
 
     window.exportCSV = function() {
         if(db.length === 0) return window.showToast("⚠️ Không có dữ liệu để xuất");
-        let csv = "\uFEFFSTT;Họ Tên;Nhiệm Vụ;Link File\n";
+        
+        // Dùng \uFEFF ở dạng chuỗi nguyên bản để Excel nhận chuẩn UTF-8 Tiếng Việt
+        // Dùng dấu chấm phẩy (;) để chia cột do hệ thống VN mặc định hiểu (;) là phân cách cột
+        let csv = "\uFEFFSTT;Họ Tên;Nhiệm Vụ\n";
+        
         db.forEach((item, index) => { 
+            // Xử lý chuỗi an toàn
             const safeName = item.name ? String(item.name).replace(/"/g, '""') : "";
             const safeTask = item.task ? String(item.task).replace(/"/g, '""') : "";
-            const safeAttach = item.attachment && item.attachment.url ? item.attachment.url : "";
-            csv += `${index + 1};"${safeName}";"${safeTask}";"${safeAttach}"\n`; 
+            
+            // Chia cột bằng dấu chấm phẩy (;)
+            csv += `${index + 1};"${safeName}";"${safeTask}"\n`; 
         });
-        const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' })); a.download = `KHCN_${currentCategory}_${currentDate}.csv`; a.click();
+        
+        const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a'); a.href = url; a.download = `KHCN_${currentCategory}_${currentDate}.csv`;
+        a.click();
+        window.showToast("Đã tải xuống file CSV");
     }
 
+    // Render Table
     window.render = function() {
         const container = document.getElementById('tableWrapper');
+        
+        // KIỂM TRA LOADING TRẠNG THÁI SKELETON
         if(!isDataLoaded) {
-            container.innerHTML = `<div class="table-container"><table><thead><tr><th style="width: 50px; text-align: center;">STT</th><th style="width: 120px;">Họ Tên</th><th>Nhiệm Vụ</th><th style="width: 130px;">Đính kèm</th><th style="text-align: right; width: 120px;">Thao tác</th></tr></thead><tbody>${Array(4).fill().map(() => `<tr><td><div class="skeleton-box" style="width: 20px; height: 18px; margin: 0 auto;"></div></td><td><div class="skeleton-box" style="width: 80px; height: 18px;"></div></td><td><div class="skeleton-box" style="width: 90%; height: 18px;"></div></td><td><div class="skeleton-box" style="width: 60px; height: 18px;"></div></td><td><div class="skeleton-box" style="width: 80px; height: 26px; float: right; border-radius: 6px;"></div></td></tr>`).join('')}</tbody></table></div>`; return;
+            container.innerHTML = `
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 50px; text-align: center;">STT</th>
+                                <th style="width: 120px;">Họ Tên</th>
+                                <th>Nhiệm Vụ</th>
+                                <th style="text-align: right; width: 120px;">Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${Array(4).fill().map(() => `
+                                <tr>
+                                    <td><div class="skeleton-box" style="width: 20px; height: 18px; margin: 0 auto;"></div></td>
+                                    <td><div class="skeleton-box" style="width: 80px; height: 18px;"></div></td>
+                                    <td><div class="skeleton-box" style="width: 90%; height: 18px;"></div></td>
+                                    <td><div class="skeleton-box" style="width: 80px; height: 26px; float: right; border-radius: 6px;"></div></td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>`;
+            return;
         }
-        if(db.length === 0) { container.innerHTML = `<div class="empty"><span style="font-size: 2rem; opacity: 0.5;">📭</span><p>Chưa có dữ liệu nào được ghi lại trong ngày này.</p></div>`; return; }
 
-        let html = `<div class="table-container"><table><thead><tr><th style="width: 50px; text-align: center;">STT</th><th style="width: 120px;">Họ Tên</th><th>Nhiệm Vụ</th><th style="width: 150px;">Đính kèm</th><th style="text-align: right; width: 120px;">Thao tác</th></tr></thead><tbody>`;
+        // KHI ĐÃ CÓ DỮ LIỆU NHƯNG MẢNG TRỐNG
+        if(db.length === 0) {
+            container.innerHTML = `
+                <div class="empty">
+                    <span style="font-size: 2rem; opacity: 0.5;">📭</span>
+                    <p>Chưa có dữ liệu nào được ghi lại trong ngày này.</p>
+                </div>`;
+            return;
+        }
+
+        let html = `
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 50px; text-align: center;">STT</th>
+                            <th style="width: 120px;">Họ Tên</th>
+                            <th>Nhiệm Vụ</th>
+                            <th style="text-align: right; width: 120px;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+        `;
+
         [...db].reverse().forEach((item, revIndex) => {
             const index = db.length - 1 - revIndex;
-            let attachDisplay = `<span style="color: #d1d5db; font-size: 13px;">-</span>`;
-            if (item.attachment && item.attachment.url) {
-                let shortName = item.attachment.name || "File";
-                attachDisplay = `<a href="${item.attachment.url}" target="_blank" class="btn-sm btn-attach" title="${item.attachment.name}">📎 ${shortName}</a>`;
-            }
-            html += `<tr><td style="color:#9ca3af; text-align: center; font-weight: 500;">${index + 1}</td><td style="font-weight: 600; color: var(--primary);">${item.name}</td><td>${item.task}</td><td>${attachDisplay}</td><td><div class="action-btns"><button class="btn-sm btn-edit" onclick="window.editItem('${item.docId}')">Sửa</button><button class="btn-sm btn-del" onclick="window.deleteItem('${item.docId}')">Xóa</button></div></td></tr>`;
+            html += `
+                <tr>
+                    <td style="color:#9ca3af; text-align: center; font-weight: 500;">${index + 1}</td>
+                    <td style="font-weight: 600; color: var(--primary);">${item.name}</td>
+                    <td>
+                        <div>${item.task}</div>
+                        ${item.attachments && item.attachments.length ? `
+                            <div style="margin-top:8px; display:flex; flex-wrap:wrap; gap:6px;">
+                                ${item.attachments.map(att => `<a class="btn-sm btn-attach" href="${att.url}" target="_blank" rel="noopener noreferrer">📎 ${att.name || 'Tệp đính kèm'}</a>`).join('')}
+                            </div>
+                        ` : ''}
+                    </td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="btn-sm btn-edit" onclick="window.editItem('${item.docId}')">Sửa</button>
+                            <button class="btn-sm btn-del" onclick="window.deleteItem('${item.docId}')">Xóa</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
         });
-        html += `</tbody></table></div>`; container.innerHTML = html;
+        html += `</tbody></table></div>`;
+        container.innerHTML = html;
     }
 
-    document.getElementById('dateDisplay').textContent = '📅 ' + new Date(currentDate + 'T00:00:00').toLocaleDateString('vi-VN', { year: 'numeric', month: '2-digit', day: '2-digit' });
+    // Init UI ban đầu
+    const initDate = new Date(currentDate + 'T00:00:00');
+    const initOptions = { year: 'numeric', month: '2-digit', day: '2-digit' };
+    document.getElementById('dateDisplay').textContent = '📅 ' + initDate.toLocaleDateString('vi-VN', initOptions);
     document.getElementById('dateInput').value = currentDate;
-    window.renderPeopleButtons(); window.render();
-    document.addEventListener('keydown', function(e) { if(e.key === 'Escape') { window.closeModal(); window.closeTaskEditModal(); window.closeConfirmModal(); } if(e.key === 'Enter' && document.getElementById('editModal').classList.contains('show')) window.saveModal(); });
+    
+    // Tải danh sách người dùng mặc định ngay lập tức
+    window.renderPeopleButtons();
+    
+    // Render lần đầu tiên sẽ vẽ khung xương Skeleton vì cờ isDataLoaded = false
+    window.render();
+
+    // Xử lý các nút bấm bàn phím
+    document.addEventListener('keydown', function(e) {
+        if(e.key === 'Escape') {
+            window.closeModal();
+            window.closeTaskEditModal();
+            window.closeConfirmModal();
+        }
+        if(e.key === 'Enter') {
+            if (document.getElementById('editModal').classList.contains('show')) window.saveModal();
+        }
+    });
 </script>
 </body>
 </html>
+
 
 
 
