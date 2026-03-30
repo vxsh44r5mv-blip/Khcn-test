@@ -330,6 +330,72 @@
         }
 
         /* ==============================================================
+           GIAO DIỆN KHUNG CHAT AI
+           ============================================================== */
+        .chat-fab {
+            position: fixed; bottom: 30px; right: 30px; height: 56px; padding: 0 24px;
+            border-radius: 30px; background: linear-gradient(135deg, var(--primary) 0%, #047857 100%); 
+            color: white; font-size: 16px; font-weight: 600;
+            border: none; box-shadow: 0 10px 20px rgba(5, 150, 105, 0.4); cursor: pointer;
+            z-index: 9998; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .chat-fab:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 15px 25px rgba(5, 150, 105, 0.5); }
+        .chat-fab:active { transform: scale(0.95); }
+        .chat-fab .pro-badge { background: #f59e0b; color: white; padding: 2px 6px; border-radius: 6px; font-size: 11px; text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px; }
+
+        .chat-panel {
+            position: fixed; top: 0; right: -450px; width: 400px; max-width: 100%; height: 100vh;
+            background: white; box-shadow: -10px 0 30px rgba(0,0,0,0.15); z-index: 10001;
+            display: flex; flex-direction: column; transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .chat-panel.open { right: 0; }
+        
+        .chat-header {
+            padding: 16px 20px; background: var(--bg-gradient); color: white;
+            display: flex; justify-content: space-between; align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); z-index: 2;
+        }
+        .chat-header h3 { margin: 0; font-size: 1.2rem; display: flex; align-items: center; gap: 8px; }
+        .chat-header .actions button {
+            background: rgba(255,255,255,0.2); border: none; color: white; width: 32px; height: 32px;
+            border-radius: 8px; cursor: pointer; margin-left: 8px; transition: var(--transition); font-size: 14px;
+        }
+        .chat-header .actions button:hover { background: rgba(255,255,255,0.4); }
+
+        .chat-messages {
+            flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px;
+            background: var(--gray-50); scroll-behavior: smooth;
+        }
+        .chat-msg { max-width: 88%; padding: 12px 16px; border-radius: 16px; font-size: 14.5px; line-height: 1.5; word-wrap: break-word; }
+        .chat-msg.ai { background: white; color: var(--gray-800); align-self: flex-start; border-bottom-left-radius: 4px; box-shadow: var(--shadow-sm); border: 1px solid var(--gray-200); }
+        .chat-msg.user { background: var(--primary); color: white; align-self: flex-end; border-bottom-right-radius: 4px; box-shadow: 0 4px 10px rgba(5, 150, 105, 0.15); }
+        .chat-msg img { max-width: 100%; border-radius: 8px; margin-top: 8px; border: 1px solid rgba(0,0,0,0.1); }
+        
+        .chat-input-container { padding: 15px; background: white; border-top: 1px solid var(--gray-200); z-index: 2; }
+        .chat-attach-preview-box { position: relative; display: inline-block; margin-bottom: 12px; display: none; }
+        .chat-attach-preview-box img { height: 70px; border-radius: 8px; border: 2px solid var(--primary-light); object-fit: cover; }
+        .chat-attach-preview-box button { position: absolute; top: -8px; right: -8px; background: #ef4444; color: white; border: none; border-radius: 50%; width: 22px; height: 22px; font-size: 12px; cursor: pointer; font-weight: bold; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        
+        .chat-input-wrapper { display: flex; align-items: flex-end; gap: 10px; background: var(--gray-100); padding: 8px 14px; border-radius: 24px; border: 1px solid transparent; transition: var(--transition); }
+        .chat-input-wrapper:focus-within { border-color: var(--primary-light); background: white; box-shadow: 0 0 0 3px var(--primary-light); }
+        .chat-attach-btn { font-size: 1.3rem; cursor: pointer; color: var(--gray-600); padding: 4px; transition: var(--transition); }
+        .chat-attach-btn:hover { color: var(--primary); }
+        
+        #chatInput { flex: 1; border: none; background: transparent; resize: none; max-height: 120px; padding: 6px 0; outline: none; font-size: 15px; font-family: inherit; color: var(--gray-800); }
+        #chatInput::placeholder { color: var(--gray-400); }
+        
+        .chat-send-btn { background: var(--primary); color: white; border: none; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: transform 0.2s, background 0.2s; }
+        .chat-send-btn:hover { background: var(--primary-hover); }
+        .chat-send-btn:active { transform: scale(0.9); }
+        
+        .chat-msg.loading { display: flex; gap: 5px; align-items: center; padding: 14px 18px; }
+        .dot { width: 7px; height: 7px; background: var(--gray-400); border-radius: 50%; animation: chatBounce 1.4s infinite ease-in-out both; }
+        .dot:nth-child(1) { animation-delay: -0.32s; }
+        .dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes chatBounce { 0%, 80%, 100% { transform: scale(0.3); opacity: 0.5; } 40% { transform: scale(1); opacity: 1; background: var(--primary); } }
+
+        /* ==============================================================
            TỐI ƯU HÓA DI ĐỘNG (MOBILE RESPONSIVE)
            ============================================================== */
         @media (max-width: 900px) {
@@ -381,6 +447,10 @@
             .modal-content { padding: 20px; width: 95%; }
             .modal-buttons { flex-direction: column; gap: 8px; }
             .modal-buttons .modal-btn { width: 100%; padding: 12px; }
+
+            /* Khung chat trên mobile */
+            .chat-panel { width: 100%; right: -100%; }
+            .chat-fab { bottom: 20px; right: 20px; height: 50px; padding: 0 18px; font-size: 15px; }
         }
     </style>
 </head>
@@ -412,7 +482,6 @@
             <div class="section-title">✍️ Nhập Liệu</div>
             <div class="input-card">
                 <label>Nhập nhanh (Tên + Nhiệm vụ)</label>
-                <!-- Đã thêm class quick-add-group cho giao diện mobile -->
                 <div class="quick-add-group" style="display: flex; flex-wrap: wrap; align-items: center;">
                     <input type="text" id="quickInput" placeholder="Nhấp để nhập nhanh (VD: Đạt trà đào cam xả)..." onfocus="window.expandQuickAdd()" onkeypress="if(event.key==='Enter') window.quickAdd()" style="flex: 1; width: 100%; transition: all 0.25s;">
                     
@@ -472,6 +541,47 @@
                 <!-- Table rendered here -->
             </div>
         </div>
+    </div>
+</div>
+
+<!-- Nút Trợ lý AI -->
+<button class="chat-fab" onclick="window.toggleChat()" title="Mở Trợ lý AI">
+    <span style="font-size: 1.2rem;">✨</span> Chat <span class="pro-badge">Pro</span>
+</button>
+
+<!-- Khung Chat AI -->
+<div class="chat-panel" id="chatPanel">
+    <div class="chat-header">
+        <h3>✨ AI Assistant</h3>
+        <div class="actions">
+            <button onclick="window.clearChat()" title="Xóa cuộc trò chuyện mới">🔄</button>
+            <button onclick="window.toggleChat()" title="Đóng">✖</button>
+        </div>
+    </div>
+    
+    <div class="chat-messages" id="chatMessages">
+        <div class="chat-msg ai">Xin chào! 👋 Mình là trợ lý AI. Mình có thể giúp gì cho công việc của bạn hôm nay? Bạn có thể hỏi đáp hoặc đính kèm một bức ảnh để mình phân tích nhé.</div>
+    </div>
+    
+    <div class="chat-input-container">
+        <div id="chatAttachPreview" class="chat-attach-preview-box">
+            <img id="chatPreviewImg" src="" alt="preview">
+            <button onclick="window.removeChatAttach()" title="Xóa ảnh đính kèm">×</button>
+        </div>
+        
+        <div class="chat-input-wrapper">
+            <label for="chatAttachInput" class="chat-attach-btn" title="Đính kèm ảnh">
+                📎
+            </label>
+            <input type="file" id="chatAttachInput" accept="image/png, image/jpeg, image/jpg, image/webp" style="display:none;" onchange="window.handleChatAttach(event)">
+            
+            <textarea id="chatInput" placeholder="Nhập tin nhắn cho AI..." rows="1" 
+                oninput="this.style.height = ''; this.style.height = Math.min(this.scrollHeight, 120) + 'px'" 
+                onkeypress="if(event.key==='Enter' && !event.shiftKey){ event.preventDefault(); window.sendChatMessage(); }"></textarea>
+            
+            <button class="chat-send-btn" onclick="window.sendChatMessage()" title="Gửi">➤</button>
+        </div>
+        <p style="font-size: 10px; color: var(--gray-400); text-align: center; margin-top: 8px;">Dữ liệu chat được bảo mật & xử lý qua Google Apps Script</p>
     </div>
 </div>
 
@@ -586,6 +696,8 @@
     let selectedPerson = null;
     let currentDate = new Date().toISOString().split('T')[0];
     let currentCategory = 'Niềm vui';
+    
+    // Quản lý file đính kèm đa luồng
     window.pendingQuickFiles = [];
     window.pendingManualFiles = [];
     window.pendingEditFiles = [];
@@ -598,7 +710,6 @@
         auth = getAuth(app);
         db_firestore = getFirestore(app);
 
-        // Khởi tạo Auth
         const initAuth = async () => {
             try {
                 if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
@@ -611,7 +722,6 @@
                 window.showToast("⚠️ Vui lòng bật 'Anonymous Login' trong Firebase Authentication!");
             }
         };
-        
         initAuth();
 
         onAuthStateChanged(auth, (user) => {
@@ -633,29 +743,22 @@
     function setupRealtimeListener() {
         if (!userAuth) return;
         
-        // Listen to Tasks
         const tasksRef = collection(db_firestore, 'artifacts', appId, 'public', 'data', 'khcn_tasks');
         onSnapshot(tasksRef, (snapshot) => {
             allTasks = [];
-            snapshot.forEach(doc => {
-                allTasks.push({ docId: doc.id, ...doc.data() });
-            });
-            // Sắp xếp theo id (timestamp)
+            snapshot.forEach(doc => { allTasks.push({ docId: doc.id, ...doc.data() }); });
             allTasks.sort((a, b) => a.id - b.id);
-            
-            // Đánh dấu đã tải dữ liệu xong
             isDataLoaded = true;
             filterData();
         }, (err) => {
             console.error("Snapshot error tasks:", err);
-            isDataLoaded = true; // Thoát trạng thái loading để hiển thị lỗi
+            isDataLoaded = true; 
             filterData();
             if(err.message.includes('permission') || err.message.includes('Missing or insufficient permissions')) {
                 window.showToast("⚠️ Lỗi phân quyền Firebase. Vui lòng cấp quyền Database rules!");
             }
         });
 
-        // Listen to Settings (People List)
         const settingsRef = collection(db_firestore, 'artifacts', appId, 'public', 'data', 'khcn_settings');
         onSnapshot(settingsRef, (snapshot) => {
             snapshot.forEach(doc => {
@@ -714,7 +817,6 @@
         document.getElementById('taskInput').focus();
     }
 
-    // Modal Xác Nhận
     let currentConfirmAction = null;
     window.openConfirmModal = function(title, message, action) {
         document.getElementById('confirmTitle').innerText = title;
@@ -731,6 +833,7 @@
         window.closeConfirmModal();
     }
 
+    // ==== Xử lý UI Đính kèm File ==== //
     function resetQuickAttachmentUi() {
         const attachInput = document.getElementById('attachInput');
         const previewEl = document.getElementById('attachPreview');
@@ -743,7 +846,6 @@
     window.expandQuickAdd = function() {
         document.getElementById('quickAddExtras').classList.add('expanded');
     }
-
     window.collapseQuickAdd = function() {
         document.getElementById('quickAddExtras').classList.remove('expanded');
     }
@@ -774,13 +876,12 @@
             throw new Error('Missing GAS URL');
         }
         
-        // Đã cập nhật giới hạn lên 100MB theo yêu cầu
         if (file.size > 100 * 1024 * 1024) {
             window.showToast('⚠️ File lớn hơn 100MB, không thể đính kèm.');
             throw new Error('File too large');
         }
 
-        window.showToast('⏳ Đang tải file lên Google Drive...');
+        window.showToast(`⏳ Đang tải file ${file.name} lên Google Drive...`);
 
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -819,6 +920,37 @@
         });
     }
 
+    // ==== Handlers cho Đính kèm ====
+    window.handleAttachments = function(e) {
+        const newFiles = Array.from(e.target.files || []);
+        if (window.pendingQuickFiles.length + newFiles.length > 5) {
+            window.showToast("⚠️ Chỉ được đính kèm tối đa 5 tập tin!");
+            const allowed = 5 - window.pendingQuickFiles.length;
+            window.pendingQuickFiles.push(...newFiles.slice(0, allowed));
+        } else {
+            window.pendingQuickFiles.push(...newFiles);
+        }
+        e.target.value = '';
+        const previewEl = document.getElementById('attachPreview');
+        if(previewEl) previewEl.textContent = window.pendingQuickFiles.length ? `${window.pendingQuickFiles.length} tệp` : 'Không có tập tin nào.';
+        window.renderAttachmentList();
+    }
+    window.removeAttachment = function(index) {
+        window.pendingQuickFiles.splice(index, 1);
+        window.renderAttachmentList();
+        const previewEl = document.getElementById('attachPreview');
+        if(previewEl) previewEl.textContent = window.pendingQuickFiles.length ? `${window.pendingQuickFiles.length} tệp` : 'Không có tập tin nào.';
+    }
+    window.renderAttachmentList = function() {
+        const listEl = document.getElementById('attachmentList');
+        if(!listEl) return;
+        if(window.pendingQuickFiles.length === 0) { listEl.innerHTML = ''; return; }
+        listEl.innerHTML = window.pendingQuickFiles.map((att, idx) => `
+            <span class="attachment-pill"><span>${att.name}</span>
+            <button type="button" onclick="window.removeAttachment(${idx})" style="background:none;border:none;color:#1e3a8a;cursor:pointer;font-weight:600;padding: 0 4px;">×</button></span>
+        `).join('');
+    }
+
     window.handleManualAttachment = function(e) {
         const newFiles = Array.from(e.target.files || []);
         if (window.pendingManualFiles.length + newFiles.length > 5) {
@@ -833,26 +965,19 @@
         if(previewEl) previewEl.textContent = window.pendingManualFiles.length ? `${window.pendingManualFiles.length} tệp` : 'Không có tập tin nào.';
         window.renderManualAttachmentList();
     }
-
     window.removeManualAttachment = function(index) {
         window.pendingManualFiles.splice(index, 1);
         window.renderManualAttachmentList();
         const previewEl = document.getElementById('manualAttachPreview');
         if(previewEl) previewEl.textContent = window.pendingManualFiles.length ? `${window.pendingManualFiles.length} tệp` : 'Không có tập tin nào.';
     }
-
     window.renderManualAttachmentList = function() {
         const listEl = document.getElementById('manualAttachmentList');
         if(!listEl) return;
-        if(window.pendingManualFiles.length === 0) {
-            listEl.innerHTML = '';
-            return;
-        }
+        if(window.pendingManualFiles.length === 0) { listEl.innerHTML = ''; return; }
         listEl.innerHTML = window.pendingManualFiles.map((att, idx) => `
-            <span class="attachment-pill">
-                <span>${att.name}</span>
-                <button type="button" onclick="window.removeManualAttachment(${idx})" style="background:none;border:none;color:#1e3a8a;cursor:pointer;font-weight:600;padding: 0 4px;">×</button>
-            </span>
+            <span class="attachment-pill"><span>${att.name}</span>
+            <button type="button" onclick="window.removeManualAttachment(${idx})" style="background:none;border:none;color:#1e3a8a;cursor:pointer;font-weight:600;padding: 0 4px;">×</button></span>
         `).join('');
     }
 
@@ -872,7 +997,7 @@
         }
     }
 
-    // Các hàm tương tác Database
+    // ==== Logic Database (Thêm, Xóa, Sửa) ====
     window.quickAdd = async function() {
         if (!userAuth) return window.showToast("⚠️ Chưa kết nối đám mây");
         const inputEl = document.getElementById('quickInput');
@@ -887,13 +1012,12 @@
         const task = parts.slice(1).join(' ');
         const timestampId = Date.now();
 
-        const selectedFiles = window.pendingQuickFiles;
         const dataPayload = { id: timestampId, date: currentDate, category: currentCategory, name, task };
 
         try {
-            if (selectedFiles.length) {
+            if (window.pendingQuickFiles.length > 0) {
                 const uploaded = [];
-                for (const file of selectedFiles) {
+                for (const file of window.pendingQuickFiles) {
                     const uploadResult = await processUploadGoogleDrive(file);
                     if (uploadResult) uploaded.push(uploadResult);
                 }
@@ -913,47 +1037,6 @@
         }
     }
 
-    window.handleAttachments = function(e) {
-        const newFiles = Array.from(e.target.files || []);
-        if (window.pendingQuickFiles.length + newFiles.length > 5) {
-            window.showToast("⚠️ Chỉ được đính kèm tối đa 5 tập tin!");
-            const allowed = 5 - window.pendingQuickFiles.length;
-            window.pendingQuickFiles.push(...newFiles.slice(0, allowed));
-        } else {
-            window.pendingQuickFiles.push(...newFiles);
-        }
-        e.target.value = '';
-        const previewEl = document.getElementById('attachPreview');
-        if(previewEl) {
-            previewEl.textContent = window.pendingQuickFiles.length ? `${window.pendingQuickFiles.length} tệp` : 'Không có tập tin nào.';
-        }
-        window.renderAttachmentList();
-    }
-
-    window.removeAttachment = function(index) {
-        window.pendingQuickFiles.splice(index, 1);
-        window.renderAttachmentList();
-        const previewEl = document.getElementById('attachPreview');
-        if(previewEl) {
-            previewEl.textContent = window.pendingQuickFiles.length ? `${window.pendingQuickFiles.length} tệp` : 'Không có tập tin nào.';
-        }
-    }
-
-    window.renderAttachmentList = function() {
-        const listEl = document.getElementById('attachmentList');
-        if(!listEl) return;
-        if(window.pendingQuickFiles.length === 0) {
-            listEl.innerHTML = '';
-            return;
-        }
-        listEl.innerHTML = window.pendingQuickFiles.map((att, idx) => `
-            <span class="attachment-pill">
-                <span>${att.name}</span>
-                <button type="button" onclick="window.removeAttachment(${idx})" style="background:none;border:none;color:#1e3a8a;cursor:pointer;font-weight:600;padding: 0 4px;">×</button>
-            </span>
-        `).join('');
-    }
-    
     window.manualAdd = async function() {
         if (!userAuth) return window.showToast("⚠️ Chưa kết nối đám mây");
         const name = selectedPerson;
@@ -1010,11 +1093,8 @@
         );
     }
 
-    // Modal Task Edit
     window.editItem = function(docId) {
         if (!userAuth) return window.showToast("⚠️ Chưa kết nối đám mây");
-        
-        // Khôi phục lại biến item (Lỗi do bản trước xóa nhầm)
         const item = db.find(i => i.docId === docId);
         if(!item) return;
 
@@ -1090,7 +1170,6 @@
         );
     }
 
-    // Modal People Edit
     window.editPeopleList = function() {
         document.getElementById('modalInput').value = people.join(', ');
         document.getElementById('editModal').classList.add('show');
@@ -1107,10 +1186,8 @@
         const names = newListStr.split(',').map(n => n.trim()).filter(n => n);
         if(names.length === 0) return window.showToast('⚠️ Vui lòng nhập ít nhất một tên');
         
-        // Đóng modal và reset trạng thái ngay lập tức
         window.closeModal();
         selectedPerson = null;
-        
         const oldPeople = [...people];
         people = names;
         window.renderPeopleButtons();
@@ -1124,13 +1201,11 @@
         } catch(error) {
             console.error(error);
             window.showToast("⚠️ Lỗi cập nhật danh sách");
-            // Khôi phục nếu lỗi
             people = oldPeople;
             window.renderPeopleButtons();
         }
     }
 
-    // Utils
     window.copyTable = function(btn) {
         if(db.length === 0) return window.showToast("⚠️ Không có dữ liệu để sao chép");
         const now = new Date();
@@ -1161,20 +1236,12 @@
 
     window.exportCSV = function() {
         if(db.length === 0) return window.showToast("⚠️ Không có dữ liệu để xuất");
-        
-        // Dùng \uFEFF ở dạng chuỗi nguyên bản để Excel nhận chuẩn UTF-8 Tiếng Việt
-        // Dùng dấu chấm phẩy (;) để chia cột do hệ thống VN mặc định hiểu (;) là phân cách cột
         let csv = "\uFEFFSTT;Họ Tên;Nhiệm Vụ\n";
-        
         db.forEach((item, index) => { 
-            // Xử lý chuỗi an toàn
             const safeName = item.name ? String(item.name).replace(/"/g, '""') : "";
             const safeTask = item.task ? String(item.task).replace(/"/g, '""') : "";
-            
-            // Chia cột bằng dấu chấm phẩy (;)
             csv += `${index + 1};"${safeName}";"${safeTask}"\n`; 
         });
-        
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a'); a.href = url; a.download = `KHCN_${currentCategory}_${currentDate}.csv`;
@@ -1182,11 +1249,8 @@
         window.showToast("Đã tải xuống file CSV");
     }
 
-    // Render Table
     window.render = function() {
         const container = document.getElementById('tableWrapper');
-        
-        // KIỂM TRA LOADING TRẠNG THÁI SKELETON
         if(!isDataLoaded) {
             container.innerHTML = `
                 <div class="table-container">
@@ -1214,7 +1278,6 @@
             return;
         }
 
-        // KHI ĐÃ CÓ DỮ LIỆU NHƯNG MẢNG TRỐNG
         if(db.length === 0) {
             container.innerHTML = `
                 <div class="empty">
@@ -1265,24 +1328,138 @@
         container.innerHTML = html;
     }
 
-    // Init UI ban đầu
+    // ==========================================
+    // LOGIC CHO TRỢ LÝ AI (CHAT AI)
+    // ==========================================
+    let chatHistory = [];
+    let chatAttachBase64 = null;
+    let chatAttachMime = null;
+
+    window.toggleChat = function() {
+        document.getElementById('chatPanel').classList.toggle('open');
+        // Kéo thanh cuộn xuống cuối khi mở
+        const msgContainer = document.getElementById('chatMessages');
+        msgContainer.scrollTop = msgContainer.scrollHeight;
+    }
+
+    window.clearChat = function() {
+        chatHistory = [];
+        document.getElementById('chatMessages').innerHTML = '<div class="chat-msg ai">Lịch sử trò chuyện đã được làm mới. Mình có thể giúp gì cho bạn?</div>';
+        window.removeChatAttach();
+    }
+
+    window.handleChatAttach = function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(event) {
+            chatAttachBase64 = event.target.result.split(',')[1];
+            chatAttachMime = file.type;
+            document.getElementById('chatPreviewImg').src = event.target.result;
+            document.getElementById('chatAttachPreview').style.display = 'inline-block';
+        };
+        reader.readAsDataURL(file);
+        e.target.value = ''; // Reset input
+    }
+
+    window.removeChatAttach = function() {
+        chatAttachBase64 = null;
+        chatAttachMime = null;
+        document.getElementById('chatPreviewImg').src = '';
+        document.getElementById('chatAttachPreview').style.display = 'none';
+    }
+
+    window.sendChatMessage = async function() {
+        const inputEl = document.getElementById('chatInput');
+        const text = inputEl.value.trim();
+        
+        // Ngăn gửi nếu không có nội dung lẫn ảnh
+        if (!text && !chatAttachBase64) return;
+
+        const msgContainer = document.getElementById('chatMessages');
+        
+        // 1. Hiển thị tin nhắn của User
+        let userContent = text;
+        if (chatAttachBase64) {
+            userContent += `<br><img src="data:${chatAttachMime};base64,${chatAttachBase64}">`;
+        }
+        msgContainer.innerHTML += `<div class="chat-msg user">${userContent}</div>`;
+        
+        // Xóa nội dung khung chat
+        inputEl.value = '';
+        inputEl.style.height = ''; 
+        
+        // 2. Hiển thị Loading (bong bóng 3 chấm)
+        const loadingId = 'loading-' + Date.now();
+        msgContainer.innerHTML += `
+            <div class="chat-msg ai loading" id="${loadingId}">
+                <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+            </div>`;
+        msgContainer.scrollTop = msgContainer.scrollHeight;
+
+        // Lưu vào History (Chuẩn bị gửi)
+        const payload = {
+            action: 'chat', // Action đặc biệt để Google Apps Script nhận diện
+            message: text,
+            imageBase64: chatAttachBase64,
+            mimeType: chatAttachMime,
+            history: chatHistory
+        };
+        
+        // Cập nhật history cho lượt gửi kế tiếp (Nếu dùng định dạng Gemini, user role = user)
+        chatHistory.push({ role: 'user', parts: [{ text: text }] });
+        
+        // Xóa ảnh đã đính kèm sau khi gửi
+        window.removeChatAttach();
+
+        try {
+            // Gửi dữ liệu tới Google Apps Script URL
+            const response = await fetch(GAS_WEB_APP_URL, {
+                method: 'POST',
+                body: JSON.stringify(payload),
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+            });
+            
+            const result = await response.json();
+            
+            // Xóa hiệu ứng loading
+            const loadEl = document.getElementById(loadingId);
+            if (loadEl) loadEl.remove();
+            
+            if (result.status === 'success') {
+                const aiReply = result.reply || "Lỗi đọc dữ liệu từ AI.";
+                // Cập nhật tin nhắn AI vào UI (thay đổi xuống dòng thành <br>)
+                msgContainer.innerHTML += `<div class="chat-msg ai">${aiReply.replace(/\n/g, '<br>')}</div>`;
+                // Đưa phản hồi của AI vào History
+                chatHistory.push({ role: 'model', parts: [{ text: aiReply }] });
+            } else {
+                msgContainer.innerHTML += `<div class="chat-msg ai" style="color: #dc2626;">⚠️ Lỗi từ máy chủ: ${result.message}</div>`;
+            }
+        } catch (error) {
+            console.error("Lỗi AI:", error);
+            const loadEl = document.getElementById(loadingId);
+            if (loadEl) loadEl.remove();
+            msgContainer.innerHTML += `<div class="chat-msg ai" style="color: #dc2626;">⚠️ Lỗi kết nối. Vui lòng kiểm tra lại Google Apps Script của bạn.</div>`;
+        }
+        
+        msgContainer.scrollTop = msgContainer.scrollHeight;
+    }
+
+    // ==== Khởi tạo chung ====
     const initDate = new Date(currentDate + 'T00:00:00');
     const initOptions = { year: 'numeric', month: '2-digit', day: '2-digit' };
     document.getElementById('dateDisplay').textContent = '📅 ' + initDate.toLocaleDateString('vi-VN', initOptions);
     document.getElementById('dateInput').value = currentDate;
     
-    // Tải danh sách người dùng mặc định ngay lập tức
     window.renderPeopleButtons();
-    
-    // Render lần đầu tiên sẽ vẽ khung xương Skeleton vì cờ isDataLoaded = false
     window.render();
 
-    // Xử lý các nút bấm bàn phím
     document.addEventListener('keydown', function(e) {
         if(e.key === 'Escape') {
             window.closeModal();
             window.closeTaskEditModal();
             window.closeConfirmModal();
+            document.getElementById('chatPanel').classList.remove('open');
         }
         if(e.key === 'Enter') {
             if (document.getElementById('editModal').classList.contains('show')) window.saveModal();
@@ -1291,7 +1468,6 @@
 </script>
 </body>
 </html>
-
 
 
 
