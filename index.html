@@ -197,6 +197,12 @@
             box-shadow: 0 0 0 4px var(--primary-light);
         }
 
+        /* Đảm bảo placeholder dài hiển thị đủ trên mobile */
+        #quickInput::placeholder {
+            font-size: 15px;
+            transition: all 0.2s;
+        }
+
         .btn {
             padding: 12px 20px;
             border: none;
@@ -329,18 +335,43 @@
             margin-top: 12px;
         }
 
+        .app-footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-bottom: 60px; /* Đẩy khoảng trống lên để không bị khuất bởi nút chat */
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 0.95rem;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            letter-spacing: 0.5px;
+        }
+        .app-footer span {
+            opacity: 0.4;
+            margin: 0 10px;
+            font-weight: 400;
+        }
+
         /* ==============================================================
            GIAO DIỆN KHUNG CHAT AI
            ============================================================== */
         .chat-fab {
-            position: fixed; bottom: 30px; right: 30px; height: 56px; padding: 0 24px;
-            border-radius: 30px; background: linear-gradient(135deg, var(--primary) 0%, #047857 100%); 
-            color: white; font-size: 16px; font-weight: 600;
-            border: none; box-shadow: 0 10px 20px rgba(5, 150, 105, 0.4); cursor: pointer;
-            z-index: 9998; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s;
+            position: fixed; bottom: 30px; right: 30px; height: 50px; padding: 0 20px;
+            border-radius: 25px; 
+            background: rgba(5, 150, 105, 0.85); /* Hơi trong suốt */
+            backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); /* Hiệu ứng kính mờ */
+            color: white; font-size: 15px; font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.2); 
+            box-shadow: 0 6px 16px rgba(5, 150, 105, 0.3); cursor: pointer;
+            z-index: 9998; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             display: flex; align-items: center; justify-content: center; gap: 8px;
+            opacity: 0.8; /* Tăng độ mờ lên 80% */
         }
-        .chat-fab:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 15px 25px rgba(5, 150, 105, 0.5); }
+        .chat-fab:hover { 
+            transform: translateY(-4px) scale(1.05); 
+            box-shadow: 0 12px 24px rgba(5, 150, 105, 0.45); 
+            opacity: 1; /* Hiện rõ 100% khi tương tác */
+            background: linear-gradient(135deg, var(--primary) 0%, #047857 100%);
+        }
         .chat-fab:active { transform: scale(0.95); }
         .chat-fab .pro-badge { background: #f59e0b; color: white; padding: 2px 6px; border-radius: 6px; font-size: 11px; text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px; }
 
@@ -455,7 +486,17 @@
 
             /* Khung chat trên mobile */
             .chat-panel { width: 100%; right: -100%; }
-            .chat-fab { bottom: 20px; right: 20px; height: 50px; padding: 0 18px; font-size: 15px; }
+            .chat-fab { bottom: 20px; right: 20px; height: 44px; padding: 0 16px; width: auto; font-size: 14px; }
+            .chat-fab .pro-badge { padding: 2px 4px; font-size: 10px; }
+
+            /* Điều chỉnh placeholder trên mobile: Chữ to hơn và giảm padding để có thêm không gian hiển thị */
+            #quickInput {
+                padding: 12px 10px !important;
+            }
+            #quickInput::placeholder {
+                font-size: 14px;
+                letter-spacing: -0.2px;
+            }
         }
     </style>
 </head>
@@ -482,26 +523,26 @@
         </div>
     </div>
 
-    <div class="layout-2col">
+        <div class="layout-2col">
         <div>
             <div class="section-title">✍️ Nhập Liệu</div>
             <div class="input-card">
                 <label>Nhập nhanh (Tên + Nhiệm vụ)</label>
                 <div class="quick-add-group" style="display: flex; flex-wrap: wrap; align-items: center;">
-                    <input type="text" id="quickInput" placeholder="Nhấp để nhập nhanh (VD: Đạt trà đào cam xả)..." onfocus="window.expandQuickAdd()" onkeypress="if(event.key==='Enter') window.quickAdd()" style="flex: 1; width: 100%; transition: all 0.25s;">
+                    <input type="text" id="quickInput" placeholder="Nhấp để nhập nhanh (VD: Đạt trà đào cam xả)" onfocus="window.expandQuickAdd()" onkeypress="if(event.key==='Enter') window.quickAdd()" style="flex: 1; width: 100%; transition: all 0.25s;">
                     
                     <div id="quickAddExtras" class="quick-add-collapse">
-                        <div class="quick-add-extras-inner" style="display: flex; gap: 8px; justify-content: space-between; flex-wrap: wrap;">
-                            <div class="attach-wrapper" style="margin-top: 0;">
-                                <label class="btn btn-outline" for="attachInput" style="position: relative; overflow: hidden;">
+                        <div class="quick-add-extras-inner" style="display: flex; gap: 16px; justify-content: space-between; flex-wrap: wrap;">
+                            <div class="attach-wrapper" style="margin-top: 0; flex: 1; min-width: 240px;">
+                                <label class="btn btn-outline" for="attachInput" style="position: relative; overflow: hidden; white-space: nowrap;">
                                     📎 Đính kèm
                                     <input type="file" id="attachInput" style="position: absolute; left:0; top:0; width:100%; height:100%; opacity:0; cursor:pointer;" multiple onchange="window.handleAttachments(event)">
                                 </label>
-                                <span class="attach-preview" id="attachPreview">Không có tập tin nào.</span>
+                                <span class="attach-preview" id="attachPreview" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 200px;">Không có tập tin nào.</span>
                             </div>
-                            <div style="display: flex; gap: 8px;">
+                            <div style="display: flex; gap: 8px; flex: 1; min-width: 300px;">
                                 <button class="btn btn-outline" style="padding: 0 16px;" onclick="window.collapseQuickAdd()" title="Thu gọn khung nhập">▲</button>
-                                <button class="btn btn-primary" style="width: auto; padding: 0 24px;" onclick="window.quickAdd()">Thêm</button>
+                                <button class="btn btn-primary" style="flex: 1; padding: 0 24px;" onclick="window.quickAdd()">Thêm</button>
                             </div>
                         </div>
                         <div class="attachment-list" id="attachmentList"></div>
@@ -546,6 +587,10 @@
                 <!-- Table rendered here -->
             </div>
         </div>
+    </div>
+
+    <div class="app-footer">
+        Nhập nhanh <span>|</span> Tiện lợi <span>|</span> Chat Pro
     </div>
 </div>
 
@@ -928,9 +973,9 @@
     // ==== Handlers cho Đính kèm ====
     window.handleAttachments = function(e) {
         const newFiles = Array.from(e.target.files || []);
-        if (window.pendingQuickFiles.length + newFiles.length > 5) {
-            window.showToast("⚠️ Chỉ được đính kèm tối đa 5 tập tin!");
-            const allowed = 5 - window.pendingQuickFiles.length;
+        if (window.pendingQuickFiles.length + newFiles.length > 30) {
+            window.showToast("⚠️ Chỉ được đính kèm tối đa 30 tập tin!");
+            const allowed = 30 - window.pendingQuickFiles.length;
             window.pendingQuickFiles.push(...newFiles.slice(0, allowed));
         } else {
             window.pendingQuickFiles.push(...newFiles);
@@ -958,9 +1003,9 @@
 
     window.handleManualAttachment = function(e) {
         const newFiles = Array.from(e.target.files || []);
-        if (window.pendingManualFiles.length + newFiles.length > 5) {
-            window.showToast("⚠️ Chỉ được đính kèm tối đa 5 tập tin!");
-            const allowed = 5 - window.pendingManualFiles.length;
+        if (window.pendingManualFiles.length + newFiles.length > 30) {
+            window.showToast("⚠️ Chỉ được đính kèm tối đa 30 tập tin!");
+            const allowed = 30 - window.pendingManualFiles.length;
             window.pendingManualFiles.push(...newFiles.slice(0, allowed));
         } else {
             window.pendingManualFiles.push(...newFiles);
@@ -988,9 +1033,9 @@
 
     window.handleEditAttachment = function(e) {
         const files = Array.from(e.target.files || []);
-        if (files.length > 5) {
-            window.showToast("⚠️ Chỉ được đính kèm tối đa 5 tập tin!");
-            window.pendingEditFiles = files.slice(0, 5);
+        if (files.length > 30) {
+            window.showToast("⚠️ Chỉ được đính kèm tối đa 30 tập tin!");
+            window.pendingEditFiles = files.slice(0, 30);
         } else {
             window.pendingEditFiles = files;
         }
@@ -1473,6 +1518,15 @@
 </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
 
 
 
