@@ -1811,11 +1811,11 @@
         window.removeChatAttach();
 
         try {
-            // Gửi dữ liệu tới Google Apps Script URL
-            const response = await fetch(GAS_WEB_APP_URL, {
+            const chatApiUrl = window.location.protocol === 'file:' ? 'http://localhost:3000/api/chat' : '/api/chat';
+            const response = await fetch(chatApiUrl, {
                 method: 'POST',
                 body: JSON.stringify(payload),
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                headers: { 'Content-Type': 'application/json' }
             });
             
             const result = await response.json();

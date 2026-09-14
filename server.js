@@ -2,13 +2,17 @@ const http = require('http');
 const fs = require('fs');
 const path = require('path');
 const proxyHandler = require('./api/proxy.js');
+const chatHandler = require('./api/chat.js');
 
 const PORT = 3000;
 
 const server = http.createServer(async (req, res) => {
-    // 1. Route API Proxy
+    // 1. Route API Proxy & Chat
     if (req.url.startsWith('/api/proxy')) {
         return proxyHandler(req, res);
+    }
+    if (req.url.startsWith('/api/chat')) {
+        return chatHandler(req, res);
     }
 
     // 2. Static files
