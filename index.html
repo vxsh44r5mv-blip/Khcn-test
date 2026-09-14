@@ -275,6 +275,8 @@
         .btn-sm:active { transform: scale(0.92); }
         .btn-edit { background: #dcfce7; color: #15803d; } .btn-edit:hover { background: #bbf7d0; }
         .btn-del { background: #fee2e2; color: #b91c1c; } .btn-del:hover { background: #fecaca; }
+        .btn-zip { background: #e0e7ff; color: #4338ca; display: inline-flex; align-items: center; gap: 4px; }
+        .btn-zip:hover { background: #c7d2fe; }
         .btn-attach { background: #e0f2fe; color: #0369a1; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; text-decoration: none; }
         .btn-attach:hover { background: #bae6fd; }
 
@@ -508,6 +510,8 @@
             }
         }
     </style>
+    <!-- Thư viện nén ZIP client-side -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 <body>
 
@@ -593,6 +597,7 @@
             <div class="controls-grid">
                 <button class="btn btn-outline" onclick="window.copyTable(this)">📋 Sao chép</button>
                 <button class="btn btn-outline" onclick="window.exportCSV()">📥 Xuất CSV</button>
+                <button class="btn btn-outline" id="downloadZipAllBtn" onclick="window.downloadAllAttachments(this)">📦 Tải tất cả zip</button>
                 <button class="btn btn-outline" style="border-color: #fca5a5; color: #ef4444; background: #fef2f2;" onclick="window.clearData()">🗑️ Xóa hết</button>
             </div>
             <div class="table-wrapper" id="tableWrapper">
@@ -944,7 +949,7 @@
         if(listEl) listEl.innerHTML = '';
     }
 
-    async function processUploadGoogleDrive(file) {
+    async function processUploadGoogleDrive(file, showToast = true) {
         if (!file) return null;
         if (GAS_WEB_APP_URL.includes('DÁN_LINK_APP_SCRIPT')) {
             window.showToast('⚠️ Chưa cấu hình Google Apps Script');
@@ -956,7 +961,9 @@
             throw new Error('File too large');
         }
 
-        window.showToast(`⏳ Đang tải file ${file.name} lên Google Drive...`);
+        if (showToast) {
+            window.showToast(`⏳ Đang tải file ${file.name} lên Google Drive...`);
+        }
 
         return new Promise((resolve, reject) => {
             const reader = new FileReader();
@@ -993,6 +1000,48 @@
             };
             reader.readAsDataURL(file);
         });
+    }
+
+    async function uploadFilesWithProgress(files, btn, mode = 'manual') {
+        if (!files || files.length === 0) return [];
+        const total = files.length;
+        let completed = 0;
+
+        const updateBtn = (statusText) => {
+            if (!btn) return;
+            if (statusText) {
+                btn.innerHTML = statusText;
+                return;
+            }
+            if (mode === 'quick') {
+                btn.innerHTML = `⏳ (${completed}/${total})`;
+            } else {
+                btn.innerHTML = `⏳ Đang tải (${completed}/${total})...`;
+            }
+        };
+
+        updateBtn();
+        window.showToast(`⏳ Đang tải lên 0/${total} tệp đính kèm...`);
+
+        const uploadPromises = files.map(async (file) => {
+            try {
+                const res = await processUploadGoogleDrive(file, false);
+                completed++;
+                updateBtn();
+                window.showToast(`⏳ (${completed}/${total}) Đã tải xong: ${file.name}`);
+                return res;
+            } catch (err) {
+                completed++;
+                updateBtn();
+                console.error(`Lỗi tải tệp ${file.name}:`, err);
+                window.showToast(`⚠️ Lỗi tải file ${file.name}: ${err.message || 'Thất bại'}`);
+                return null;
+            }
+        });
+
+        const results = (await Promise.all(uploadPromises)).filter(Boolean);
+        updateBtn('⏳ Đang lưu...');
+        return results;
     }
 
     // ==== Handlers cho Đính kèm ====
@@ -1088,14 +1137,17 @@
         const timestampId = Date.now();
 
         const submitBtn = document.getElementById('quickAddSubmitBtn');
-        if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Đang lưu...'; }
+        const hasQuickFiles = window.pendingQuickFiles && window.pendingQuickFiles.length > 0;
+        if (submitBtn) { 
+            submitBtn.disabled = true; 
+            submitBtn.innerHTML = hasQuickFiles ? `⏳ (0/${window.pendingQuickFiles.length})` : '⏳ Đang lưu...'; 
+        }
 
         const dataPayload = { id: timestampId, date: currentDate, category: currentCategory, name, task };
 
         try {
-            if (window.pendingQuickFiles.length > 0) {
-                window.showToast(`⏳ Đang tải ${window.pendingQuickFiles.length} tệp lên Drive...`);
-                const uploaded = (await Promise.all(window.pendingQuickFiles.map(processUploadGoogleDrive))).filter(Boolean);
+            if (hasQuickFiles) {
+                const uploaded = await uploadFilesWithProgress(window.pendingQuickFiles, submitBtn, 'quick');
                 if (uploaded.length) dataPayload.attachments = uploaded;
             }
 
@@ -1124,15 +1176,18 @@
         if(!task) return window.showToast("⚠️ Vui lòng nhập nhiệm vụ!");
 
         const submitBtn = document.getElementById('manualAddSubmitBtn');
-        if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Đang lưu...'; }
+        const hasManualFiles = window.pendingManualFiles && window.pendingManualFiles.length > 0;
+        if (submitBtn) { 
+            submitBtn.disabled = true; 
+            submitBtn.innerHTML = hasManualFiles ? `⏳ Đang tải (0/${window.pendingManualFiles.length})...` : '⏳ Đang lưu...'; 
+        }
 
         const timestampId = Date.now();
         const dataPayload = { id: timestampId, date: currentDate, category: currentCategory, name, task };
 
         try {
-            if (window.pendingManualFiles.length > 0) {
-                window.showToast(`⏳ Đang tải ${window.pendingManualFiles.length} tệp lên Drive...`);
-                const uploaded = (await Promise.all(window.pendingManualFiles.map(processUploadGoogleDrive))).filter(Boolean);
+            if (hasManualFiles) {
+                const uploaded = await uploadFilesWithProgress(window.pendingManualFiles, submitBtn, 'manual');
                 if (uploaded.length) dataPayload.attachments = uploaded;
             }
 
@@ -1205,13 +1260,16 @@
         if(!n || !t) return window.showToast("⚠️ Vui lòng nhập đầy đủ thông tin");
 
         const saveBtn = document.getElementById('saveTaskEditBtn');
-        if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Đang lưu...'; }
+        const hasEditFiles = window.pendingEditFiles && window.pendingEditFiles.length > 0;
+        if (saveBtn) { 
+            saveBtn.disabled = true; 
+            saveBtn.innerHTML = hasEditFiles ? `⏳ Đang tải (0/${window.pendingEditFiles.length})...` : '⏳ Đang lưu...'; 
+        }
 
         try {
             const payload = { name: n, task: t };
-            if (window.pendingEditFiles.length > 0) {
-                window.showToast(`⏳ Đang tải ${window.pendingEditFiles.length} tệp lên Drive...`);
-                const uploaded = (await Promise.all(window.pendingEditFiles.map(processUploadGoogleDrive))).filter(Boolean);
+            if (hasEditFiles) {
+                const uploaded = await uploadFilesWithProgress(window.pendingEditFiles, saveBtn, 'edit');
                 if (uploaded.length) payload.attachments = uploaded;
             } else if (item && item.attachments) {
                 payload.attachments = item.attachments;
@@ -1330,6 +1388,259 @@
         window.showToast("Đã tải xuống file CSV");
     }
 
+
+    function getDirectDownloadUrl(url) {
+        if (!url) return '';
+        const match = url.match(/\/(?:file|document|spreadsheets)\/d\/([a-zA-Z0-9_-]+)/) || url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+        if (match && match[1]) {
+            const id = match[1];
+            // Tải qua API Proxy (hỗ trợ cả localhost lẫn Vercel, hoàn toàn không bị chặn CORS)
+            if (window.location.protocol === 'file:') {
+                return 'http://localhost:3000/api/proxy?id=' + encodeURIComponent(id);
+            }
+            return '/api/proxy?id=' + encodeURIComponent(id);
+        }
+        return url;
+    }
+
+    // Tải ZIP cho riêng 1 nhiệm vụ
+    window.downloadTaskZip = async function(docId, btn) {
+        if (typeof JSZip === 'undefined') {
+            return window.showToast('⚠️ Thư viện nén file chưa sẵn sàng, vui lòng tải lại trang!');
+        }
+
+        const item = db.find(i => i.docId === docId) || allTasks.find(i => i.docId === docId);
+        if (!item || !item.attachments || item.attachments.length === 0) {
+            return window.showToast('⚠️ Nhiệm vụ này không có tệp đính kèm nào!');
+        }
+
+        const files = item.attachments;
+        const originalText = btn ? btn.innerHTML : '';
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '⏳ (0/' + files.length + ')';
+        }
+
+        window.showToast('⏳ Đang chuẩn bị nén ' + files.length + ' tệp của ' + item.name + '...');
+
+        try {
+            const zip = new JSZip();
+            let successCount = 0;
+            const fallbackFiles = [];
+            const seenNames = {};
+
+            for (let i = 0; i < files.length; i++) {
+                const f = files[i];
+                if (btn) btn.innerHTML = '⏳ (' + (i + 1) + '/' + files.length + ')';
+
+                const directUrl = getDirectDownloadUrl(f.url);
+                let fetched = false;
+
+                try {
+                    const response = await fetch(directUrl);
+                    if (response.ok) {
+                        const arrayBuffer = await response.arrayBuffer();
+                        if (arrayBuffer.byteLength > 0) {
+                            const cleanName = (f.name || ('file_' + (i + 1))).replace(/[\/\\:*?"<>|]/g, '_');
+                            let finalFileName = cleanName;
+
+                            if (seenNames[finalFileName]) {
+                                seenNames[finalFileName]++;
+                                const extDot = finalFileName.lastIndexOf('.');
+                                if (extDot !== -1) {
+                                    finalFileName = finalFileName.substring(0, extDot) + ' (' + seenNames[finalFileName] + ')' + finalFileName.substring(extDot);
+                                } else {
+                                    finalFileName = finalFileName + ' (' + seenNames[finalFileName] + ')';
+                                }
+                            } else {
+                                seenNames[finalFileName] = 1;
+                            }
+
+                            zip.file(finalFileName, arrayBuffer);
+                            successCount++;
+                            fetched = true;
+                        }
+                    }
+                } catch (fetchErr) {
+                    console.warn('Lỗi tải tệp ' + f.name + ':', fetchErr);
+                }
+
+                if (!fetched) {
+                    fallbackFiles.push({ name: f.name, url: directUrl || f.url });
+                }
+            }
+
+            if (successCount > 0) {
+                if (btn) btn.innerHTML = '⏳ Đang tạo ZIP...';
+                const zipContent = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+                const cleanOwner = (item.name || 'KHCN').replace(/[\/\\:*?"<>|]/g, '_');
+                const cleanTask = (item.task || 'DinhKem').substring(0, 15).replace(/[\/\\:*?"<>|]/g, '_');
+                const downloadUrl = URL.createObjectURL(zipContent);
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                a.download = '[' + cleanOwner + ']_' + cleanTask + '_' + currentDate + '.zip';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(downloadUrl);
+            }
+
+            if (fallbackFiles.length > 0) {
+                fallbackFiles.forEach((ff, idx) => {
+                    setTimeout(() => {
+                        const a = document.createElement('a');
+                        a.href = ff.url;
+                        a.target = '_blank';
+                        a.rel = 'noopener noreferrer';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                    }, idx * 400);
+                });
+
+                if (successCount === 0) {
+                    window.showToast('⚠️ Đang mở tải trực tiếp ' + fallbackFiles.length + ' tệp...');
+                } else {
+                    window.showToast('✅ Đã nén ' + successCount + ' tệp vào file ZIP và mở tải ' + fallbackFiles.length + ' tệp còn lại!');
+                }
+            } else {
+                window.showToast('✅ Đã tải file zip (' + successCount + '/' + files.length + ' tệp)!');
+            }
+        } catch (err) {
+            console.error('Lỗi khi nén file:', err);
+            window.showToast('⚠️ Lỗi nén file: ' + err.message);
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = originalText || '📦 Tải zip';
+            }
+        }
+    };
+
+    // Tải ZIP cho TOÀN BỘ các nhiệm vụ trong ngày
+    window.downloadAllAttachments = async function(btn) {
+        if (typeof JSZip === 'undefined') {
+            return window.showToast('⚠️ Thư viện nén file chưa sẵn sàng, vui lòng tải lại trang!');
+        }
+
+        const fileList = [];
+        db.forEach((item, itemIdx) => {
+            if (item.attachments && item.attachments.length > 0) {
+                item.attachments.forEach(att => {
+                    fileList.push({
+                        owner: item.name || ('Nhiệm_vụ_' + (itemIdx + 1)),
+                        name: att.name || 'tap_tin',
+                        url: att.url
+                    });
+                });
+            }
+        });
+
+        if (fileList.length === 0) {
+            return window.showToast('⚠️ Không có tệp đính kèm nào trong danh sách hiện tại!');
+        }
+
+        const originalText = btn ? btn.innerHTML : '';
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '⏳ (0/' + fileList.length + ')';
+        }
+
+        window.showToast('⏳ Đang gom và tải ' + fileList.length + ' tệp của toàn bộ danh sách...');
+
+        try {
+            const zip = new JSZip();
+            let successCount = 0;
+            const fallbackFiles = [];
+            const seenNames = {};
+
+            for (let i = 0; i < fileList.length; i++) {
+                const f = fileList[i];
+                if (btn) btn.innerHTML = '⏳ (' + (i + 1) + '/' + fileList.length + ')';
+
+                const directUrl = getDirectDownloadUrl(f.url);
+                let fetched = false;
+
+                try {
+                    const response = await fetch(directUrl);
+                    if (response.ok) {
+                        const arrayBuffer = await response.arrayBuffer();
+                        if (arrayBuffer.byteLength > 0) {
+                            const cleanOwner = f.owner.replace(/[\/\\:*?"<>|]/g, '_');
+                            const cleanName = f.name.replace(/[\/\\:*?"<>|]/g, '_');
+                            let finalFileName = '[' + cleanOwner + '] ' + cleanName;
+
+                            if (seenNames[finalFileName]) {
+                                seenNames[finalFileName]++;
+                                const extDot = finalFileName.lastIndexOf('.');
+                                if (extDot !== -1) {
+                                    finalFileName = finalFileName.substring(0, extDot) + ' (' + seenNames[finalFileName] + ')' + finalFileName.substring(extDot);
+                                } else {
+                                    finalFileName = finalFileName + ' (' + seenNames[finalFileName] + ')';
+                                }
+                            } else {
+                                seenNames[finalFileName] = 1;
+                            }
+
+                            zip.file(finalFileName, arrayBuffer);
+                            successCount++;
+                            fetched = true;
+                        }
+                    }
+                } catch (fetchErr) {
+                    console.warn('Lỗi tải tệp ' + f.name + ':', fetchErr);
+                }
+
+                if (!fetched) {
+                    fallbackFiles.push({ name: f.name, url: directUrl || f.url });
+                }
+            }
+
+            if (successCount > 0) {
+                if (btn) btn.innerHTML = '⏳ Đang nén ZIP...';
+                const zipContent = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
+                const downloadUrl = URL.createObjectURL(zipContent);
+                const a = document.createElement('a');
+                a.href = downloadUrl;
+                a.download = 'KHCN_TatCaDinhKem_' + currentCategory + '_' + currentDate + '.zip';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(downloadUrl);
+            }
+
+            if (fallbackFiles.length > 0) {
+                fallbackFiles.forEach((ff, idx) => {
+                    setTimeout(() => {
+                        const a = document.createElement('a');
+                        a.href = ff.url;
+                        a.target = '_blank';
+                        a.rel = 'noopener noreferrer';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                    }, idx * 400);
+                });
+
+                if (successCount === 0) {
+                    window.showToast('⚠️ Đang mở tải trực tiếp ' + fallbackFiles.length + ' tệp...');
+                } else {
+                    window.showToast('✅ Đã nén ' + successCount + ' tệp và mở tải ' + fallbackFiles.length + ' tệp còn lại!');
+                }
+            } else {
+                window.showToast('✅ Đã nén và tải toàn bộ ' + successCount + '/' + fileList.length + ' tệp thành công!');
+            }
+        } catch (err) {
+            console.error('Lỗi khi nén file:', err);
+            window.showToast('⚠️ Lỗi nén file: ' + err.message);
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = originalText || '📦 Tải tất cả zip';
+            }
+        }
+    };
+
     window.render = function() {
         const container = document.getElementById('tableWrapper');
         if(!isDataLoaded) {
@@ -1341,7 +1652,7 @@
                                 <th style="width: 50px; text-align: center;">STT</th>
                                 <th style="width: 120px;">Họ Tên</th>
                                 <th>Nhiệm Vụ</th>
-                                <th style="text-align: right; width: 120px;">Thao tác</th>
+                                <th style="text-align: right; min-width: 140px;">Thao tác</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -1376,7 +1687,7 @@
                             <th style="width: 50px; text-align: center;">STT</th>
                             <th style="width: 120px;">Họ Tên</th>
                             <th>Nhiệm Vụ</th>
-                            <th style="text-align: right; width: 120px;">Thao tác</th>
+                            <th style="text-align: right; min-width: 140px;">Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1398,6 +1709,9 @@
                     </td>
                     <td>
                         <div class="action-btns">
+                            ${item.attachments && item.attachments.length ? `
+                                <button class="btn-sm btn-zip" onclick="window.downloadTaskZip('${escapeHtml(item.docId)}', this)" title="Tải tất cả ${item.attachments.length} tệp đính kèm (.zip)">📦 Tải zip</button>
+                            ` : ''}
                             <button class="btn-sm btn-edit" onclick="window.editItem('${escapeHtml(item.docId)}')">Sửa</button>
                             <button class="btn-sm btn-del" onclick="window.deleteItem('${escapeHtml(item.docId)}')">Xóa</button>
                         </div>
