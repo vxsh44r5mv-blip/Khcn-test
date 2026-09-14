@@ -2,7 +2,9 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#059669">
+    <meta name="description" content="KHCN Quản lý - Hệ thống lưu trữ và tổng hợp dữ liệu">
     <title>KHCN Quản lý nhập liệu</title>
     <style>
         :root {
@@ -218,6 +220,13 @@
         }
 
         .btn:active { transform: scale(0.97); }
+        .btn:disabled, .modal-btn:disabled, .chat-send-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+            pointer-events: none;
+        }
 
         .btn-primary { background: var(--primary); color: white; width: 100%; box-shadow: 0 4px 6px rgba(5, 150, 105, 0.2); }
         .btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
@@ -542,7 +551,7 @@
                             </div>
                             <div style="display: flex; gap: 8px; flex: 1; min-width: 300px;">
                                 <button class="btn btn-outline" style="padding: 0 16px;" onclick="window.collapseQuickAdd()" title="Thu gọn khung nhập">▲</button>
-                                <button class="btn btn-primary" style="flex: 1; padding: 0 24px;" onclick="window.quickAdd()">Thêm</button>
+                                <button class="btn btn-primary" id="quickAddSubmitBtn" style="flex: 1; padding: 0 24px;" onclick="window.quickAdd()">Thêm</button>
                             </div>
                         </div>
                         <div class="attachment-list" id="attachmentList"></div>
@@ -571,13 +580,16 @@
                         <span class="attach-preview" id="manualAttachPreview">Không có tập tin nào.</span>
                     </div>
                     <div class="attachment-list" id="manualAttachmentList" style="margin-bottom: 12px;"></div>
-                    <button class="btn btn-primary" onclick="window.manualAdd()">Lưu vào danh sách</button>
+                    <button class="btn btn-primary" id="manualAddSubmitBtn" onclick="window.manualAdd()">Lưu vào danh sách</button>
                 </div>
             </div>
         </div>
 
         <div>
-            <div class="section-title">📊 Tổng Hợp</div>
+            <div class="section-title" style="display: flex; justify-content: space-between; align-items: center;">
+                <span>📊 Tổng Hợp</span>
+                <span id="taskCountBadge" style="font-size: 0.8rem; background: rgba(255,255,255,0.25); padding: 2px 10px; border-radius: 12px; font-weight: 600;">0 việc</span>
+            </div>
             <div class="controls-grid">
                 <button class="btn btn-outline" onclick="window.copyTable(this)">📋 Sao chép</button>
                 <button class="btn btn-outline" onclick="window.exportCSV()">📥 Xuất CSV</button>
@@ -674,7 +686,7 @@
         <input type="hidden" id="editTaskId">
         <div class="modal-buttons">
             <button class="modal-btn modal-btn-cancel" onclick="window.closeTaskEditModal()">Hủy</button>
-            <button class="modal-btn modal-btn-primary" onclick="window.saveTaskEdit()">Lưu</button>
+            <button class="modal-btn modal-btn-primary" id="saveTaskEditBtn" onclick="window.saveTaskEdit()">Lưu</button>
         </div>
     </div>
 </div>
@@ -717,6 +729,17 @@
         
         if (toastTimeout) clearTimeout(toastTimeout);
         toastTimeout = setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    // Hàm mã hóa ký tự đặc biệt chống tấn công XSS
+    function escapeHtml(str) {
+        if (str === null || str === undefined) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
     }
 
     /* ===================================================================
@@ -825,6 +848,8 @@
             item.date === currentDate && 
             (item.category === currentCategory || (!item.category && currentCategory === 'Niềm vui'))
         );
+        const badge = document.getElementById('taskCountBadge');
+        if (badge) badge.textContent = `${db.length} việc`;
         window.render();
     }
 
@@ -996,7 +1021,7 @@
         if(!listEl) return;
         if(window.pendingQuickFiles.length === 0) { listEl.innerHTML = ''; return; }
         listEl.innerHTML = window.pendingQuickFiles.map((att, idx) => `
-            <span class="attachment-pill"><span>${att.name}</span>
+            <span class="attachment-pill"><span>${escapeHtml(att.name)}</span>
             <button type="button" onclick="window.removeAttachment(${idx})" style="background:none;border:none;color:#1e3a8a;cursor:pointer;font-weight:600;padding: 0 4px;">×</button></span>
         `).join('');
     }
@@ -1026,7 +1051,7 @@
         if(!listEl) return;
         if(window.pendingManualFiles.length === 0) { listEl.innerHTML = ''; return; }
         listEl.innerHTML = window.pendingManualFiles.map((att, idx) => `
-            <span class="attachment-pill"><span>${att.name}</span>
+            <span class="attachment-pill"><span>${escapeHtml(att.name)}</span>
             <button type="button" onclick="window.removeManualAttachment(${idx})" style="background:none;border:none;color:#1e3a8a;cursor:pointer;font-weight:600;padding: 0 4px;">×</button></span>
         `).join('');
     }
@@ -1043,7 +1068,7 @@
         const listEl = document.getElementById('editAttachmentList');
         if(previewEl) previewEl.textContent = window.pendingEditFiles.length ? `Đã chọn ${window.pendingEditFiles.length} file mới:` : 'Không có tập tin nào được chọn.';
         if(listEl) {
-            listEl.innerHTML = window.pendingEditFiles.map(att => `<span class="attachment-pill"><span>${att.name}</span></span>`).join('');
+            listEl.innerHTML = window.pendingEditFiles.map(att => `<span class="attachment-pill"><span>${escapeHtml(att.name)}</span></span>`).join('');
         }
     }
 
@@ -1062,15 +1087,15 @@
         const task = parts.slice(1).join(' ');
         const timestampId = Date.now();
 
+        const submitBtn = document.getElementById('quickAddSubmitBtn');
+        if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Đang lưu...'; }
+
         const dataPayload = { id: timestampId, date: currentDate, category: currentCategory, name, task };
 
         try {
             if (window.pendingQuickFiles.length > 0) {
-                const uploaded = [];
-                for (const file of window.pendingQuickFiles) {
-                    const uploadResult = await processUploadGoogleDrive(file);
-                    if (uploadResult) uploaded.push(uploadResult);
-                }
+                window.showToast(`⏳ Đang tải ${window.pendingQuickFiles.length} tệp lên Drive...`);
+                const uploaded = (await Promise.all(window.pendingQuickFiles.map(processUploadGoogleDrive))).filter(Boolean);
                 if (uploaded.length) dataPayload.attachments = uploaded;
             }
 
@@ -1084,6 +1109,8 @@
             console.error(error);
             window.showToast("⚠️ Lỗi lưu dữ liệu: Kiểm tra quyền Firebase");
             inputEl.value = val;
+        } finally {
+            if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Thêm'; }
         }
     }
 
@@ -1096,16 +1123,16 @@
         if(!name) return window.showToast("⚠️ Vui lòng chọn người trước!");
         if(!task) return window.showToast("⚠️ Vui lòng nhập nhiệm vụ!");
 
+        const submitBtn = document.getElementById('manualAddSubmitBtn');
+        if (submitBtn) { submitBtn.disabled = true; submitBtn.textContent = 'Đang lưu...'; }
+
         const timestampId = Date.now();
         const dataPayload = { id: timestampId, date: currentDate, category: currentCategory, name, task };
 
         try {
             if (window.pendingManualFiles.length > 0) {
-                const uploaded = [];
-                for (const file of window.pendingManualFiles) {
-                    const uploadResult = await processUploadGoogleDrive(file);
-                    if (uploadResult) uploaded.push(uploadResult);
-                }
+                window.showToast(`⏳ Đang tải ${window.pendingManualFiles.length} tệp lên Drive...`);
+                const uploaded = (await Promise.all(window.pendingManualFiles.map(processUploadGoogleDrive))).filter(Boolean);
                 if (uploaded.length) dataPayload.attachments = uploaded;
             }
 
@@ -1122,6 +1149,8 @@
             inputEl.value = task;
             selectedPerson = name;
             window.renderPeopleButtons();
+        } finally {
+            if (submitBtn) { submitBtn.disabled = false; submitBtn.textContent = 'Lưu vào danh sách'; }
         }
     }
 
@@ -1175,14 +1204,14 @@
 
         if(!n || !t) return window.showToast("⚠️ Vui lòng nhập đầy đủ thông tin");
 
+        const saveBtn = document.getElementById('saveTaskEditBtn');
+        if (saveBtn) { saveBtn.disabled = true; saveBtn.textContent = 'Đang lưu...'; }
+
         try {
             const payload = { name: n, task: t };
             if (window.pendingEditFiles.length > 0) {
-                const uploaded = [];
-                for (const file of window.pendingEditFiles) {
-                    const uploadResult = await processUploadGoogleDrive(file);
-                    if (uploadResult) uploaded.push(uploadResult);
-                }
+                window.showToast(`⏳ Đang tải ${window.pendingEditFiles.length} tệp lên Drive...`);
+                const uploaded = (await Promise.all(window.pendingEditFiles.map(processUploadGoogleDrive))).filter(Boolean);
                 if (uploaded.length) payload.attachments = uploaded;
             } else if (item && item.attachments) {
                 payload.attachments = item.attachments;
@@ -1195,6 +1224,8 @@
         } catch(error) {
             console.error(error);
             window.showToast("⚠️ Lỗi cập nhật dữ liệu");
+        } finally {
+            if (saveBtn) { saveBtn.disabled = false; saveBtn.textContent = 'Lưu'; }
         }
     }
 
@@ -1356,19 +1387,19 @@
             html += `
                 <tr>
                     <td style="color:#9ca3af; text-align: center; font-weight: 500;">${index + 1}</td>
-                    <td style="font-weight: 600; color: var(--primary);">${item.name}</td>
+                    <td style="font-weight: 600; color: var(--primary);">${escapeHtml(item.name)}</td>
                     <td>
-                        <div>${item.task}</div>
+                        <div>${escapeHtml(item.task)}</div>
                         ${item.attachments && item.attachments.length ? `
                             <div style="margin-top:8px; display:flex; flex-wrap:wrap; gap:6px;">
-                                ${item.attachments.map(att => `<a class="btn-sm btn-attach" href="${att.url}" target="_blank" rel="noopener noreferrer">📎 ${att.name || 'Tệp đính kèm'}</a>`).join('')}
+                                ${item.attachments.map(att => `<a class="btn-sm btn-attach" href="${escapeHtml(att.url)}" target="_blank" rel="noopener noreferrer">📎 ${escapeHtml(att.name || 'Tệp đính kèm')}</a>`).join('')}
                             </div>
                         ` : ''}
                     </td>
                     <td>
                         <div class="action-btns">
-                            <button class="btn-sm btn-edit" onclick="window.editItem('${item.docId}')">Sửa</button>
-                            <button class="btn-sm btn-del" onclick="window.deleteItem('${item.docId}')">Xóa</button>
+                            <button class="btn-sm btn-edit" onclick="window.editItem('${escapeHtml(item.docId)}')">Sửa</button>
+                            <button class="btn-sm btn-del" onclick="window.deleteItem('${escapeHtml(item.docId)}')">Xóa</button>
                         </div>
                     </td>
                 </tr>
@@ -1421,6 +1452,7 @@
 
     window.sendChatMessage = async function() {
         const inputEl = document.getElementById('chatInput');
+        const sendBtn = document.querySelector('.chat-send-btn');
         const text = inputEl.value.trim();
         
         // Ngăn gửi nếu không có nội dung lẫn ảnh
@@ -1428,16 +1460,18 @@
 
         const msgContainer = document.getElementById('chatMessages');
         
-        // 1. Hiển thị tin nhắn của User
-        let userContent = text;
+        // 1. Hiển thị tin nhắn của User an toàn chống XSS
+        let userContent = escapeHtml(text).replace(/\n/g, '<br>');
         if (chatAttachBase64) {
-            userContent += `<br><img src="data:${chatAttachMime};base64,${chatAttachBase64}">`;
+            userContent += `<br><img src="data:${escapeHtml(chatAttachMime)};base64,${chatAttachBase64}">`;
         }
         msgContainer.innerHTML += `<div class="chat-msg user">${userContent}</div>`;
         
-        // Xóa nội dung khung chat
+        // Xóa nội dung khung chat và tạm khóa nút gửi
         inputEl.value = '';
-        inputEl.style.height = ''; 
+        inputEl.style.height = '';
+        if (sendBtn) sendBtn.disabled = true;
+        inputEl.disabled = true;
         
         // 2. Hiển thị Loading (bong bóng 3 chấm)
         const loadingId = 'loading-' + Date.now();
@@ -1456,7 +1490,7 @@
             history: chatHistory
         };
         
-        // Cập nhật history cho lượt gửi kế tiếp (Nếu dùng định dạng Gemini, user role = user)
+        // Cập nhật history cho lượt gửi kế tiếp
         chatHistory.push({ role: 'user', parts: [{ text: text }] });
         
         // Xóa ảnh đã đính kèm sau khi gửi
@@ -1478,21 +1512,25 @@
             
             if (result.status === 'success') {
                 const aiReply = result.reply || "Lỗi đọc dữ liệu từ AI.";
-                // Cập nhật tin nhắn AI vào UI (thay đổi xuống dòng thành <br>)
-                msgContainer.innerHTML += `<div class="chat-msg ai">${aiReply.replace(/\n/g, '<br>')}</div>`;
+                // Cập nhật tin nhắn AI an toàn vào UI
+                const formattedReply = escapeHtml(aiReply).replace(/\n/g, '<br>');
+                msgContainer.innerHTML += `<div class="chat-msg ai">${formattedReply}</div>`;
                 // Đưa phản hồi của AI vào History
                 chatHistory.push({ role: 'model', parts: [{ text: aiReply }] });
             } else {
-                msgContainer.innerHTML += `<div class="chat-msg ai" style="color: #dc2626;">⚠️ Lỗi từ máy chủ: ${result.message}</div>`;
+                msgContainer.innerHTML += `<div class="chat-msg ai" style="color: #dc2626;">⚠️ Lỗi từ máy chủ: ${escapeHtml(result.message)}</div>`;
             }
         } catch (error) {
             console.error("Lỗi AI:", error);
             const loadEl = document.getElementById(loadingId);
             if (loadEl) loadEl.remove();
             msgContainer.innerHTML += `<div class="chat-msg ai" style="color: #dc2626;">⚠️ Lỗi kết nối. Vui lòng kiểm tra lại Google Apps Script của bạn.</div>`;
+        } finally {
+            if (sendBtn) sendBtn.disabled = false;
+            inputEl.disabled = false;
+            inputEl.focus();
+            msgContainer.scrollTop = msgContainer.scrollHeight;
         }
-        
-        msgContainer.scrollTop = msgContainer.scrollHeight;
     }
 
     // ==== Khởi tạo chung ====
@@ -1503,6 +1541,17 @@
     
     window.renderPeopleButtons();
     window.render();
+
+    // Đóng modal khi click ra ngoài backdrop
+    document.querySelectorAll('.modal').forEach(modal => {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                if (modal.id === 'editModal') window.closeModal();
+                else if (modal.id === 'taskEditModal') window.closeTaskEditModal();
+                else if (modal.id === 'confirmModal') window.closeConfirmModal();
+            }
+        });
+    });
 
     document.addEventListener('keydown', function(e) {
         if(e.key === 'Escape') {
@@ -1518,15 +1567,3 @@
 </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
