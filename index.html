@@ -1104,24 +1104,26 @@
             if (GAS_WEB_APP_URL.includes('DÁN_LINK_APP_SCRIPT')) {
                 return reject(new Error('Chưa cấu hình Google Apps Script'));
             }
-            if (file.size > 100 * 1024 * 1024) {
-                return reject(new Error('File lớn hơn 100MB'));
+            if (file.size > 40 * 1024 * 1024) {
+                return reject(new Error('File lớn hơn 40MB'));
             }
 
-            if (onProgress) onProgress(10);
+            if (onProgress) onProgress(5, 'init');
 
             const reader = new FileReader();
             reader.onprogress = (evt) => {
                 if (evt.lengthComputable && onProgress) {
-                    const readPct = Math.round((evt.loaded / evt.total) * 20);
-                    onProgress(10 + readPct);
+                    const readPct = Math.round((evt.loaded / evt.total) * 15);
+                    onProgress(5 + readPct, 'init');
                 }
             };
 
             reader.onload = async function() {
                 let progressInterval = null;
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 120000);
+
                 try {
-                    if (onProgress) onProgress(35);
                     const base64Data = reader.result.split(',')[1];
                     const payload = {
                         filename: file.name,
@@ -1129,35 +1131,63 @@
                         base64: base64Data
                     };
 
-                    // Tiến độ % mô phỏng mượt mà trong khi fetch() gửi và Drive xử lý
-                    let cur = 35;
+                    const startTime = Date.now();
+                    // Ước tính thời gian tải: dung lượng (~250KB/s) + 4s xử lý Drive
+                    const estimatedMs = Math.max(3500, (file.size / 250000) * 1000 + 4000);
+                    let currentPct = 20;
+
                     progressInterval = setInterval(() => {
-                        if (cur < 92) {
-                            cur += Math.floor(Math.random() * 8) + 4;
-                            if (cur > 92) cur = 92;
-                            if (onProgress) onProgress(cur);
+                        const elapsed = Date.now() - startTime;
+                        if (elapsed < estimatedMs) {
+                            currentPct = 20 + Math.round((elapsed / estimatedMs) * 68);
+                        } else {
+                            // Khi mạng đã gửi xong và Google Drive đang tạo file / sinh URL:
+                            // Tiếp tục tăng chậm dần 88% -> 98% theo hàm log, KHÔNG BAO GIỜ bị đứng cứng ở 92%!
+                            const extraSec = (elapsed - estimatedMs) / 1000;
+                            currentPct = Math.min(98, 88 + Math.round(Math.log10(extraSec + 1) * 7));
                         }
+
+                        const stage = currentPct >= 88 ? 'drive' : 'upload';
+                        if (onProgress) onProgress(currentPct, stage);
                     }, 250);
 
                     const response = await fetch(GAS_WEB_APP_URL, {
                         method: 'POST',
                         body: JSON.stringify(payload),
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        signal: controller.signal
                     });
 
+                    clearTimeout(timeoutId);
                     if (progressInterval) clearInterval(progressInterval);
 
-                    const result = await response.json();
+                    const rawText = await response.text();
+                    let result;
+                    try {
+                        result = JSON.parse(rawText);
+                    } catch (parseErr) {
+                        console.error('Phản hồi không phải JSON từ GAS:', rawText);
+                        if (rawText.includes('Service invoked') || rawText.includes('Exception')) {
+                            throw new Error('Google Drive bận, vui lòng thử lại sau giây lát');
+                        }
+                        throw new Error('Lỗi máy chủ Google Drive: ' + rawText.substring(0, 80));
+                    }
+
                     if (result.status === 'success') {
-                        if (onProgress) onProgress(100);
+                        if (onProgress) onProgress(100, 'done');
                         resolve({ url: result.url, name: result.name || file.name });
                     } else {
-                        throw new Error(result.message || 'Lỗi lưu Drive');
+                        throw new Error(result.message || 'Lỗi lưu Google Drive');
                     }
                 } catch (err) {
+                    clearTimeout(timeoutId);
                     if (progressInterval) clearInterval(progressInterval);
-                    console.error('Lỗi tải tệp lên Google Drive:', err);
-                    reject(err);
+                    if (err.name === 'AbortError') {
+                        reject(new Error('Quá thời gian kết nối (120s) khi tải tệp lên Drive'));
+                    } else {
+                        console.error('Lỗi tải tệp lên Google Drive:', err);
+                        reject(err);
+                    }
                 }
             };
 
@@ -1176,7 +1206,9 @@
         let completedCount = 0;
 
         if (btn) {
-            btn.innerHTML = (window.imageUploadMode === 'original') ? (mode === 'quick' ? '⏳ 0%' : '⏳ Đang chuẩn bị tệp gốc...') : (mode === 'quick' ? '⏳ 0%' : '⏳ Đang tối ưu tệp...');
+            btn.innerHTML = (window.imageUploadMode === 'original') 
+                ? (mode === 'quick' ? '⏳ 0%' : '⏳ Đang chuẩn bị tệp gốc...') 
+                : (mode === 'quick' ? '⏳ 0%' : '⏳ Đang tối ưu tệp...');
         }
 
         // Tối ưu các ảnh lớn (>1.2MB) trước để upload nhanh gấp 10-15 lần
@@ -1186,9 +1218,11 @@
         }
 
         const fileProgress = {};
+        const fileStages = {};
         const fileTotals = {};
         optimizedFiles.forEach((f, i) => {
             fileProgress[i] = 0;
+            fileStages[i] = 'init';
             fileTotals[i] = f.size || 1;
         });
 
@@ -1200,43 +1234,68 @@
             return Math.min(99, Math.round(weightedSum / (totalBytes || 1)));
         };
 
-        const updateBtnUI = (customText) => {
+        const updateBtnUI = () => {
             if (!btn) return;
-            if (customText) {
-                btn.innerHTML = customText;
-                return;
-            }
             const pct = calculateOverallPercent();
+            const currentIdx = Math.min(completedCount + 1, totalCount);
+            const currentStage = fileStages[completedCount] || 'upload';
+
+            let stageLabel = 'Đang tải';
+            if (currentStage === 'drive') {
+                stageLabel = 'Đang lưu Drive';
+            } else if (currentStage === 'done') {
+                stageLabel = 'Đã xong';
+            }
+
             if (mode === 'quick') {
-                btn.innerHTML = `⏳ ${pct}% (${completedCount}/${totalCount})`;
+                if (currentStage === 'drive') {
+                    btn.innerHTML = `⏳ Drive ${pct}% (${currentIdx}/${totalCount})`;
+                } else {
+                    btn.innerHTML = `⏳ ${pct}% (${currentIdx}/${totalCount})`;
+                }
             } else {
-                btn.innerHTML = `⏳ Đang tải ${pct}% (${completedCount}/${totalCount} tệp)...`;
+                btn.innerHTML = `⏳ ${stageLabel} ${pct}% (${currentIdx}/${totalCount} tệp)...`;
             }
         };
 
         updateBtnUI();
         window.showToast(`⏳ Bắt đầu tải lên ${totalCount} tệp đính kèm...`);
 
-        // Tải tuần tự hoặc tối đa 2 luồng để bảo vệ băng thông
+        // Tải tuần tự với tính năng tự động thử lại 1 lần nếu chập chờn mạng
         const results = [];
         for (let i = 0; i < optimizedFiles.length; i++) {
             const f = optimizedFiles[i];
-            try {
-                const res = await uploadSingleFileGAS(f, (pct) => {
-                    fileProgress[i] = pct;
-                    updateBtnUI();
-                });
-                completedCount++;
-                fileProgress[i] = 100;
-                updateBtnUI();
-                window.showToast(`⏳ Đang tải ${calculateOverallPercent()}% (${completedCount}/${totalCount} tệp): ${f.name}`);
+            const currentIdx = i + 1;
+            let res = null;
+
+            for (let attempt = 1; attempt <= 2; attempt++) {
+                try {
+                    res = await uploadSingleFileGAS(f, (pct, stage) => {
+                        fileProgress[i] = pct;
+                        fileStages[i] = stage;
+                        updateBtnUI();
+                    });
+                    break;
+                } catch (err) {
+                    if (attempt < 2) {
+                        console.warn(`Thử lại tệp ${f.name} lần 2...`, err);
+                        window.showToast(`⏳ Đang thử lại tệp (${currentIdx}/${totalCount}): ${f.name}`);
+                        await new Promise(r => setTimeout(r, 1500));
+                    } else {
+                        console.error(`Lỗi tải tệp ${f.name}:`, err);
+                        window.showToast(`⚠️ Không thể tải ${f.name}: ${err.message || 'Thất bại'}`);
+                    }
+                }
+            }
+
+            completedCount++;
+            fileProgress[i] = 100;
+            fileStages[i] = 'done';
+            updateBtnUI();
+
+            if (res) {
+                window.showToast(`⏳ (${completedCount}/${totalCount} tệp) Đã xong: ${f.name}`);
                 results.push(res);
-            } catch (err) {
-                completedCount++;
-                fileProgress[i] = 100;
-                updateBtnUI();
-                console.error(`Lỗi tải tệp ${f.name}:`, err);
-                window.showToast(`⚠️ Không thể tải ${f.name}: ${err.message || 'Thất bại'}`);
             }
         }
 
