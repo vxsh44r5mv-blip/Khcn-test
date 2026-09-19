@@ -1825,7 +1825,7 @@
             <span class="nav-logo">⚡</span>
             <div class="nav-title-group">
                 <span class="nav-title">KHCN Quản lý</span>
-                <span class="nav-version">v2.1</span>
+                <span class="nav-version">v2.2</span>
             </div>
         </div>
 
@@ -2039,7 +2039,7 @@
             <div class="studio-header-left">
                 <span class="studio-icon">🎨</span>
                 <div>
-                    <div class="studio-title">Studio Chỉnh Sửa Ảnh & Chuyển Đổi DOCX <span class="studio-pill">Pro v2.1</span></div>
+                    <div class="studio-title">Studio Chỉnh Sửa Ảnh & Chuyển Đổi DOCX <span class="studio-pill">Pro v2.2</span></div>
                     <div class="studio-sub" id="studioFileInfo">Chưa có ảnh nào được tải lên</div>
                 </div>
             </div>
@@ -2597,7 +2597,7 @@
             snapshot.forEach(doc => { allTasks.push({ docId: doc.id, ...doc.data() }); });
             allTasks.sort((a, b) => a.id - b.id);
             isDataLoaded = true;
-            try { localStorage.setItem('khcn_tasks_cache_v2_1', JSON.stringify(allTasks)); } catch (e) {}
+            try { localStorage.setItem('khcn_tasks_cache_v2_2', JSON.stringify(allTasks)); } catch (e) {}
             filterData();
         }, (err) => {
             console.error("Snapshot error tasks:", err);
@@ -4116,7 +4116,7 @@
     window.saveScratchpad = function() {
         const text = document.getElementById('utilScratchpad').value || '';
         try {
-            localStorage.setItem('khcn_scratchpad_v2_1', text);
+            localStorage.setItem('khcn_scratchpad_v2_2', text);
             const status = document.getElementById('scratchpadSaveStatus');
             if (status) status.textContent = 'Đã lưu lúc ' + new Date().toLocaleTimeString('vi-VN');
         } catch(e) {}
@@ -5581,15 +5581,15 @@
     document.getElementById('dateDisplay').textContent = '📅 ' + initDate.toLocaleDateString('vi-VN', initOptions);
     document.getElementById('dateInput').value = currentDate;
     
-    // V2.1 Instant Cache: Hiển thị ngay lập tức trong 0.01s từ bộ nhớ đệm
+    // V2.2 Instant Cache: Hiển thị ngay lập tức trong 0.01s từ bộ nhớ đệm
     try {
-        const cachedTasks = localStorage.getItem('khcn_tasks_cache_v2_1');
+        const cachedTasks = localStorage.getItem('khcn_tasks_cache_v2_2') || localStorage.getItem('khcn_tasks_cache_v2_1');
         if (cachedTasks) {
             allTasks = JSON.parse(cachedTasks);
             isDataLoaded = true;
             filterData();
         }
-        const cachedScratch = localStorage.getItem('khcn_scratchpad_v2_1');
+        const cachedScratch = localStorage.getItem('khcn_scratchpad_v2_2') || localStorage.getItem('khcn_scratchpad_v2_1');
         if (cachedScratch && document.getElementById('utilScratchpad')) {
             document.getElementById('utilScratchpad').value = cachedScratch;
         }
