@@ -97,11 +97,17 @@ module.exports = async function handler(req, res) {
 
     if (!body) {
         body = await new Promise((resolve) => {
-            let data = '';
-            req.on('data', chunk => { data += chunk; });
+            const chunks = [];
+            req.on('data', chunk => { chunks.push(chunk); });
             req.on('end', () => {
-                try { resolve(JSON.parse(data)); } catch (e) { resolve({}); }
+                try {
+                    const str = Buffer.concat(chunks).toString('utf8');
+                    resolve(JSON.parse(str));
+                } catch (e) {
+                    resolve({});
+                }
             });
+            req.on('error', () => resolve({}));
         });
     }
 

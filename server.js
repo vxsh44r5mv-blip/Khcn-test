@@ -45,7 +45,15 @@ const server = http.createServer(async (req, res) => {
 
         const contentType = mimeTypes[ext] || 'application/octet-stream';
         res.writeHead(200, { 'Content-Type': contentType });
-        fs.createReadStream(filePath).pipe(res);
+        if (req.method === 'HEAD') {
+            return res.end();
+        }
+        const stream = fs.createReadStream(filePath);
+        stream.on('error', (e) => {
+            if (!res.headersSent) res.writeHead(500);
+            res.end('File read error');
+        });
+        stream.pipe(res);
     } catch (err) {
         res.writeHead(500, { 'Content-Type': 'text/plain;charset=utf-8' });
         res.end('Server Error: ' + err.message);
