@@ -1127,6 +1127,8 @@
             </div>
             <div class="util-btn-group">
                 <button type="button" class="util-btn" onclick="window.formatUtilText('upper')">VIẾT HOA</button>
+                <button type="button" class="util-btn" style="color: #0369a1; border-color: #bae6fd; background: #f0f9ff;" onclick="window.formatUtilText('upper_no_accent')">VIẾT HOA BỎ DẤU</button>
+                <button type="button" class="util-btn" onclick="window.formatUtilText('no_accent')">Bỏ dấu tiếng Việt</button>
                 <button type="button" class="util-btn" onclick="window.formatUtilText('lower')">viết thường</button>
                 <button type="button" class="util-btn" onclick="window.formatUtilText('capital')">Viết Hoa Đầu Từ</button>
                 <button type="button" class="util-btn" onclick="window.formatUtilText('clean')">Xóa Khoảng Trắng Thừa</button>
@@ -2829,12 +2831,24 @@
         document.getElementById('statLines').textContent = lines;
     };
 
+    function removeVietnameseAccents(str) {
+        return str
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/đ/g, 'd')
+            .replace(/Đ/g, 'D');
+    }
+
     window.formatUtilText = function(type) {
         const el = document.getElementById('utilTextarea');
         if (!el) return;
         let text = el.value || '';
         if (type === 'upper') {
             text = text.toUpperCase();
+        } else if (type === 'upper_no_accent') {
+            text = removeVietnameseAccents(text).toUpperCase();
+        } else if (type === 'no_accent') {
+            text = removeVietnameseAccents(text);
         } else if (type === 'lower') {
             text = text.toLowerCase();
         } else if (type === 'capital') {
