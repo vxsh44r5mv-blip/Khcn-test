@@ -998,6 +998,509 @@
         }
         .util-btn.primary:hover { background: var(--primary-hover); }
 
+    
+        /* ===== V2.1 FULLSCREEN IMAGE & DOCX STUDIO ===== */
+        .studio-fullscreen-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            background: rgba(15, 23, 42, 0.96);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: flex;
+            flex-direction: column;
+            color: #f8fafc;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            animation: fadeIn 0.25s ease-out;
+        }
+        .studio-container {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        .studio-header {
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            background: #0f172a;
+            border-bottom: 1px solid #334155;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+        .studio-header-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 260px;
+        }
+        .studio-icon {
+            font-size: 1.5rem;
+            line-height: 1;
+        }
+        .studio-title {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .studio-pill {
+            font-size: 10.5px;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #6366f1, #a855f7);
+            color: #fff;
+            text-transform: uppercase;
+        }
+        .studio-sub {
+            font-size: 11.5px;
+            color: #94a3b8;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 260px;
+        }
+        .studio-tabs {
+            display: inline-flex;
+            background: rgba(255, 255, 255, 0.08);
+            padding: 4px;
+            border-radius: 30px;
+            gap: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+        .studio-tab-btn {
+            background: transparent;
+            border: none;
+            padding: 6px 16px;
+            color: #cbd5e1;
+            font-size: 12.5px;
+            font-weight: 600;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .studio-tab-btn:hover {
+            color: #fff;
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .studio-tab-btn.active {
+            background: #059669;
+            color: #ffffff;
+            box-shadow: 0 2px 8px rgba(5, 150, 105, 0.4);
+        }
+        .studio-header-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .studio-btn {
+            padding: 7px 16px;
+            font-size: 12.5px;
+            font-weight: 600;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s ease;
+        }
+        .studio-btn-upload {
+            background: #334155;
+            color: #f8fafc;
+            border: 1px solid #475569;
+        }
+        .studio-btn-upload:hover {
+            background: #475569;
+            color: #fff;
+        }
+        .studio-btn-save {
+            background: linear-gradient(135deg, #059669, #10b981);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.35);
+        }
+        .studio-btn-save:hover {
+            filter: brightness(1.1);
+        }
+        .studio-btn-save:disabled {
+            background: #334155;
+            color: #64748b;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        .studio-btn-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #cbd5e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.15s;
+        }
+        .studio-btn-close:hover {
+            background: #ef4444;
+            color: #fff;
+            border-color: #ef4444;
+        }
+
+        /* Studio Main Layout */
+        .studio-body {
+            flex: 1;
+            display: flex;
+            overflow: hidden;
+            position: relative;
+        }
+        .studio-sidebar {
+            width: 380px;
+            max-width: 90vw;
+            background: #1e293b;
+            border-right: 1px solid #334155;
+            padding: 18px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            flex-shrink: 0;
+        }
+        .studio-panel-tab {
+            display: none;
+            flex-direction: column;
+            gap: 16px;
+            animation: fadeIn 0.2s ease-out;
+        }
+        .studio-panel-tab.active {
+            display: flex;
+        }
+        .studio-control-group {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .studio-group-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .studio-slider-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .studio-slider-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 12px;
+            color: #cbd5e1;
+        }
+        .studio-slider-label span:last-child {
+            font-weight: 700;
+            color: #38bdf8;
+            font-variant-numeric: tabular-nums;
+        }
+        .studio-slider-item input[type="range"] {
+            width: 100%;
+            accent-color: #10b981;
+            cursor: pointer;
+            height: 6px;
+            background: #334155;
+            border-radius: 3px;
+            outline: none;
+        }
+        .studio-mini-btn {
+            padding: 5px 10px;
+            font-size: 11.5px;
+            font-weight: 600;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #cbd5e1;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .studio-mini-btn:hover {
+            background: rgba(255, 255, 255, 0.18);
+            color: #fff;
+        }
+        .studio-btn-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .studio-tool-btn {
+            padding: 8px 10px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 8px;
+            background: #334155;
+            border: 1px solid #475569;
+            color: #f8fafc;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.15s;
+        }
+        .studio-tool-btn:hover {
+            background: #475569;
+            border-color: #64748b;
+        }
+        .studio-tool-btn.primary {
+            background: #0369a1;
+            border-color: #0284c7;
+            color: #fff;
+        }
+        .studio-tool-btn.active {
+            background: #f59e0b;
+            border-color: #d97706;
+            color: #fff;
+        }
+
+        /* AI Mode Selectors */
+        .studio-ai-mode-selector {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 4px;
+            border-radius: 10px;
+        }
+        .ai-mode-chip {
+            padding: 7px 8px;
+            font-size: 11.5px;
+            font-weight: 600;
+            border-radius: 8px;
+            border: none;
+            background: transparent;
+            color: #94a3b8;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.15s;
+        }
+        .ai-mode-chip.active {
+            background: #6366f1;
+            color: #ffffff;
+            font-weight: 700;
+        }
+        .studio-input {
+            width: 100%;
+            padding: 9px 12px;
+            border-radius: 8px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            color: #f8fafc;
+            font-size: 13px;
+            outline: none;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+        .studio-input:focus {
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2);
+        }
+        .studio-btn-ai {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border: none;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(99, 102, 241, 0.35);
+            transition: all 0.2s;
+        }
+        .studio-btn-ai:hover {
+            filter: brightness(1.1);
+            transform: translateY(-1px);
+        }
+        .studio-btn-ai:disabled {
+            background: #334155;
+            color: #64748b;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .studio-btn-docx {
+            width: 100%;
+            padding: 11px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #0284c7, #2563eb);
+            border: none;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 13.5px;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(2, 132, 199, 0.35);
+            transition: all 0.2s;
+        }
+        .studio-btn-docx:hover {
+            filter: brightness(1.1);
+            transform: translateY(-1px);
+        }
+        .studio-btn-docx:disabled {
+            background: #334155;
+            color: #64748b;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .studio-tag-prompt {
+            padding: 4px 8px;
+            font-size: 11px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: #cbd5e1;
+            cursor: pointer;
+        }
+        .studio-tag-prompt:hover {
+            background: rgba(255, 255, 255, 0.18);
+            color: #fff;
+        }
+        .studio-ai-feedback {
+            padding: 10px 12px;
+            background: rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 8px;
+            font-size: 12px;
+            color: #c7d2fe;
+            line-height: 1.4;
+        }
+
+        /* DOCX Preview */
+        .docx-preview-content {
+            background: #ffffff;
+            color: #111827;
+            padding: 16px;
+            border-radius: 8px;
+            max-height: 360px;
+            overflow-y: auto;
+            font-size: 13px;
+            line-height: 1.5;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .docx-preview-content h1, .docx-preview-content h2, .docx-preview-content h3 {
+            color: #111827;
+            margin-top: 10px;
+            margin-bottom: 6px;
+        }
+        .docx-preview-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+            font-size: 12px;
+        }
+        .docx-preview-content th, .docx-preview-content td {
+            border: 1px solid #d1d5db;
+            padding: 6px 8px;
+        }
+        .docx-preview-content th {
+            background: #f3f4f6;
+        }
+
+        /* Studio Viewport (Center) */
+        .studio-viewport {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0b0f19;
+            position: relative;
+            overflow: auto;
+            padding: 24px;
+        }
+        .studio-empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 40px;
+            border: 2px dashed #334155;
+            border-radius: 16px;
+            background: rgba(30, 41, 59, 0.4);
+            max-width: 450px;
+        }
+        .studio-canvas-container {
+            position: relative;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+            border-radius: 4px;
+            line-height: 0;
+            user-select: none;
+            max-width: 100%;
+            max-height: 100%;
+        }
+        #studioMainCanvas {
+            max-width: 100%;
+            max-height: calc(100vh - 120px);
+            object-fit: contain;
+            display: block;
+            border-radius: 4px;
+        }
+        .crop-overlay-box {
+            position: absolute;
+            border: 2px dashed #38bdf8;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.55);
+            pointer-events: all;
+            cursor: move;
+            box-sizing: border-box;
+        }
+        .crop-handle {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background: #38bdf8;
+            border: 1.5px solid #ffffff;
+            border-radius: 2px;
+        }
+        .crop-handle.nw { top: -6px; left: -6px; cursor: nwse-resize; }
+        .crop-handle.ne { top: -6px; right: -6px; cursor: nesw-resize; }
+        .crop-handle.sw { bottom: -6px; left: -6px; cursor: nesw-resize; }
+        .crop-handle.se { bottom: -6px; right: -6px; cursor: nwse-resize; }
+
+        /* Loading Spinner */
+        .studio-loading-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(4px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            z-index: 50;
+        }
+        .studio-spinner {
+            width: 44px;
+            height: 44px;
+            border: 4px solid rgba(255, 255, 255, 0.15);
+            border-top-color: #38bdf8;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
     </style>
     <!-- Thư viện nén ZIP client-side -->
     <!-- Thư viện nén ZIP cục bộ không dùng Cloudflare, tránh bị chặn ở mạng cơ quan -->
@@ -1177,12 +1680,43 @@
             <button type="button" id="btnTestPing" class="btn btn-outline" onclick="window.checkCloudPing(this)">🚀 Kiểm tra độ trễ ngay</button>
         </div>
 
-        <!-- Card 5: Không gian cắm tính năng mới -->
-        <div class="util-card" style="border: 2px dashed #cbd5e1; background: rgba(255,255,255,0.6); align-items: center; justify-content: center; text-align: center; padding: 30px 20px;">
-            <span style="font-size: 2.2rem; opacity: 0.6; margin-bottom: 6px;">🚀</span>
-            <div style="font-size: 1rem; font-weight: 700; color: var(--gray-700);">Không Gian Tính Năng Mới</div>
-            <p style="font-size: 12px; color: var(--gray-500); margin-top: 4px; max-width: 280px;">Bản 2.1 đã sẵn sàng để cắm thêm bất kỳ tiện ích nào bạn cần! Hãy nói cho tôi biết tính năng bạn muốn bổ sung.</p>
+        
+        <!-- Card 5: Studio Chỉnh Sửa Ảnh & Chuyển Đổi DOCX -->
+        <div class="util-card studio-card-feature" style="grid-column: 1 / -1; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #fff; border: 1px solid #334155; position: relative; overflow: hidden; padding: 26px;">
+            <div style="position: absolute; right: -20px; bottom: -20px; font-size: 8rem; opacity: 0.07; pointer-events: none;">🎨</div>
+            <div class="util-card-header" style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.6rem;">🎨</span>
+                    <div>
+                        <div style="font-size: 1.15rem; font-weight: 800; color: #f8fafc;">Studio Chỉnh Sửa Ảnh & Chuyển Đổi DOCX</div>
+                        <div style="font-size: 0.8rem; color: #94a3b8; margin-top: 2px;">Chỉnh màu sắc, điểm đen/trắng, cắt xoay | Đổi ảnh/PDF sang Word (.docx) | Chỉnh sửa bằng AI Gemini</div>
+                    </div>
+                </div>
+                <span class="util-badge" style="background: linear-gradient(135deg, #6366f1, #a855f7); color: #fff; padding: 4px 10px; font-size: 12px;">Studio Pro</span>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin-top: 8px;">
+                <div style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); padding: 14px; border-radius: 12px;">
+                    <div style="font-weight: 700; font-size: 0.92rem; color: #38bdf8; margin-bottom: 4px;">🎛️ Bộ Lọc Màu Sắc & Cắt Xoay</div>
+                    <div style="font-size: 0.8rem; color: #cbd5e1; line-height: 1.4;">Độ sáng, tương phản, điểm đen/trắng, xoay 90°, lật ảnh và công cụ cắt (crop) tự do.</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); padding: 14px; border-radius: 12px;">
+                    <div style="font-weight: 700; font-size: 0.92rem; color: #34d399; margin-bottom: 4px;">📄 Chuyển Ảnh/PDF Sang Word (.docx)</div>
+                    <div style="font-size: 0.8rem; color: #cbd5e1; line-height: 1.4;">Nhận diện văn bản, bảng biểu, in đậm/nghiêng bằng AI và xuất thẳng ra file Word .docx chuẩn.</div>
+                </div>
+                <div style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); padding: 14px; border-radius: 12px;">
+                    <div style="font-weight: 700; font-size: 0.92rem; color: #f472b6; margin-bottom: 4px;">🤖 Chỉnh Sửa Ảnh Thông Minh AI</div>
+                    <div style="font-size: 0.8rem; color: #cbd5e1; line-height: 1.4;">Thay chữ/thông tin giữ nguyên nền gradient hoặc miêu tả bằng prompt tiếng Việt.</div>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 12px; align-items: center; justify-content: flex-end; margin-top: 10px; flex-wrap: wrap;">
+                <button type="button" class="btn btn-primary" onclick="window.openImageStudio()" style="background: linear-gradient(135deg, #059669, #10b981); border: none; padding: 10px 24px; font-weight: 700; font-size: 0.95rem; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4); cursor: pointer;">
+                    🚀 Mở Không Gian Studio Toàn Màn Hình
+                </button>
+            </div>
         </div>
+
     </div>
 
     <div class="app-footer">
@@ -1291,6 +1825,240 @@
             <button class="modal-btn" style="background: #ef4444; color: white;" onclick="window.executeConfirm()">Đồng ý</button>
         </div>
     </div>
+
+<!-- FULLSCREEN STUDIO CHỈNH SỬA ẢNH & CHUYỂN ĐỔI DOCX -->
+<div id="imageStudioModal" class="studio-fullscreen-modal" style="display: none;">
+    <div class="studio-container">
+        <!-- Studio Header -->
+        <div class="studio-header">
+            <div class="studio-header-left">
+                <span class="studio-icon">🎨</span>
+                <div>
+                    <div class="studio-title">Studio Chỉnh Sửa Ảnh & Chuyển Đổi DOCX <span class="studio-pill">Pro v2.1</span></div>
+                    <div class="studio-sub" id="studioFileInfo">Chưa có ảnh nào được tải lên</div>
+                </div>
+            </div>
+            
+            <div class="studio-tabs">
+                <button type="button" class="studio-tab-btn active" id="tabBtnAdjust" onclick="window.switchStudioTab('adjust')">🎛️ Chỉnh màu & Cắt xoay</button>
+                <button type="button" class="studio-tab-btn" id="tabBtnAi" onclick="window.switchStudioTab('ai')">🤖 Chỉnh sửa AI</button>
+                <button type="button" class="studio-tab-btn" id="tabBtnDocx" onclick="window.switchStudioTab('docx')">📄 Chuyển sang Word (.docx)</button>
+            </div>
+
+            <div class="studio-header-right">
+                <label class="studio-btn studio-btn-upload" title="Mở ảnh hoặc tài liệu mới">
+                    📂 Mở tệp
+                    <input type="file" id="studioFileInput" accept="image/*,application/pdf" style="display:none;" onchange="window.handleStudioUpload(event)">
+                </label>
+                <button type="button" class="studio-btn studio-btn-save" onclick="window.downloadStudioImage()" id="studioDownloadBtn" disabled title="Tải ảnh đã chỉnh sửa">
+                    💾 Tải ảnh
+                </button>
+                <button type="button" class="studio-btn-close" onclick="window.closeImageStudio()" title="Đóng Studio (Esc)">✕</button>
+            </div>
+        </div>
+
+        <!-- Studio Body -->
+        <div class="studio-body">
+            <!-- Left Sidebar Controls -->
+            <div class="studio-sidebar">
+                <!-- Panel 1: Adjust & Transform -->
+                <div id="studioPanelAdjust" class="studio-panel-tab active">
+                    <div class="studio-control-group">
+                        <div class="studio-group-title">
+                            <span>Ánh sáng & Màu sắc</span>
+                            <button type="button" class="studio-mini-btn" onclick="window.resetStudioFilters()">🔄 Đặt lại</button>
+                        </div>
+                        
+                        <div class="studio-slider-item">
+                            <div class="studio-slider-label">
+                                <span>Độ sáng (Brightness)</span>
+                                <span id="valBrightness">0</span>
+                            </div>
+                            <input type="range" id="sliderBrightness" min="-100" max="100" value="0" oninput="window.updateStudioFilters()">
+                        </div>
+
+                        <div class="studio-slider-item">
+                            <div class="studio-slider-label">
+                                <span>Tương phản (Contrast)</span>
+                                <span id="valContrast">0</span>
+                            </div>
+                            <input type="range" id="sliderContrast" min="-100" max="100" value="0" oninput="window.updateStudioFilters()">
+                        </div>
+
+                        <div class="studio-slider-item">
+                            <div class="studio-slider-label">
+                                <span>Điểm đen (Black point)</span>
+                                <span id="valBlackPoint">0</span>
+                            </div>
+                            <input type="range" id="sliderBlackPoint" min="0" max="100" value="0" oninput="window.updateStudioFilters()">
+                        </div>
+
+                        <div class="studio-slider-item">
+                            <div class="studio-slider-label">
+                                <span>Điểm trắng (White point)</span>
+                                <span id="valWhitePoint">255</span>
+                            </div>
+                            <input type="range" id="sliderWhitePoint" min="150" max="255" value="255" oninput="window.updateStudioFilters()">
+                        </div>
+
+                        <div class="studio-slider-item">
+                            <div class="studio-slider-label">
+                                <span>Bão hòa màu (Saturation)</span>
+                                <span id="valSaturation">0</span>
+                            </div>
+                            <input type="range" id="sliderSaturation" min="-100" max="100" value="0" oninput="window.updateStudioFilters()">
+                        </div>
+
+                        <div style="display: flex; gap: 8px; margin-top: 4px;">
+                            <button type="button" class="studio-mini-btn" style="flex:1;" onclick="window.applyStudioPreset('doc_clean')">📝 Nét văn bản</button>
+                            <button type="button" class="studio-mini-btn" style="flex:1;" onclick="window.applyStudioPreset('vivid')">✨ Rực rỡ</button>
+                            <button type="button" class="studio-mini-btn" style="flex:1;" onclick="window.applyStudioPreset('bw')">🖤 Trắng đen</button>
+                        </div>
+                    </div>
+
+                    <div class="studio-control-group">
+                        <div class="studio-group-title">Cắt & Xoay hình ảnh</div>
+                        <div class="studio-btn-grid">
+                            <button type="button" class="studio-tool-btn" onclick="window.rotateStudioImage(-90)">↺ Xoay trái 90°</button>
+                            <button type="button" class="studio-tool-btn" onclick="window.rotateStudioImage(90)">↻ Xoay phải 90°</button>
+                            <button type="button" class="studio-tool-btn" onclick="window.flipStudioImage('horizontal')">⇆ Lật ngang</button>
+                            <button type="button" class="studio-tool-btn" onclick="window.flipStudioImage('vertical')">⇅ Lật dọc</button>
+                        </div>
+
+                        <div style="margin-top: 6px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <span style="font-size: 12px; font-weight: 600; color: #cbd5e1;">Công cụ Cắt (Crop):</span>
+                                <span id="cropStatusText" style="font-size: 11px; color: #94a3b8;">Tắt</span>
+                            </div>
+                            <div style="display: flex; gap: 6px;">
+                                <button type="button" id="btnToggleCrop" class="studio-tool-btn primary" onclick="window.toggleStudioCrop()" style="flex: 1;">✂️ Bật khung cắt</button>
+                                <button type="button" id="btnApplyCrop" class="studio-tool-btn" onclick="window.applyStudioCrop()" style="flex: 1; display: none; background: #059669; color: #fff; border-color: #059669;">✓ Áp dụng cắt</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel 2: AI Editing -->
+                <div id="studioPanelAI" class="studio-panel-tab">
+                    <div class="studio-control-group">
+                        <div class="studio-group-title">Tùy chọn AI (Gemini 3.1 Pro / Vision)</div>
+                        <div class="studio-ai-mode-selector">
+                            <button type="button" class="ai-mode-chip active" id="chipModeReplace" onclick="window.setAiMode('replace')">🔤 Sửa chữ trên ảnh</button>
+                            <button type="button" class="ai-mode-chip" id="chipModePrompt" onclick="window.setAiMode('prompt')">🎨 Chỉnh theo miêu tả</button>
+                        </div>
+                    </div>
+
+                    <!-- AI Mode 1: Thay thế chữ trên ảnh giữ nền -->
+                    <div id="aiModeReplaceBox">
+                        <div class="studio-control-group">
+                            <div class="studio-group-title">Thay chữ/thông tin (Giữ nền gốc)</div>
+                            <p style="font-size: 11.5px; color: #94a3b8; line-height: 1.4; margin: 0;">
+                                Thích hợp sửa tên, ngày tháng, nội dung trên thiệp mời, chứng chỉ, văn bản mà vẫn giữ màu nền gradient gốc.
+                            </p>
+                            
+                            <div>
+                                <label style="font-size: 11.5px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">Đoạn chữ cũ cần xóa:</label>
+                                <input type="text" id="aiOldText" class="studio-input" placeholder="Ví dụ: Nguyễn Văn A hoặc 19/09/2026">
+                            </div>
+
+                            <div>
+                                <label style="font-size: 11.5px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">Nội dung chữ mới thay thế:</label>
+                                <input type="text" id="aiNewText" class="studio-input" placeholder="Ví dụ: Trần Thị B hoặc 20/09/2026">
+                            </div>
+
+                            <button type="button" id="btnRunAiReplace" class="studio-btn-ai" onclick="window.executeAiTextReplace()" style="margin-top: 4px;">
+                                ✨ Phân tích & Thay thế bằng AI
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- AI Mode 2: Chỉnh sửa bằng miêu tả prompt -->
+                    <div id="aiModePromptBox" style="display: none;">
+                        <div class="studio-control-group">
+                            <div class="studio-group-title">Mô tả mong muốn bằng tiếng Việt</div>
+                            <p style="font-size: 11.5px; color: #94a3b8; line-height: 1.4; margin: 0;">
+                                AI phân tích hình ảnh và tự động điều chỉnh thông số màu sắc, làm nét tài liệu theo phong cách bạn yêu cầu.
+                            </p>
+                            <textarea id="aiPromptInput" class="studio-input" style="height: 85px; resize: vertical;" placeholder="Ví dụ: Làm rõ nét tài liệu scan bị mờ, tăng tương phản chữ đen giấy trắng và làm sáng nền..."></textarea>
+                            
+                            <div style="display: flex; flex-wrap: wrap; gap: 5px;">
+                                <button type="button" class="studio-tag-prompt" onclick="window.setAiSamplePrompt('Làm nét và tăng tương phản tài liệu scan/chụp')">📄 Nét văn bản</button>
+                                <button type="button" class="studio-tag-prompt" onclick="window.setAiSamplePrompt('Tăng độ sáng, làm ấm màu và rực rỡ hơn')">☀️ Sáng ấm</button>
+                                <button type="button" class="studio-tag-prompt" onclick="window.setAiSamplePrompt('Chuyển ảnh đen trắng nghệ thuật tương phản cao')">🖤 Trắng đen</button>
+                            </div>
+
+                            <button type="button" id="btnRunAiPrompt" class="studio-btn-ai" onclick="window.executeAiPromptEdit()">
+                                🚀 Xử lý qua AI
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="aiResultFeedback" class="studio-ai-feedback" style="display: none;"></div>
+                </div>
+
+                <!-- Panel 3: Convert Image/PDF to Word (.docx) -->
+                <div id="studioPanelDocx" class="studio-panel-tab">
+                    <div class="studio-control-group">
+                        <div class="studio-group-title">Chuyển đổi sang Word (.docx)</div>
+                        <p style="font-size: 11.5px; color: #94a3b8; line-height: 1.4; margin: 0;">
+                            Gemini Vision phân tích cấu trúc tài liệu, trích xuất chính xác tiêu đề, đoạn văn, in đậm/nghiêng và bảng biểu thành file Microsoft Word (.docx) chuẩn.
+                        </p>
+
+                        <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 8px; font-size: 12px; color: #cbd5e1; display: flex; flex-direction: column; gap: 4px;">
+                            <div>✓ Giữ cấu trúc tiêu đề <b>H1, H2, H3</b></div>
+                            <div>✓ Giữ in đậm <b>B</b>, in nghiêng <i>I</i>, gạch chân</div>
+                            <div>✓ Giữ nguyên cấu trúc bảng biểu dữ liệu</div>
+                            <div>✓ Tải trực tiếp file .docx chuẩn mở bằng MS Word</div>
+                        </div>
+
+                        <button type="button" id="btnConvertDocx" class="studio-btn-docx" onclick="window.executeConvertToDocx()">
+                            📄 Trích xuất & Tải file Word (.docx)
+                        </button>
+                    </div>
+
+                    <div id="docxPreviewBox" style="display: none;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                            <span style="font-size: 12px; font-weight: 700; color: #38bdf8;">Xem trước nội dung trích xuất:</span>
+                            <button type="button" class="studio-mini-btn" onclick="window.downloadDocxFile()">💾 Tải lại .docx</button>
+                        </div>
+                        <div id="docxHtmlPreview" class="docx-preview-content"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Center Main Workspace Canvas -->
+            <div class="studio-viewport" id="studioViewport">
+                <div id="studioEmptyState" class="studio-empty-state">
+                    <span style="font-size: 3.5rem; margin-bottom: 10px;">🖼️</span>
+                    <div style="font-size: 1.1rem; font-weight: 700; color: #f8fafc;">Kéo thả ảnh hoặc tài liệu PDF vào đây</div>
+                    <div style="font-size: 0.85rem; color: #94a3b8; margin-top: 6px; max-width: 320px; line-height: 1.4;">
+                        Hỗ trợ ảnh PNG, JPG, WEBP hoặc file PDF.<br>Bạn cũng có thể dán ảnh trực tiếp bằng <b>Ctrl + V</b>.
+                    </div>
+                    <button type="button" class="studio-btn studio-btn-upload" style="margin-top: 16px;" onclick="document.getElementById('studioFileInput').click()">
+                        📂 Chọn tệp từ máy tính
+                    </button>
+                </div>
+
+                <div id="studioCanvasContainer" class="studio-canvas-container" style="display: none;">
+                    <canvas id="studioMainCanvas"></canvas>
+                    <div id="cropOverlayBox" class="crop-overlay-box" style="display: none;">
+                        <div class="crop-handle nw"></div>
+                        <div class="crop-handle ne"></div>
+                        <div class="crop-handle sw"></div>
+                        <div class="crop-handle se"></div>
+                    </div>
+                </div>
+
+                <!-- Loading overlay for AI / DOCX conversion -->
+                <div id="studioLoadingOverlay" class="studio-loading-overlay" style="display: none;">
+                    <div class="studio-spinner"></div>
+                    <div id="studioLoadingText" style="font-weight: 600; font-size: 14px; color: #fff;">Đang xử lý qua Gemini AI...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 </div>
 
 <div id="toast">
@@ -2926,6 +3694,797 @@
             if (btn) btn.disabled = false;
         }
     };
+
+    
+    /* ===================================================================
+       V2.1 STUDIO CHỈNH SỬA ẢNH & CHUYỂN ĐỔI DOCX
+       =================================================================== */
+    let studioRawImage = null;
+    let studioRotation = 0;
+    let studioFlipH = 1;
+    let studioFlipV = 1;
+    let studioCurrentFileName = 'image.png';
+    let studioCurrentMimeType = 'image/png';
+    let studioCurrentPdfBase64 = null;
+    let studioLastDocxHtml = '';
+    let isStudioCropActive = false;
+    let cropBox = { x: 50, y: 50, w: 200, h: 150 };
+
+    window.openImageStudio = function(optionalFile) {
+        const modal = document.getElementById('imageStudioModal');
+        if (!modal) return;
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+
+        if (optionalFile) {
+            window.loadStudioFile(optionalFile);
+        }
+    };
+
+    window.closeImageStudio = function() {
+        const modal = document.getElementById('imageStudioModal');
+        if (!modal) return;
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+        if (isStudioCropActive) window.toggleStudioCrop();
+    };
+
+    window.switchStudioTab = function(tabName) {
+        document.querySelectorAll('.studio-tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.studio-panel-tab').forEach(panel => panel.classList.remove('active'));
+
+        if (tabName === 'adjust') {
+            document.getElementById('tabBtnAdjust').classList.add('active');
+            document.getElementById('studioPanelAdjust').classList.add('active');
+        } else if (tabName === 'ai') {
+            document.getElementById('tabBtnAi').classList.add('active');
+            document.getElementById('studioPanelAI').classList.add('active');
+        } else if (tabName === 'docx') {
+            document.getElementById('tabBtnDocx').classList.add('active');
+            document.getElementById('studioPanelDocx').classList.add('active');
+        }
+    };
+
+    window.setAiMode = function(mode) {
+        const chipRep = document.getElementById('chipModeReplace');
+        const chipPrm = document.getElementById('chipModePrompt');
+        const boxRep = document.getElementById('aiModeReplaceBox');
+        const boxPrm = document.getElementById('aiModePromptBox');
+
+        if (mode === 'replace') {
+            chipRep.classList.add('active');
+            chipPrm.classList.remove('active');
+            boxRep.style.display = 'block';
+            boxPrm.style.display = 'none';
+        } else {
+            chipRep.classList.remove('active');
+            chipPrm.classList.add('active');
+            boxRep.style.display = 'none';
+            boxPrm.style.display = 'block';
+        }
+    };
+
+    window.setAiSamplePrompt = function(prompt) {
+        const input = document.getElementById('aiPromptInput');
+        if (input) input.value = prompt;
+    };
+
+    window.handleStudioUpload = function(event) {
+        const file = event.target.files && event.target.files[0];
+        if (file) {
+            window.loadStudioFile(file);
+        }
+        event.target.value = '';
+    };
+
+    window.loadStudioFile = function(file) {
+        studioCurrentFileName = file.name || 'image.png';
+        studioCurrentMimeType = file.type || 'image/png';
+        document.getElementById('studioFileInfo').textContent = `${studioCurrentFileName} (${(file.size / 1024).toFixed(1)} KB)`;
+
+        if (file.type === 'application/pdf') {
+            // Đọc file PDF sang base64 để gửi OCR DOCX
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const b64 = e.target.result.split(',')[1];
+                studioCurrentPdfBase64 = b64;
+                window.switchStudioTab('docx');
+                window.showToast('📄 Đã tải file PDF. Bạn có thể bấm "Chuyển sang Word (.docx)"');
+                document.getElementById('studioEmptyState').innerHTML = `
+                    <span style="font-size: 3.5rem; margin-bottom: 10px;">📄</span>
+                    <div style="font-size: 1.1rem; font-weight: 700; color: #f8fafc;">Tệp PDF: ${studioCurrentFileName}</div>
+                    <div style="font-size: 0.85rem; color: #38bdf8; margin-top: 6px;">Sẵn sàng chuyển đổi cấu trúc sang Word (.docx)</div>
+                    <button type="button" class="studio-btn studio-btn-docx" style="margin-top: 16px; width: auto;" onclick="window.executeConvertToDocx()">
+                        📄 Trích xuất sang Word ngay
+                    </button>
+                `;
+            };
+            reader.readAsDataURL(file);
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                studioRawImage = img;
+                studioRotation = 0;
+                studioFlipH = 1;
+                studioFlipV = 1;
+                studioCurrentPdfBase64 = null;
+                window.resetStudioFilters();
+                document.getElementById('studioEmptyState').style.display = 'none';
+                document.getElementById('studioCanvasContainer').style.display = 'block';
+                document.getElementById('studioDownloadBtn').disabled = false;
+                window.renderStudioCanvas();
+                window.showToast('🖼️ Đã mở ảnh trong Studio thành công!');
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    };
+
+    // V2.1 Canvas Rendering Pipeline
+    window.renderStudioCanvas = function() {
+        if (!studioRawImage) return;
+        const canvas = document.getElementById('studioMainCanvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+
+        const isSideways = Math.abs(studioRotation) % 180 === 90;
+        canvas.width = isSideways ? studioRawImage.height : studioRawImage.width;
+        canvas.height = isSideways ? studioRawImage.width : studioRawImage.height;
+
+        ctx.save();
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.rotate((studioRotation * Math.PI) / 180);
+        ctx.scale(studioFlipH, studioFlipV);
+        ctx.drawImage(studioRawImage, -studioRawImage.width / 2, -studioRawImage.height / 2);
+        ctx.restore();
+
+        // Đọc thông số bộ lọc
+        const brightness = parseInt(document.getElementById('sliderBrightness').value, 10) || 0;
+        const contrast = parseInt(document.getElementById('sliderContrast').value, 10) || 0;
+        const blackPoint = parseInt(document.getElementById('sliderBlackPoint').value, 10) || 0;
+        const whitePoint = parseInt(document.getElementById('sliderWhitePoint').value, 10) || 255;
+        const saturation = parseInt(document.getElementById('sliderSaturation').value, 10) || 0;
+
+        document.getElementById('valBrightness').textContent = brightness;
+        document.getElementById('valContrast').textContent = contrast;
+        document.getElementById('valBlackPoint').textContent = blackPoint;
+        document.getElementById('valWhitePoint').textContent = whitePoint;
+        document.getElementById('valSaturation').textContent = saturation;
+
+        // Nếu có điều chỉnh thì xử lý pixel
+        if (brightness !== 0 || contrast !== 0 || blackPoint !== 0 || whitePoint !== 255 || saturation !== 0) {
+            const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imgData.data;
+            const len = data.length;
+
+            const cFactor = (259 * (contrast + 255)) / (255 * (259 - contrast));
+            const bOffset = brightness * 2.55;
+            const bp = blackPoint;
+            const wp = whitePoint;
+            const range = Math.max(1, wp - bp);
+            const satFactor = (saturation + 100) / 100;
+
+            for (let i = 0; i < len; i += 4) {
+                let r = data[i];
+                let g = data[i + 1];
+                let b = data[i + 2];
+
+                // 1. Black / White point stretch
+                r = ((r - bp) * 255) / range;
+                g = ((g - bp) * 255) / range;
+                b = ((b - bp) * 255) / range;
+
+                // 2. Contrast
+                r = cFactor * (r - 128) + 128;
+                g = cFactor * (g - 128) + 128;
+                b = cFactor * (b - 128) + 128;
+
+                // 3. Brightness
+                r += bOffset;
+                g += bOffset;
+                b += bOffset;
+
+                // 4. Saturation
+                if (saturation !== 0) {
+                    const gray = 0.2989 * r + 0.5870 * g + 0.1140 * b;
+                    r = gray + satFactor * (r - gray);
+                    g = gray + satFactor * (g - gray);
+                    b = gray + satFactor * (b - gray);
+                }
+
+                data[i] = r < 0 ? 0 : r > 255 ? 255 : r;
+                data[i + 1] = g < 0 ? 0 : g > 255 ? 255 : g;
+                data[i + 2] = b < 0 ? 0 : b > 255 ? 255 : b;
+            }
+
+            ctx.putImageData(imgData, 0, 0);
+        }
+
+        if (isStudioCropActive) {
+            window.updateCropBoxPosition();
+        }
+    };
+
+    window.updateStudioFilters = function() {
+        window.renderStudioCanvas();
+    };
+
+    window.resetStudioFilters = function() {
+        document.getElementById('sliderBrightness').value = 0;
+        document.getElementById('sliderContrast').value = 0;
+        document.getElementById('sliderBlackPoint').value = 0;
+        document.getElementById('sliderWhitePoint').value = 255;
+        document.getElementById('sliderSaturation').value = 0;
+        window.renderStudioCanvas();
+    };
+
+    window.applyStudioPreset = function(type) {
+        if (!studioRawImage) return;
+        if (type === 'doc_clean') {
+            // Tối ưu hóa văn bản/tài liệu chụp
+            document.getElementById('sliderBrightness').value = 15;
+            document.getElementById('sliderContrast').value = 35;
+            document.getElementById('sliderBlackPoint').value = 25;
+            document.getElementById('sliderWhitePoint').value = 235;
+            document.getElementById('sliderSaturation').value = -40;
+            window.showToast('📝 Đã áp dụng bộ lọc Nét Văn Bản');
+        } else if (type === 'vivid') {
+            document.getElementById('sliderBrightness').value = 5;
+            document.getElementById('sliderContrast').value = 15;
+            document.getElementById('sliderBlackPoint').value = 0;
+            document.getElementById('sliderWhitePoint').value = 255;
+            document.getElementById('sliderSaturation').value = 25;
+            window.showToast('✨ Đã áp dụng bộ lọc Rực Rỡ');
+        } else if (type === 'bw') {
+            document.getElementById('sliderBrightness').value = 0;
+            document.getElementById('sliderContrast').value = 20;
+            document.getElementById('sliderBlackPoint').value = 15;
+            document.getElementById('sliderWhitePoint').value = 245;
+            document.getElementById('sliderSaturation').value = -100;
+            window.showToast('🖤 Đã chuyển sang Trắng Đen tương phản cao');
+        }
+        window.renderStudioCanvas();
+    };
+
+    window.rotateStudioImage = function(deg) {
+        if (!studioRawImage) return;
+        studioRotation = (studioRotation + deg) % 360;
+        window.renderStudioCanvas();
+    };
+
+    window.flipStudioImage = function(axis) {
+        if (!studioRawImage) return;
+        if (axis === 'horizontal') studioFlipH = -studioFlipH;
+        if (axis === 'vertical') studioFlipV = -studioFlipV;
+        window.renderStudioCanvas();
+    };
+
+    // V2.1 Studio Crop Tool
+    window.toggleStudioCrop = function() {
+        if (!studioRawImage) return;
+        const cropBoxEl = document.getElementById('cropOverlayBox');
+        const btnToggle = document.getElementById('btnToggleCrop');
+        const btnApply = document.getElementById('btnApplyCrop');
+        const statusText = document.getElementById('cropStatusText');
+
+        isStudioCropActive = !isStudioCropActive;
+
+        if (isStudioCropActive) {
+            btnToggle.classList.add('active');
+            btnToggle.textContent = '✕ Hủy cắt';
+            btnApply.style.display = 'block';
+            statusText.textContent = 'Đang bật';
+            statusText.style.color = '#38bdf8';
+
+            const canvas = document.getElementById('studioMainCanvas');
+            cropBox = {
+                x: Math.round(canvas.width * 0.1),
+                y: Math.round(canvas.height * 0.1),
+                w: Math.round(canvas.width * 0.8),
+                h: Math.round(canvas.height * 0.8)
+            };
+            cropBoxEl.style.display = 'block';
+            window.updateCropBoxPosition();
+            window.showToast('✂️ Kéo thả khung viền xanh để chọn vùng cần cắt');
+        } else {
+            btnToggle.classList.remove('active');
+            btnToggle.textContent = '✂️ Bật khung cắt';
+            btnApply.style.display = 'none';
+            cropBoxEl.style.display = 'none';
+            statusText.textContent = 'Tắt';
+            statusText.style.color = '#94a3b8';
+        }
+    };
+
+    window.updateCropBoxPosition = function() {
+        const canvas = document.getElementById('studioMainCanvas');
+        const cropBoxEl = document.getElementById('cropOverlayBox');
+        if (!canvas || !cropBoxEl || !isStudioCropActive) return;
+
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = rect.width / canvas.width;
+        const scaleY = rect.height / canvas.height;
+
+        cropBoxEl.style.left = (cropBox.x * scaleX) + 'px';
+        cropBoxEl.style.top = (cropBox.y * scaleY) + 'px';
+        cropBoxEl.style.width = (cropBox.w * scaleX) + 'px';
+        cropBoxEl.style.height = (cropBox.h * scaleY) + 'px';
+    };
+
+    // Kéo thả khung cắt crop
+    (function initCropDrag() {
+        let isDragging = false;
+        let startX, startY, origX, origY;
+        const cropBoxEl = document.getElementById('cropOverlayBox');
+
+        document.addEventListener('mousedown', function(e) {
+            if (!isStudioCropActive) return;
+            if (e.target === cropBoxEl) {
+                isDragging = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                origX = cropBox.x;
+                origY = cropBox.y;
+                e.preventDefault();
+            }
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (!isDragging || !isStudioCropActive) return;
+            const canvas = document.getElementById('studioMainCanvas');
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+
+            const dx = (e.clientX - startX) * scaleX;
+            const dy = (e.clientY - startY) * scaleY;
+
+            cropBox.x = Math.max(0, Math.min(canvas.width - cropBox.w, origX + dx));
+            cropBox.y = Math.max(0, Math.min(canvas.height - cropBox.h, origY + dy));
+            window.updateCropBoxPosition();
+        });
+
+        document.addEventListener('mouseup', function() {
+            isDragging = false;
+        });
+    })();
+
+    window.applyStudioCrop = function() {
+        if (!studioRawImage || !isStudioCropActive) return;
+        const canvas = document.getElementById('studioMainCanvas');
+        if (!canvas) return;
+
+        const cropW = Math.max(10, Math.round(cropBox.w));
+        const cropH = Math.max(10, Math.round(cropBox.h));
+        const cropX = Math.max(0, Math.round(cropBox.x));
+        const cropY = Math.max(0, Math.round(cropBox.y));
+
+        const tmpCanvas = document.createElement('canvas');
+        tmpCanvas.width = cropW;
+        tmpCanvas.height = cropH;
+        const tmpCtx = tmpCanvas.getContext('2d');
+        tmpCtx.drawImage(canvas, cropX, cropY, cropW, cropH, 0, 0, cropW, cropH);
+
+        const newImg = new Image();
+        newImg.onload = function() {
+            studioRawImage = newImg;
+            studioRotation = 0;
+            studioFlipH = 1;
+            studioFlipV = 1;
+            window.resetStudioFilters();
+            window.toggleStudioCrop();
+            window.renderStudioCanvas();
+            window.showToast('✂️ Đã cắt ảnh thành công!');
+        };
+        newImg.src = tmpCanvas.toDataURL('image/png');
+    };
+
+    window.downloadStudioImage = function() {
+        const canvas = document.getElementById('studioMainCanvas');
+        if (!canvas) return;
+        const link = document.createElement('a');
+        const baseName = studioCurrentFileName.replace(/\.[^/.]+$/, '');
+        link.download = `${baseName}_edited.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        window.showToast('💾 Đã tải ảnh chỉnh sửa về máy!');
+    };
+
+    // V2.1 AI EDITING LOGIC (GEMINI 3.1 PRO / VISION)
+    window.executeAiTextReplace = async function() {
+        const canvas = document.getElementById('studioMainCanvas');
+        if (!canvas) return window.showToast('⚠️ Vui lòng mở ảnh trước khi thay chữ!');
+
+        const oldText = (document.getElementById('aiOldText').value || '').trim();
+        const newText = (document.getElementById('aiNewText').value || '').trim();
+
+        if (!oldText) return window.showToast('⚠️ Vui lòng nhập đoạn chữ cũ cần thay thế');
+
+        const overlay = document.getElementById('studioLoadingOverlay');
+        const loadText = document.getElementById('studioLoadingText');
+        const fb = document.getElementById('aiResultFeedback');
+        const btn = document.getElementById('btnRunAiReplace');
+
+        overlay.style.display = 'flex';
+        loadText.textContent = 'Gemini AI đang phân tích vị trí chữ và màu nền...';
+        btn.disabled = true;
+
+        try {
+            const imageBase64 = canvas.toDataURL('image/jpeg', 0.9).split(',')[1];
+            const resp = await fetch('/api/studio', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'ai_edit_text',
+                    imageBase64: imageBase64,
+                    mimeType: 'image/jpeg',
+                    oldText: oldText,
+                    newText: newText
+                })
+            });
+
+            const data = await resp.json();
+            if (!resp.ok || data.status !== 'success') {
+                throw new Error(data.message || 'Lỗi xử lý từ AI');
+            }
+
+            const patch = data.patch;
+            if (!patch.found) {
+                fb.style.display = 'block';
+                fb.innerHTML = `<span style="color:#ef4444;">⚠️ ${patch.message || 'Không tìm thấy vị trí chữ trong ảnh. Vui lòng kiểm tra lại chính tả!'}</span>`;
+                window.showToast('⚠️ AI không tìm thấy chữ trên ảnh');
+                return;
+            }
+
+            // Tọa độ chuẩn hóa box_2d [ymin, xmin, ymax, xmax] 0..1000
+            const box = patch.box_2d || [0,0,0,0];
+            const y1 = (box[0] * canvas.height) / 1000;
+            const x1 = (box[1] * canvas.width) / 1000;
+            const y2 = (box[2] * canvas.height) / 1000;
+            const x2 = (box[3] * canvas.width) / 1000;
+            const padX = 2;
+            const padY = 2;
+            const patchW = Math.max(4, (x2 - x1) + padX * 2);
+            const patchH = Math.max(4, (y2 - y1) + padY * 2);
+            const startX = Math.max(0, x1 - padX);
+            const startY = Math.max(0, y1 - padY);
+
+            const ctx = canvas.getContext('2d');
+
+            // 1. Phục hồi nền gradient hoặc màu đơn sắc xung quanh chữ
+            if (patch.bg_type === 'gradient_vertical') {
+                const grad = ctx.createLinearGradient(startX, startY, startX, startY + patchH);
+                grad.addColorStop(0, patch.bg_color_start || '#ffffff');
+                grad.addColorStop(1, patch.bg_color_end || '#ffffff');
+                ctx.fillStyle = grad;
+            } else if (patch.bg_type === 'gradient_horizontal') {
+                const grad = ctx.createLinearGradient(startX, startY, startX + patchW, startY);
+                grad.addColorStop(0, patch.bg_color_start || '#ffffff');
+                grad.addColorStop(1, patch.bg_color_end || '#ffffff');
+                ctx.fillStyle = grad;
+            } else {
+                ctx.fillStyle = patch.bg_color_start || '#ffffff';
+            }
+            ctx.fillRect(startX, startY, patchW, patchH);
+
+            // 2. Viết chữ mới thay thế
+            if (newText) {
+                const fontSize = Math.round(patch.font_size_ratio ? patch.font_size_ratio * canvas.height : patchH * 0.78);
+                const fontFamily = patch.font_family === 'serif' ? 'Times New Roman, serif' : 'Arial, sans-serif';
+                const fontWeight = patch.font_weight || 'bold';
+
+                ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+                ctx.fillStyle = patch.font_color || '#111827';
+                ctx.textBaseline = 'middle';
+
+                let targetX = startX + patchW / 2;
+                if (patch.text_align === 'left') {
+                    ctx.textAlign = 'left';
+                    targetX = startX + 4;
+                } else if (patch.text_align === 'right') {
+                    ctx.textAlign = 'right';
+                    targetX = startX + patchW - 4;
+                } else {
+                    ctx.textAlign = 'center';
+                }
+
+                ctx.fillText(newText, targetX, startY + patchH / 2);
+            }
+
+            // Cập nhật lại rawImage để lưu giữ kết quả
+            const updatedImg = new Image();
+            updatedImg.onload = function() {
+                studioRawImage = updatedImg;
+            };
+            updatedImg.src = canvas.toDataURL('image/png');
+
+            fb.style.display = 'block';
+            fb.innerHTML = `✨ Đã thay thế thành công chữ <b>"${escapeHtml(oldText)}"</b> thành <b>"${escapeHtml(newText)}"</b>! (Model: ${data.modelUsed})`;
+            window.showToast('✨ Thay thế chữ thành công!');
+
+        } catch (err) {
+            fb.style.display = 'block';
+            fb.innerHTML = `<span style="color:#ef4444;">⚠️ Lỗi: ${err.message}</span>`;
+            window.showToast('⚠️ Lỗi: ' + err.message);
+        } finally {
+            overlay.style.display = 'none';
+            btn.disabled = false;
+        }
+    };
+
+    window.executeAiPromptEdit = async function() {
+        const canvas = document.getElementById('studioMainCanvas');
+        if (!canvas) return window.showToast('⚠️ Vui lòng mở ảnh trước khi thực hiện!');
+
+        const promptText = (document.getElementById('aiPromptInput').value || '').trim();
+        if (!promptText) return window.showToast('⚠️ Vui lòng nhập miêu tả mong muốn');
+
+        const overlay = document.getElementById('studioLoadingOverlay');
+        const loadText = document.getElementById('studioLoadingText');
+        const fb = document.getElementById('aiResultFeedback');
+        const btn = document.getElementById('btnRunAiPrompt');
+
+        overlay.style.display = 'flex';
+        loadText.textContent = 'Gemini AI đang phân tích và tối ưu hóa hình ảnh...';
+        btn.disabled = true;
+
+        try {
+            const imageBase64 = canvas.toDataURL('image/jpeg', 0.9).split(',')[1];
+            const resp = await fetch('/api/studio', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'ai_prompt_edit',
+                    imageBase64: imageBase64,
+                    mimeType: 'image/jpeg',
+                    promptText: promptText
+                })
+            });
+
+            const data = await resp.json();
+            if (!resp.ok || data.status !== 'success') {
+                throw new Error(data.message || 'Lỗi xử lý từ AI');
+            }
+
+            const aiEdit = data.aiEdit || {};
+            const filters = aiEdit.filters || {};
+
+            if (filters.brightness !== undefined) document.getElementById('sliderBrightness').value = filters.brightness;
+            if (filters.contrast !== undefined) document.getElementById('sliderContrast').value = filters.contrast;
+            if (filters.blackPoint !== undefined) document.getElementById('sliderBlackPoint').value = filters.blackPoint;
+            if (filters.whitePoint !== undefined) document.getElementById('sliderWhitePoint').value = filters.whitePoint;
+            if (filters.saturation !== undefined) document.getElementById('sliderSaturation').value = filters.saturation;
+
+            window.renderStudioCanvas();
+
+            fb.style.display = 'block';
+            fb.innerHTML = `🤖 <b>AI Đánh giá:</b> ${escapeHtml(aiEdit.explanation || 'Đã áp dụng các thông số tối ưu.')} <br><small style="color:#94a3b8;">(Model: ${data.modelUsed})</small>`;
+            window.showToast('🚀 AI đã tinh chỉnh ảnh theo yêu cầu!');
+
+        } catch (err) {
+            fb.style.display = 'block';
+            fb.innerHTML = `<span style="color:#ef4444;">⚠️ Lỗi: ${err.message}</span>`;
+            window.showToast('⚠️ Lỗi: ' + err.message);
+        } finally {
+            overlay.style.display = 'none';
+            btn.disabled = false;
+        }
+    };
+
+    // V2.1 CHUYỂN ĐỔI SANG MICROSOFT WORD (.DOCX)
+    window.executeConvertToDocx = async function() {
+        const canvas = document.getElementById('studioMainCanvas');
+        if (!canvas && !studioCurrentPdfBase64) {
+            return window.showToast('⚠️ Vui lòng mở ảnh hoặc file PDF trước khi chuyển đổi!');
+        }
+
+        const overlay = document.getElementById('studioLoadingOverlay');
+        const loadText = document.getElementById('studioLoadingText');
+        const btn = document.getElementById('btnConvertDocx');
+
+        overlay.style.display = 'flex';
+        loadText.textContent = 'Gemini AI đang phân tích cấu trúc tài liệu, bảng biểu & định dạng...';
+        btn.disabled = true;
+
+        try {
+            let base64Data = studioCurrentPdfBase64;
+            let mimeType = 'application/pdf';
+
+            if (!base64Data && canvas) {
+                base64Data = canvas.toDataURL('image/jpeg', 0.95).split(',')[1];
+                mimeType = 'image/jpeg';
+            }
+
+            const resp = await fetch('/api/studio', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'ocr_docx',
+                    imageBase64: base64Data,
+                    mimeType: mimeType
+                })
+            });
+
+            const data = await resp.json();
+            if (!resp.ok || data.status !== 'success') {
+                throw new Error(data.message || 'Lỗi nhận diện tài liệu');
+            }
+
+            studioLastDocxHtml = data.html || '';
+
+            // Hiển thị preview
+            const previewBox = document.getElementById('docxPreviewBox');
+            const previewContent = document.getElementById('docxHtmlPreview');
+            previewBox.style.display = 'block';
+            previewContent.innerHTML = studioLastDocxHtml;
+
+            // Xuất file Word .docx thực thụ qua JSZip
+            await window.downloadDocxFile();
+            window.showToast('📄 Đã tạo và tải file Word (.docx) thành công!');
+
+        } catch (err) {
+            window.showToast('⚠️ Lỗi chuyển đổi DOCX: ' + err.message);
+        } finally {
+            overlay.style.display = 'none';
+            btn.disabled = false;
+        }
+    };
+
+    window.downloadDocxFile = async function() {
+        if (!studioLastDocxHtml) return window.showToast('⚠️ Chưa có nội dung văn bản để xuất Word');
+        if (typeof JSZip === 'undefined') return window.showToast('⚠️ Đang nạp thư viện JSZip, vui lòng thử lại');
+
+        const zip = new JSZip();
+
+        // 1. Content Types
+        zip.file('[Content_Types].xml', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+</Types>`);
+
+        // 2. Rels
+        zip.file('_rels/.rels', `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+</Relationships>`);
+
+        // 3. Parser HTML to DOCX XML
+        function escapeXml(str) {
+            return (str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&apos;');
+        }
+
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(`<div>${studioLastDocxHtml}</div>`, 'text/html');
+        let bodyXml = '';
+
+        function parseRuns(node, inheritB = false, inheritI = false, inheritU = false) {
+            let runsXml = '';
+            node.childNodes.forEach(child => {
+                if (child.nodeType === Node.TEXT_NODE) {
+                    const text = child.textContent;
+                    if (!text) return;
+                    let rPr = '';
+                    if (inheritB) rPr += '<w:b/>';
+                    if (inheritI) rPr += '<w:i/>';
+                    if (inheritU) rPr += '<w:u w:val="single"/>';
+                    runsXml += `<w:r>${rPr ? `<w:rPr>${rPr}</w:rPr>` : ''}<w:t xml:space="preserve">${escapeXml(text)}</w:t></w:r>`;
+                } else if (child.nodeType === Node.ELEMENT_NODE) {
+                    const tag = child.tagName.toLowerCase();
+                    const isB = inheritB || tag === 'b' || tag === 'strong';
+                    const isI = inheritI || tag === 'i' || tag === 'em';
+                    const isU = inheritU || tag === 'u';
+                    runsXml += parseRuns(child, isB, isI, isU);
+                }
+            });
+            return runsXml;
+        }
+
+        function processElement(el) {
+            const tag = el.tagName ? el.tagName.toLowerCase() : '';
+            if (tag === 'h1') {
+                const runs = parseRuns(el, true);
+                bodyXml += `<w:p><w:pPr><w:jc w:val="center"/><w:spacing w:before="240" w:after="120"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="34"/><w:color w:val="111827"/></w:rPr><w:t>${escapeXml(el.textContent)}</w:t></w:r></w:p>`;
+            } else if (tag === 'h2') {
+                bodyXml += `<w:p><w:pPr><w:spacing w:before="180" w:after="80"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="28"/><w:color w:val="1F2937"/></w:rPr><w:t>${escapeXml(el.textContent)}</w:t></w:r></w:p>`;
+            } else if (tag === 'h3') {
+                bodyXml += `<w:p><w:pPr><w:spacing w:before="140" w:after="60"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="24"/><w:color w:val="374151"/></w:rPr><w:t>${escapeXml(el.textContent)}</w:t></w:r></w:p>`;
+            } else if (tag === 'p') {
+                const runs = parseRuns(el);
+                bodyXml += `<w:p><w:pPr><w:spacing w:after="100"/></w:pPr>${runs || '<w:r><w:t></w:t></w:r>'}</w:p>`;
+            } else if (tag === 'ul' || tag === 'ol') {
+                el.querySelectorAll('li').forEach(li => {
+                    const bullet = tag === 'ul' ? '• ' : '';
+                    const runs = parseRuns(li);
+                    bodyXml += `<w:p><w:pPr><w:ind w:left="400"/><w:spacing w:after="60"/></w:pPr><w:r><w:t>${bullet}</w:t></w:r>${runs}</w:p>`;
+                });
+            } else if (tag === 'table') {
+                bodyXml += `<w:tbl><w:tblPr><w:tblW w:w="0" w:type="auto"/><w:tblBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="CCCCCC"/><w:left w:val="single" w:sz="4" w:space="0" w:color="CCCCCC"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="CCCCCC"/><w:right w:val="single" w:sz="4" w:space="0" w:color="CCCCCC"/><w:insideH w:val="single" w:sz="4" w:space="0" w:color="E5E7EB"/><w:insideV w:val="single" w:sz="4" w:space="0" w:color="E5E7EB"/></w:tblBorders></w:tblPr>`;
+                el.querySelectorAll('tr').forEach(tr => {
+                    bodyXml += '<w:tr>';
+                    tr.querySelectorAll('th, td').forEach(cell => {
+                        const isTh = cell.tagName.toLowerCase() === 'th';
+                        const runs = parseRuns(cell, isTh);
+                        const bgXml = isTh ? '<w:shd w:val="clear" w:color="auto" w:fill="F3F4F6"/>' : '';
+                        bodyXml += `<w:tc><w:tcPr><w:tcMar><w:top w:w="120" w:type="dxa"/><w:bottom w:w="120" w:type="dxa"/><w:left w:w="160" w:type="dxa"/><w:right w:w="160" w:type="dxa"/></w:tcMar>${bgXml}</w:tcPr><w:p>${runs}</w:p></w:tc>`;
+                    });
+                    bodyXml += '</w:tr>';
+                });
+                bodyXml += '</w:tbl>';
+            } else {
+                if (el.children.length > 0) {
+                    Array.from(el.children).forEach(processElement);
+                } else if (el.textContent.trim()) {
+                    bodyXml += `<w:p><w:pPr><w:spacing w:after="100"/></w:pPr><w:r><w:t>${escapeXml(el.textContent)}</w:t></w:r></w:p>`;
+                }
+            }
+        }
+
+        Array.from(doc.body.children[0].children).forEach(processElement);
+        if (!bodyXml.trim()) {
+            bodyXml = `<w:p><w:r><w:t>${escapeXml(doc.body.textContent || '')}</w:t></w:r></w:p>`;
+        }
+
+        const documentXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:body>
+    ${bodyXml}
+  </w:body>
+</w:document>`;
+
+        zip.file('word/document.xml', documentXml);
+
+        const blob = await zip.generateAsync({ type: 'blob' });
+        const baseName = studioCurrentFileName.replace(/\.[^/.]+$/, '');
+        const link = document.createElement('a');
+        link.download = `${baseName}_converted.docx`;
+        link.href = URL.createObjectURL(blob);
+        link.click();
+    };
+
+    // Hỗ trợ Paste ảnh từ Clipboard (Ctrl + V) khi Studio đang mở
+    document.addEventListener('paste', function(e) {
+        const modal = document.getElementById('imageStudioModal');
+        if (!modal || modal.style.display === 'none') return;
+        const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+        for (let index in items) {
+            const item = items[index];
+            if (item.kind === 'file') {
+                const blob = item.getAsFile();
+                if (blob) {
+                    window.loadStudioFile(blob);
+                    e.preventDefault();
+                    break;
+                }
+            }
+        }
+    });
+
+    // Hỗ trợ Kéo thả file trực tiếp vào Studio Viewport
+    const studioViewport = document.getElementById('studioViewport');
+    if (studioViewport) {
+        studioViewport.addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); }, false);
+        studioViewport.addEventListener('drop', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const dt = e.dataTransfer;
+            const files = dt ? Array.from(dt.files) : [];
+            if (files.length) {
+                window.loadStudioFile(files[0]);
+            }
+        }, false);
+    }
+
 
     // ==== Khởi tạo chung ====
     const initDate = new Date(currentDate + 'T00:00:00');
