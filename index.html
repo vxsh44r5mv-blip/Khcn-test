@@ -480,31 +480,73 @@
         @keyframes chatBounce { 0%, 80%, 100% { transform: scale(0.3); opacity: 0.5; } 40% { transform: scale(1); opacity: 1; background: var(--primary); } }
 
         /* ==============================================================
-           TỐI ƯU HÓA DI ĐỘNG (MOBILE RESPONSIVE)
+           TỐI ƯU HÓA DI ĐỘNG (MOBILE RESPONSIVE & TOUCH DEVICES)
            ============================================================== */
         @media (max-width: 900px) {
             .layout-2col { grid-template-columns: 1fr; }
         }
 
-        @media (max-width: 768px) {
-            body { padding: 12px; }
+        @media (max-width: 820px), (pointer: coarse) and (max-width: 1024px) {
+            body { padding: 8px 6px; }
+            .container { width: 100%; max-width: 100%; }
             
-            header h1 { font-size: 1.7rem; }
-            .date-badge { padding: 8px 16px; font-size: 0.95rem; }
+            header h1 { font-size: 1.5rem; }
+            .date-badge { padding: 8px 14px; font-size: 0.9rem; }
             
-            /* Cấu trúc lại Tabs cho vừa màn hình nhỏ */
+            /* --- NAVBAR DI ĐỘNG --- */
+            .app-navbar {
+                flex-direction: column;
+                align-items: stretch;
+                padding: 10px 12px;
+                gap: 10px;
+                border-radius: 18px;
+                margin-bottom: 14px;
+            }
+            .nav-brand {
+                width: 100%;
+                justify-content: space-between;
+            }
+            .nav-right {
+                width: 100%;
+                justify-content: space-between;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .nav-tabs {
+                width: 100%;
+                display: flex;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                flex-wrap: nowrap;
+                gap: 4px;
+                padding: 4px;
+                scrollbar-width: none;
+                border-radius: 24px;
+            }
+            .nav-tabs::-webkit-scrollbar {
+                display: none;
+            }
+            .nav-tabs .tab-btn {
+                flex: 0 0 auto;
+                white-space: nowrap;
+                padding: 8px 14px;
+                font-size: 0.82rem;
+                text-align: center;
+                border-radius: 18px;
+            }
+            
+            /* Cấu trúc Tabs tác vụ */
             .tabs { width: 100%; justify-content: space-between; border-radius: 20px; padding: 4px; }
-            .tab-btn { flex: 1; padding: 10px 8px; font-size: 0.85rem; text-align: center; border-radius: 16px; }
             
             /* Tăng độ lớn chạm và giãn cách */
-            .layout-2col { gap: 16px; }
-            .input-card, .people-section, .table-wrapper { padding: 16px; }
+            .layout-2col { gap: 14px; }
+            .input-card, .people-section, .table-wrapper { padding: 14px; }
             
             /* Chỉnh khung Thêm nhanh */
             .quick-add-group { flex-direction: column; align-items: stretch; gap: 0 !important; }
             .quick-add-group > input { width: 100% !important; min-width: unset !important; margin: 0 !important; }
             
-            .quick-add-extras-inner { flex-direction: column; align-items: stretch; gap: 12px !important; }
+            .quick-add-extras-inner { flex-direction: column; align-items: stretch; gap: 10px !important; }
             .quick-add-extras-inner > div:last-child { display: flex; width: 100%; }
             .quick-add-extras-inner .btn-primary { flex: 1; }
             
@@ -512,12 +554,147 @@
             .attach-wrapper .btn { width: 100%; }
 
             /* Nút thao tác tổng (Copy, Xuất CSV, Xóa) */
-            .controls-grid { flex-direction: column; gap: 8px; margin-bottom: 16px; }
+            .controls-grid { flex-direction: column; gap: 8px; margin-bottom: 14px; }
             .controls-grid .btn { width: 100%; }
             
-            /* Bố cục người thực hiện thành dạng lưới */
-            .people-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-            .btn-person { padding: 12px 10px; width: 100%; display: flex; justify-content: center; font-size: 14px; }
+            /* Bố cục người thực hiện */
+            .people-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+            .btn-person { padding: 10px 8px; width: 100%; display: flex; justify-content: center; font-size: 13.5px; }
+            
+            /* Smart Input Card trên Mobile */
+            .smart-input-card { padding: 14px; }
+            .smart-people-chips { max-height: 85px; }
+            
+            /* Tab Tiện ích (Utilities) trên mobile */
+            .utilities-view {
+                grid-template-columns: 1fr !important;
+                gap: 12px;
+                margin-bottom: 20px;
+            }
+            .util-card { padding: 16px; }
+
+            /* --- TAB STUDIO ẢNH & DOCX TRÊN DI ĐỘNG --- */
+            .studio-workspace-view {
+                height: auto;
+                min-height: calc(100vh - 90px);
+                border-radius: 14px;
+                margin-bottom: 16px;
+            }
+            .studio-workspace-view.is-fullscreen {
+                position: fixed !important;
+                inset: 0 !important;
+                width: 100vw !important;
+                height: 100vh !important;
+                border-radius: 0 !important;
+                margin: 0 !important;
+            }
+            .studio-header {
+                height: auto;
+                padding: 10px 12px;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+            }
+            .studio-header-left {
+                min-width: unset;
+                width: 100%;
+                justify-content: space-between;
+            }
+            .studio-title {
+                font-size: 0.92rem;
+                flex-wrap: wrap;
+            }
+            .studio-sub {
+                max-width: 200px;
+                font-size: 11px;
+            }
+            .studio-tabs {
+                width: 100%;
+                display: flex;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                flex-wrap: nowrap;
+                padding: 4px;
+                gap: 4px;
+                scrollbar-width: none;
+            }
+            .studio-tabs::-webkit-scrollbar {
+                display: none;
+            }
+            .studio-tab-btn {
+                flex: 0 0 auto;
+                white-space: nowrap;
+                padding: 7px 12px;
+                font-size: 12px;
+            }
+            .studio-header-right {
+                width: 100%;
+                flex-wrap: wrap;
+                gap: 6px;
+            }
+            .studio-model-selector-box {
+                flex: 1 1 100% !important;
+                justify-content: flex-start;
+                padding: 6px 10px !important;
+            }
+            .studio-header-right .studio-btn {
+                flex: 1;
+                justify-content: center;
+                padding: 8px 10px;
+                font-size: 12px;
+            }
+
+            /* Studio Body: Viewport ảnh trên cùng, sidebar controls cuộn bên dưới */
+            .studio-body {
+                flex-direction: column !important;
+                overflow-y: auto;
+            }
+            .studio-viewport {
+                order: 1 !important;
+                min-height: 220px;
+                max-height: 44vh;
+                flex: none;
+                padding: 10px;
+                background: #090d16;
+            }
+            #studioMainCanvas {
+                max-height: 42vh;
+                max-width: 100%;
+            }
+            .studio-sidebar {
+                order: 2 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                flex: 1;
+                border-right: none;
+                border-top: 1px solid #334155;
+                padding: 14px 12px 24px 12px;
+                overflow-y: visible;
+            }
+
+            /* Crop handles dễ kéo chạm bằng ngón tay trên điện thoại */
+            .crop-handle {
+                width: 24px;
+                height: 24px;
+            }
+            .crop-handle.n, .crop-handle.s {
+                width: 28px;
+                height: 16px;
+                left: calc(50% - 14px);
+            }
+            .crop-handle.e, .crop-handle.w {
+                height: 28px;
+                width: 16px;
+                top: calc(50% - 14px);
+            }
+            .crop-handle::after {
+                content: '';
+                position: absolute;
+                top: -12px;
+                left: -12px;
+                right: -12px;
+                bottom: -12px;
+            }
             
             /* Tối ưu hóa bảng cho màn hình hẹp */
             th, td { padding: 12px 10px; font-size: 13px; }
@@ -528,7 +705,7 @@
             #toast { width: 90vw; max-width: none; justify-content: center; bottom: 20px; }
             
             /* Modal tràn viền hơn trên mobile */
-            .modal-content { padding: 20px; width: 95%; }
+            .modal-content { padding: 18px; width: 95%; }
             .modal-buttons { flex-direction: column; gap: 8px; }
             .modal-buttons .modal-btn { width: 100%; padding: 12px; }
 
@@ -2408,8 +2585,14 @@
     window.switchTab = function(cat) {
         currentCategory = cat;
         document.querySelectorAll('.nav-tabs .tab-btn').forEach(btn => {
-            if (btn.innerText.includes(cat)) btn.classList.add('active');
-            else btn.classList.remove('active');
+            if (btn.innerText.includes(cat)) {
+                btn.classList.add('active');
+                if (typeof window.isMobileDevice === 'function' && window.isMobileDevice()) {
+                    try { btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }); } catch(e) {}
+                }
+            } else {
+                btn.classList.remove('active');
+            }
         });
 
         const tasksEl = document.getElementById('tasksLayout');
@@ -4015,15 +4198,28 @@
         document.querySelectorAll('.studio-tab-btn').forEach(btn => btn.classList.remove('active'));
         document.querySelectorAll('.studio-panel-tab').forEach(panel => panel.classList.remove('active'));
 
+        let activeBtn = null;
         if (tabName === 'adjust') {
-            document.getElementById('tabBtnAdjust').classList.add('active');
-            document.getElementById('studioPanelAdjust').classList.add('active');
+            activeBtn = document.getElementById('tabBtnAdjust');
+            if (activeBtn) activeBtn.classList.add('active');
+            const p = document.getElementById('studioPanelAdjust');
+            if (p) p.classList.add('active');
         } else if (tabName === 'ai') {
-            document.getElementById('tabBtnAi').classList.add('active');
-            document.getElementById('studioPanelAI').classList.add('active');
+            activeBtn = document.getElementById('tabBtnAi');
+            if (activeBtn) activeBtn.classList.add('active');
+            const p = document.getElementById('studioPanelAI');
+            if (p) p.classList.add('active');
         } else if (tabName === 'docx') {
-            document.getElementById('tabBtnDocx').classList.add('active');
-            document.getElementById('studioPanelDocx').classList.add('active');
+            activeBtn = document.getElementById('tabBtnDocx');
+            if (activeBtn) activeBtn.classList.add('active');
+            const p = document.getElementById('studioPanelDocx');
+            if (p) p.classList.add('active');
+        }
+
+        if (activeBtn && typeof window.isMobileDevice === 'function' && window.isMobileDevice()) {
+            try { activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }); } catch(e) {}
+            const sidebar = document.querySelector('.studio-sidebar');
+            if (sidebar) sidebar.scrollTop = 0;
         }
     };
 
@@ -4489,17 +4685,27 @@
         const scaleX = canvas.width / rect.width;
         const scaleY = canvas.height / rect.height;
 
-        const x = (e.clientX - rect.left) * scaleX;
-        const y = (e.clientY - rect.top) * scaleY;
+        let clientX = e.clientX;
+        let clientY = e.clientY;
+        if (e.touches && e.touches.length > 0) {
+            clientX = e.touches[0].clientX;
+            clientY = e.touches[0].clientY;
+        } else if (e.changedTouches && e.changedTouches.length > 0) {
+            clientX = e.changedTouches[0].clientX;
+            clientY = e.changedTouches[0].clientY;
+        }
+
+        const x = (clientX - rect.left) * scaleX;
+        const y = (clientY - rect.top) * scaleY;
         return {
             x: Math.max(0, Math.min(canvas.width, x)),
             y: Math.max(0, Math.min(canvas.height, y))
         };
     }
 
-    // Kéo thả chọn vùng & co giãn 8 hướng hoàn chỉnh
+    // Kéo thả chọn vùng & co giãn 8 hướng hoàn chỉnh (Hỗ trợ cả Chuột và Cảm ứng Mobile/Tablet)
     (function setupCropInteraction() {
-        document.addEventListener('mousedown', function(e) {
+        function handlePointerDown(e) {
             if (!isStudioCropActive) return;
 
             const handle = e.target.closest('.crop-handle');
@@ -4507,7 +4713,7 @@
                 cropDragAction = handle.getAttribute('data-handle');
                 cropDragStartMouse = getCanvasCoordinates(e);
                 cropDragStartBox = { ...cropBox };
-                e.preventDefault();
+                if (e.cancelable) e.preventDefault();
                 e.stopPropagation();
                 return;
             }
@@ -4517,7 +4723,7 @@
                 cropDragAction = 'move';
                 cropDragStartMouse = getCanvasCoordinates(e);
                 cropDragStartBox = { ...cropBox };
-                e.preventDefault();
+                if (e.cancelable) e.preventDefault();
                 e.stopPropagation();
                 return;
             }
@@ -4530,15 +4736,17 @@
                 cropBox = { x: pos.x, y: pos.y, w: 1, h: 1 };
                 cropDragStartBox = { ...cropBox };
                 window.updateCropBoxPosition();
-                e.preventDefault();
+                if (e.cancelable) e.preventDefault();
                 e.stopPropagation();
             }
-        });
+        }
 
-        document.addEventListener('mousemove', function(e) {
+        function handlePointerMove(e) {
             if (!isStudioCropActive || !cropDragAction) return;
             const canvas = document.getElementById('studioMainCanvas');
             if (!canvas) return;
+
+            if (e.cancelable) e.preventDefault();
 
             const cur = getCanvasCoordinates(e);
             const dx = cur.x - cropDragStartMouse.x;
@@ -4578,7 +4786,7 @@
                     b.x = newX;
                 }
                 if (cropDragAction.includes('n')) {
-                    const newY = Math.max(0, Math.min(cropDragStartBox.y + cropDragStartBox.h - 20, cropDragStartBox.y + dy));
+                    const newY = Math.max(0, Math.min(cropDragStartBox.y + cropDragStartBox.h - 20, cropDragStartBox.h + dy));
                     b.h = (cropDragStartBox.y + cropDragStartBox.h) - newY;
                     b.y = newY;
                 }
@@ -4594,16 +4802,27 @@
             }
 
             window.updateCropBoxPosition();
-        });
+        }
 
-        document.addEventListener('mouseup', function() {
+        function handlePointerUp() {
             if (cropDragAction) {
                 cropDragAction = null;
                 if (cropBox.w < 20) cropBox.w = 20;
                 if (cropBox.h < 20) cropBox.h = 20;
                 window.updateCropBoxPosition();
             }
-        });
+        }
+
+        // Chuột máy tính (Desktop)
+        document.addEventListener('mousedown', handlePointerDown);
+        document.addEventListener('mousemove', handlePointerMove);
+        document.addEventListener('mouseup', handlePointerUp);
+
+        // Chạm ngón tay (Mobile / Tablet Touch)
+        document.addEventListener('touchstart', handlePointerDown, { passive: false });
+        document.addEventListener('touchmove', handlePointerMove, { passive: false });
+        document.addEventListener('touchend', handlePointerUp, { passive: false });
+        document.addEventListener('touchcancel', handlePointerUp, { passive: false });
     })();
 
     window.applyStudioCrop = function() {
@@ -5348,6 +5567,41 @@
         if(e.key === 'Enter') {
             if (document.getElementById('editModal').classList.contains('show')) window.saveModal();
         }
+    });
+
+    // ===== NHẬN DIỆN THIẾT BỊ DI ĐỘNG & TỰ ĐỘNG TỐI ƯU HÓA MOBILE (V2.1) =====
+    window.isMobileDevice = function() {
+        const ua = navigator.userAgent || navigator.vendor || window.opera || '';
+        const isMobileUa = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|mobile|CriOS|Silk/i.test(ua);
+        const isTouchScreen = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+        const isNarrowScreen = window.innerWidth <= 820;
+        return isMobileUa || (isTouchScreen && isNarrowScreen);
+    };
+
+    window.applyMobileOptimizations = function() {
+        const isMobile = window.isMobileDevice();
+        document.documentElement.classList.toggle('is-mobile-device', isMobile);
+        document.body.classList.toggle('is-mobile-device', isMobile);
+
+        // Đảm bảo thẻ meta viewport hỗ trợ trải nghiệm di động mượt mà
+        let metaVp = document.querySelector('meta[name="viewport"]');
+        if (!metaVp) {
+            metaVp = document.createElement('meta');
+            metaVp.name = 'viewport';
+            document.head.appendChild(metaVp);
+        }
+        if (isMobile) {
+            metaVp.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover';
+        } else {
+            metaVp.content = 'width=device-width, initial-scale=1.0';
+        }
+    };
+
+    // Khởi chạy ngay và lắng nghe xoay màn hình hoặc đổi kích thước
+    window.applyMobileOptimizations();
+    window.addEventListener('resize', window.applyMobileOptimizations);
+    window.addEventListener('orientationchange', function() {
+        setTimeout(window.applyMobileOptimizations, 150);
     });
 </script>
 </body>
