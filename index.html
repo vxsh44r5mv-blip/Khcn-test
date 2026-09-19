@@ -1911,7 +1911,33 @@
                     </div>
 
                     <div class="studio-control-group">
-                        <div class="studio-group-title">Xoay & Lật ảnh</div>
+                        <div class="studio-group-title">
+                            <span>Xoay & Căn Chỉnh Ngay Ngắn</span>
+                            <span class="studio-pill" style="background: linear-gradient(135deg, #6366f1, #a855f7);">AI Auto-Rotate</span>
+                        </div>
+                        <p style="font-size: 11.5px; color: #94a3b8; line-height: 1.4; margin: 0;">
+                            AI tự động nhận diện chiều đọc của chữ và độ nghiêng của trang giấy để xoay ảnh ngay ngắn 100%.
+                        </p>
+                        
+                        <button type="button" class="studio-btn-ai" id="btnAiAutoRotate" onclick="window.executeAiAutoRotate()" style="background: linear-gradient(135deg, #6366f1, #9333ea); padding: 9px; width: 100%;" title="Tự động nhận diện hướng chữ và xoay thẳng ảnh">
+                            ✨ Tự Động Xoay Ngay Ngắn (AI Auto-Rotate)
+                        </button>
+
+                        <div class="studio-slider-item" style="margin-top: 4px;">
+                            <div class="studio-slider-label">
+                                <span>Căn chỉnh vi sai góc nghiêng</span>
+                                <div style="display: flex; align-items: center; gap: 6px;">
+                                    <span id="valFineTilt" style="font-weight: 700; color: #38bdf8;">0.0°</span>
+                                    <button type="button" class="studio-mini-btn" onclick="window.resetFineTilt()" title="Đặt lại về 0°" style="padding: 1px 6px; font-size: 10px;">↺ 0°</button>
+                                </div>
+                            </div>
+                            <input type="range" id="sliderFineTilt" min="-45" max="45" step="0.2" value="0" oninput="window.handleFineTiltInput(this.value)" title="Kéo để xoay nghiêng mượt mà theo từng độ lẻ">
+                            <button type="button" id="btnApplyFineTilt" class="studio-mini-btn" onclick="window.applyFineTilt()" style="display: none; width: 100%; margin-top: 4px; background: #059669; color: #fff; border-color: #059669; font-weight: 600; padding: 4px;">
+                                ✓ Áp dụng góc nghiêng này
+                            </button>
+                        </div>
+
+                        <div style="font-size: 11.5px; font-weight: 600; color: #cbd5e1; margin-top: 4px;">Xoay 90° & Lật ảnh:</div>
                         <div class="studio-btn-grid">
                             <button type="button" class="studio-tool-btn" onclick="window.rotateStudioImage(-90)">↺ Xoay trái 90°</button>
                             <button type="button" class="studio-tool-btn" onclick="window.rotateStudioImage(90)">↻ Xoay phải 90°</button>
@@ -3828,6 +3854,7 @@
        =================================================================== */
     let studioRawImage = null;
     let studioRotation = 0;
+    let studioFineTilt = 0;
     let studioFlipH = 1;
     let studioFlipV = 1;
     let studioCurrentFileName = 'image.png';
@@ -3933,10 +3960,14 @@
             img.onload = function() {
                 studioRawImage = img;
                 studioRotation = 0;
+                studioFineTilt = 0;
                 studioFlipH = 1;
                 studioFlipV = 1;
                 studioCurrentPdfBase64 = null;
                 window.resetStudioFilters();
+                if (document.getElementById('sliderFineTilt')) document.getElementById('sliderFineTilt').value = 0;
+                if (document.getElementById('valFineTilt')) document.getElementById('valFineTilt').textContent = '0.0°';
+                if (document.getElementById('btnApplyFineTilt')) document.getElementById('btnApplyFineTilt').style.display = 'none';
                 document.getElementById('studioEmptyState').style.display = 'none';
                 document.getElementById('studioCanvasContainer').style.display = 'block';
                 document.getElementById('studioDownloadBtn').disabled = false;
@@ -3948,6 +3979,23 @@
         reader.readAsDataURL(file);
     };
 
+    // Helper lấy màu viền cạnh của ảnh để lấp khoảng trống khi xoay nghiêng
+    window.getStudioEdgeBgColor = function() {
+        if (!studioRawImage) return '#ffffff';
+        try {
+            const sampleCanvas = document.createElement('canvas');
+            sampleCanvas.width = 8;
+            sampleCanvas.height = 8;
+            const sCtx = sampleCanvas.getContext('2d');
+            sCtx.drawImage(studioRawImage, 0, 0, 8, 8);
+            const p = sCtx.getImageData(0, 0, 1, 1).data;
+            if (p[3] < 15) return 'rgba(0,0,0,0)';
+            return `rgb(${p[0]}, ${p[1]}, ${p[2]})`;
+        } catch (e) {
+            return '#ffffff';
+        }
+    };
+
     // V2.1 Canvas Rendering Pipeline
     window.renderStudioCanvas = function() {
         if (!studioRawImage) return;
@@ -3955,15 +4003,29 @@
         if (!canvas) return;
         const ctx = canvas.getContext('2d');
 
-        const isSideways = Math.abs(studioRotation) % 180 === 90;
-        canvas.width = isSideways ? studioRawImage.height : studioRawImage.width;
-        canvas.height = isSideways ? studioRawImage.width : studioRawImage.height;
+        const totalAngle = (studioRotation + (studioFineTilt || 0));
+        const rad = (totalAngle * Math.PI) / 180;
+        const cos = Math.abs(Math.cos(rad));
+        const sin = Math.abs(Math.sin(rad));
+
+        const origW = studioRawImage.width;
+        const origH = studioRawImage.height;
+        const newW = Math.max(1, Math.round(origW * cos + origH * sin));
+        const newH = Math.max(1, Math.round(origW * sin + origH * cos));
+
+        canvas.width = newW;
+        canvas.height = newH;
 
         ctx.save();
-        ctx.translate(canvas.width / 2, canvas.height / 2);
-        ctx.rotate((studioRotation * Math.PI) / 180);
+        if (Math.abs(totalAngle % 90) > 0.05) {
+            const edgeBg = window.getStudioEdgeBgColor();
+            ctx.fillStyle = edgeBg;
+            ctx.fillRect(0, 0, newW, newH);
+        }
+        ctx.translate(newW / 2, newH / 2);
+        ctx.rotate(rad);
         ctx.scale(studioFlipH, studioFlipV);
-        ctx.drawImage(studioRawImage, -studioRawImage.width / 2, -studioRawImage.height / 2);
+        ctx.drawImage(studioRawImage, -origW / 2, -origH / 2);
         ctx.restore();
 
         // Đọc thông số bộ lọc
@@ -4085,6 +4147,90 @@
         if (axis === 'horizontal') studioFlipH = -studioFlipH;
         if (axis === 'vertical') studioFlipV = -studioFlipV;
         window.renderStudioCanvas();
+    };
+
+    window.handleFineTiltInput = function(val) {
+        if (!studioRawImage) return;
+        studioFineTilt = parseFloat(val) || 0;
+        const badge = document.getElementById('valFineTilt');
+        if (badge) {
+            badge.textContent = (studioFineTilt > 0 ? '+' : '') + studioFineTilt.toFixed(1) + '°';
+        }
+        const btnApply = document.getElementById('btnApplyFineTilt');
+        if (btnApply) {
+            btnApply.style.display = Math.abs(studioFineTilt) >= 0.1 ? 'block' : 'none';
+        }
+        window.renderStudioCanvas();
+    };
+
+    window.resetFineTilt = function() {
+        studioFineTilt = 0;
+        const slider = document.getElementById('sliderFineTilt');
+        if (slider) slider.value = 0;
+        const badge = document.getElementById('valFineTilt');
+        if (badge) badge.textContent = '0.0°';
+        const btnApply = document.getElementById('btnApplyFineTilt');
+        if (btnApply) btnApply.style.display = 'none';
+        window.renderStudioCanvas();
+    };
+
+    // Helper nung (bake) trực tiếp góc xoay/nghiêng/lật vào studioRawImage
+    window.bakeCurrentRotationIntoRawImage = async function() {
+        if (!studioRawImage) return;
+        const totalAngle = (studioRotation + (studioFineTilt || 0));
+        const rad = (totalAngle * Math.PI) / 180;
+        const cos = Math.abs(Math.cos(rad));
+        const sin = Math.abs(Math.sin(rad));
+        const origW = studioRawImage.width;
+        const origH = studioRawImage.height;
+        const newW = Math.max(1, Math.round(origW * cos + origH * sin));
+        const newH = Math.max(1, Math.round(origW * sin + origH * cos));
+
+        const rotCanvas = document.createElement('canvas');
+        rotCanvas.width = newW;
+        rotCanvas.height = newH;
+        const rotCtx = rotCanvas.getContext('2d');
+
+        if (Math.abs(totalAngle % 90) > 0.05) {
+            rotCtx.fillStyle = window.getStudioEdgeBgColor ? window.getStudioEdgeBgColor() : '#ffffff';
+            rotCtx.fillRect(0, 0, newW, newH);
+        }
+
+        rotCtx.translate(newW / 2, newH / 2);
+        rotCtx.rotate(rad);
+        rotCtx.scale(studioFlipH, studioFlipV);
+        rotCtx.drawImage(studioRawImage, -origW / 2, -origH / 2);
+
+        const rotImg = new Image();
+        await new Promise((resolve) => {
+            rotImg.onload = resolve;
+            rotImg.src = rotCanvas.toDataURL('image/png');
+        });
+
+        studioRawImage = rotImg;
+        studioRotation = 0;
+        studioFineTilt = 0;
+        studioFlipH = 1;
+        studioFlipV = 1;
+
+        const slider = document.getElementById('sliderFineTilt');
+        if (slider) slider.value = 0;
+        const badge = document.getElementById('valFineTilt');
+        if (badge) badge.textContent = '0.0°';
+        const btnApply = document.getElementById('btnApplyFineTilt');
+        if (btnApply) btnApply.style.display = 'none';
+
+        if (isStudioCropActive) {
+            window.toggleStudioCrop();
+        }
+
+        window.renderStudioCanvas();
+    };
+
+    window.applyFineTilt = async function() {
+        if (!studioRawImage || Math.abs(studioFineTilt) < 0.1) return;
+        await window.bakeCurrentRotationIntoRawImage();
+        window.showToast('✓ Đã áp dụng góc nghiêng vào ảnh!');
     };
 
     // V2.1 Studio Crop Tool & Auto-Crop Engine
@@ -4533,6 +4679,61 @@
             window.updateCropBoxPosition();
         }
         window.showToast('⚡ Đã tự động nhận diện viền thừa! Bấm "✓ Áp dụng cắt" để cắt viền.');
+    };
+
+    // TÍNH NĂNG MỚI: TỰ ĐỘNG XOAY NGAY NGẮN ẢNH VÀ CHỮ (GEMINI VISION AI)
+    window.executeAiAutoRotate = async function() {
+        const canvas = document.getElementById('studioMainCanvas');
+        if (!canvas || !studioRawImage) return window.showToast('⚠️ Vui lòng mở ảnh trước khi sử dụng AI Auto-Rotate!');
+
+        const overlay = document.getElementById('studioLoadingOverlay');
+        const loadText = document.getElementById('studioLoadingText');
+        const btn = document.getElementById('btnAiAutoRotate');
+
+        overlay.style.display = 'flex';
+        loadText.textContent = 'Gemini AI đang phân tích chiều đọc của chữ và độ nghiêng của ảnh...';
+        if (btn) btn.disabled = true;
+
+        try {
+            const imageBase64 = canvas.toDataURL('image/jpeg', 0.9).split(',')[1];
+            const resp = await fetch('/api/studio', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'ai_auto_rotate',
+                    imageBase64: imageBase64,
+                    mimeType: 'image/jpeg'
+                })
+            });
+
+            const data = await resp.json();
+            if (!resp.ok || data.status !== 'success') {
+                throw new Error(data.message || 'Lỗi từ AI');
+            }
+
+            const rot = data.rotateResult || {};
+            const totalAngle = parseFloat(rot.total_rotate_angle) || 0;
+            const explanation = rot.explanation || '';
+
+            if (rot.is_already_straight || Math.abs(totalAngle) < 0.4) {
+                window.showToast(`✨ ${explanation || 'Ảnh và văn bản đã hoàn toàn ngay ngắn rồi!'}`);
+                return;
+            }
+
+            // Xoay thêm góc totalAngle do AI tính toán
+            studioRotation = (studioRotation + totalAngle) % 360;
+            await window.bakeCurrentRotationIntoRawImage();
+
+            const angleSign = totalAngle > 0 ? '+' : '';
+            window.showToast(`✨ Đã tự động xoay ${angleSign}${totalAngle.toFixed(1)}°: ${explanation || 'Ảnh và chữ đã ngay ngắn!'}`);
+
+        } catch (err) {
+            console.error('Lỗi AI Auto-Rotate:', err);
+            window.showToast('❌ Lỗi xoay tự động: ' + err.message);
+        } finally {
+            overlay.style.display = 'none';
+            if (btn) btn.disabled = false;
+        }
     };
 
     window.downloadStudioImage = function() {

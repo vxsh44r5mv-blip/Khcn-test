@@ -350,6 +350,66 @@ Chỉ trả về DUY NHẤT 1 JSON hợp lệ (không bọc trong markdown \`\`\
             return res.end(JSON.stringify(result));
         }
 
+        // 5. ACTION: AI AUTO ROTATE (TỰ ĐỘNG XOAY NGAY NGẮN HƯỚNG ẢNH VÀ CHỮ)
+        if (action === 'ai_auto_rotate') {
+            const systemPrompt = `Bạn là chuyên gia thị giác máy tính và phân tích hướng văn bản, xoay ảnh tài liệu ngay ngắn (image auto-rotation, deskew & text orientation detection).
+Nhiệm vụ: Phân tích hướng của văn bản, chữ viết và đối tượng trong ảnh để tính toán góc cần xoay giúp ảnh thẳng đứng và văn bản đọc xuôi chiều tự nhiên từ trái sang phải, từ trên xuống dưới:
+1. "orientation_correction": Góc xoay thô nếu ảnh bị chụp lộn ngược hoặc nằm ngang (chọn một trong các giá trị: 0, 90, 180, hoặc 270 độ theo chiều kim đồng hồ).
+2. "fine_tilt_angle": Góc nghiêng nhỏ lẻ (số thực từ -45.0 đến 45.0 độ, ví dụ 2.5 hoặc -3.8 độ; số dương là xoay theo chiều kim đồng hồ, số âm là ngược chiều kim đồng hồ) để các dòng chữ hoàn toàn nằm ngang song song với cạnh đáy.
+3. "total_rotate_angle": Tổng góc cần xoay để ảnh thẳng = orientation_correction + fine_tilt_angle.
+4. "is_already_straight": true nếu ảnh đã thẳng hàng ngay ngắn sẵn (total_rotate_angle gần 0, sai số < 0.5 độ), ngược lại là false.
+5. "explanation": Giải thích ngắn gọn bằng tiếng Việt (ví dụ: "Ảnh bị nghiêng 12 độ, đã tính toán góc xoay cân chỉnh." hoặc "Ảnh và chữ đã ngay ngắn sẵn.").
+Chỉ trả về DUY NHẤT 1 JSON hợp lệ (không bọc trong markdown \`\`\`json, không thêm text ngoài JSON):
+{
+  "orientation_correction": 0,
+  "fine_tilt_angle": 0.0,
+  "total_rotate_angle": 0.0,
+  "is_already_straight": true,
+  "explanation": "Ảnh và chữ đã ngay ngắn chuẩn."
+}`;
+
+            const contents = [{
+                role: 'user',
+                parts: [
+                    {
+                        inline_data: {
+                            mime_type: mimeType || 'image/jpeg',
+                            data: imageBase64
+                        }
+                    },
+                    {
+                        text: 'Phân tích hướng chữ và góc nghiêng của ảnh để xác định góc cần xoay cho thẳng hàng ngay ngắn.'
+                    }
+                ]
+            }];
+
+            const { text, modelUsed } = await callGemini(contents, systemPrompt, 0.1);
+            let cleanedJson = text.trim();
+            if (cleanedJson.startsWith('```json')) {
+                cleanedJson = cleanedJson.replace(/^```json\s*/i, '').replace(/\s*```$/, '');
+            } else if (cleanedJson.startsWith('```')) {
+                cleanedJson = cleanedJson.replace(/^```\s*/i, '').replace(/\s*```$/, '');
+            }
+
+            let rotateData;
+            try {
+                rotateData = JSON.parse(cleanedJson);
+            } catch (e) {
+                rotateData = {
+                    orientation_correction: 0,
+                    fine_tilt_angle: 0.0,
+                    total_rotate_angle: 0.0,
+                    is_already_straight: true,
+                    explanation: text
+                };
+            }
+
+            const result = { status: 'success', rotateResult: rotateData, modelUsed };
+            if (res.status) return res.status(200).json(result);
+            res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8' });
+            return res.end(JSON.stringify(result));
+        }
+
         throw new Error('Hành động (action) không hợp lệ: ' + action);
 
     } catch (err) {
