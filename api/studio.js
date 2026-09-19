@@ -20,18 +20,30 @@ function resolveApiKey() {
     return Buffer.from(enc, 'base64').toString('utf8');
 }
 
-// Fallback models if gemini-3.1-pro hits quota limit
-const CANDIDATE_MODELS = [
-    'gemini-3-flash-preview',
-    'gemini-2.5-flash',
-    'gemini-3.1-pro-preview'
-];
+function getCandidateModels(selectedModel) {
+    if (selectedModel === 'gemini-3.1-pro-preview') {
+        return ['gemini-3.1-pro-preview'];
+    }
+    if (selectedModel === 'gemini-2.5-pro') {
+        return ['gemini-2.5-pro', 'gemini-3.1-pro-preview'];
+    }
+    if (selectedModel === 'flash_auto' || selectedModel === 'gemini-flash') {
+        return ['gemini-3.5-flash', 'gemini-2.5-flash', 'gemini-3-flash-preview'];
+    }
+    if (selectedModel && selectedModel !== 'auto') {
+        return [selectedModel, 'gemini-3.5-flash', 'gemini-2.5-flash'];
+    }
+    // Mặc định auto: Ưu tiên Flash 3.5 và Flash 2.5 cực nhanh
+    return ['gemini-3.5-flash', 'gemini-2.5-flash', 'gemini-3.1-pro-preview'];
+}
 
-async function callGemini(contents, systemInstruction, temperature = 0.2) {
-    const apiKey = resolveApiKey();
+async function callGemini(contents, systemInstruction, temperature = 0.2, selectedModel = null, customApiKey = null) {
+    const apiKey = (customApiKey && customApiKey.trim()) ? customApiKey.trim() : resolveApiKey();
     let lastError = null;
 
-    for (const model of CANDIDATE_MODELS) {
+    const candidateModels = getCandidateModels(selectedModel);
+
+    for (const model of candidateModels) {
         try {
             const url = 'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + apiKey;
             const bodyPayload = {
@@ -62,7 +74,12 @@ async function callGemini(contents, systemInstruction, temperature = 0.2) {
                 const errData = await response.json().catch(() => ({}));
                 const msg = errData.error?.message || ('HTTP ' + response.status);
                 console.warn('Gemini model ' + model + ' returned error: ' + msg);
-                lastError = new Error(model + ': ' + msg);
+
+                if (selectedModel && selectedModel.includes('pro') && (msg.includes('limit: 0') || msg.includes('Quota exceeded'))) {
+                    lastError = new Error(`Model "${model}" yêu cầu tài khoản Google AI Studio có kích hoạt Billing (hạn mức miễn phí hiện tại là 0). Bạn vui lòng chọn model "Gemini 3.5/2.5 Flash" để dùng miễn phí, hoặc nhập API Key có Billing.`);
+                } else {
+                    lastError = new Error(model + ': ' + msg);
+                }
             }
         } catch (err) {
             console.warn('Gemini model ' + model + ' exception: ' + err.message);
@@ -111,7 +128,7 @@ module.exports = async function handler(req, res) {
         });
     }
 
-    const { action, imageBase64, mimeType, oldText, newText, promptText } = body || {};
+    const { action, imageBase64, mimeType, oldText, newText, promptText, selectedModel, customApiKey } = body || {};
 
     try {
         if (!imageBase64 && !body.pdfBase64) {
@@ -150,7 +167,7 @@ Quy tắc định dạng:
                 ]
             }];
 
-            const { text, modelUsed } = await callGemini(contents, systemPrompt, 0.1);
+            const { text, modelUsed } = await callGemini(contents, systemPrompt, 0.1, selectedModel, customApiKey);
             let cleanedHtml = text.trim();
             if (cleanedHtml.startsWith('```html')) {
                 cleanedHtml = cleanedHtml.replace(/^```html\s*/i, '').replace(/\s*```$/, '');
@@ -211,7 +228,7 @@ Quy ước:
                 ]
             }];
 
-            const { text, modelUsed } = await callGemini(contents, systemPrompt, 0.1);
+            const { text, modelUsed } = await callGemini(contents, systemPrompt, 0.1, selectedModel, customApiKey);
             let cleanedJson = text.trim();
             if (cleanedJson.startsWith('```json')) {
                 cleanedJson = cleanedJson.replace(/^```json\s*/i, '').replace(/\s*```$/, '');
@@ -280,7 +297,7 @@ Phạm vi giá trị:
                 ]
             }];
 
-            const { text, modelUsed } = await callGemini(contents, systemPrompt, 0.2);
+            const { text, modelUsed } = await callGemini(contents, systemPrompt, 0.2, selectedModel, customApiKey);
             let cleanedJson = text.trim();
             if (cleanedJson.startsWith('```json')) {
                 cleanedJson = cleanedJson.replace(/^```json\s*/i, '').replace(/\s*```$/, '');
@@ -329,7 +346,7 @@ Chỉ trả về DUY NHẤT 1 JSON hợp lệ (không bọc trong markdown \`\`\
                 ]
             }];
 
-            const { text, modelUsed } = await callGemini(contents, systemPrompt, 0.1);
+            const { text, modelUsed } = await callGemini(contents, systemPrompt, 0.1, selectedModel, customApiKey);
             let cleanedJson = text.trim();
             if (cleanedJson.startsWith('```json')) {
                 cleanedJson = cleanedJson.replace(/^```json\s*/i, '').replace(/\s*```$/, '');
@@ -383,7 +400,7 @@ Chỉ trả về DUY NHẤT 1 JSON hợp lệ (không bọc trong markdown \`\`\
                 ]
             }];
 
-            const { text, modelUsed } = await callGemini(contents, systemPrompt, 0.1);
+            const { text, modelUsed } = await callGemini(contents, systemPrompt, 0.1, selectedModel, customApiKey);
             let cleanedJson = text.trim();
             if (cleanedJson.startsWith('```json')) {
                 cleanedJson = cleanedJson.replace(/^```json\s*/i, '').replace(/\s*```$/, '');

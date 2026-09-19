@@ -1798,6 +1798,15 @@
             </div>
 
             <div class="studio-header-right">
+                <div class="studio-model-selector-box" style="display: flex; align-items: center; gap: 6px; background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255,255,255,0.14); border-radius: 8px; padding: 4px 10px;" title="Lựa chọn mô hình AI (Gemini Engine)">
+                    <span style="font-size: 13px;">🤖</span>
+                    <select id="studioHeaderModelSelector" onchange="window.setStudioSelectedModel(this.value)" style="background: transparent; color: #f8fafc; border: none; font-size: 11.5px; font-weight: 600; outline: none; cursor: pointer;">
+                        <option value="flash_auto" selected>⚡ Gemini 3.5/2.5 Flash (Miễn phí, 1-2s)</option>
+                        <option value="gemini-3.1-pro-preview">🧠 Gemini 3.1 Pro (Cần Billing)</option>
+                        <option value="gemini-2.5-pro">💎 Gemini 2.5 Pro (Cần Billing)</option>
+                        <option value="auto">🔄 Tự động (Auto-Fallback)</option>
+                    </select>
+                </div>
                 <label class="studio-btn studio-btn-upload" title="Mở ảnh hoặc tài liệu mới">
                     📂 Mở tệp
                     <input type="file" id="studioFileInput" accept="image/*,application/pdf" style="display:none;" onchange="window.handleStudioUpload(event)">
@@ -1950,7 +1959,38 @@
                 <!-- Panel 2: AI Editing -->
                 <div id="studioPanelAI" class="studio-panel-tab">
                     <div class="studio-control-group">
-                        <div class="studio-group-title">Tùy chọn AI (Gemini 3.1 Pro / Vision)</div>
+                        <div class="studio-group-title">
+                            <span>Mô hình AI (Gemini Engine)</span>
+                            <span id="badgeActiveModel" class="studio-pill" style="background: linear-gradient(135deg, #10b981, #06b6d4);">Flash 3.5/2.5</span>
+                        </div>
+                        
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <label style="font-size: 11.5px; font-weight: 600; color: #cbd5e1;">Chọn Engine xử lý AI:</label>
+                            <select id="studioPanelModelSelector" class="studio-input" onchange="window.setStudioSelectedModel(this.value)" style="padding: 7px 10px; font-size: 12px; font-weight: 600;">
+                                <option value="flash_auto" selected>⚡ Siêu tốc: Gemini 3.5 / 2.5 Flash (Miễn phí, 1-2s)</option>
+                                <option value="gemini-3.1-pro-preview">🧠 Chuyên sâu: Gemini 3.1 Pro Preview (Yêu cầu Billing)</option>
+                                <option value="gemini-2.5-pro">💎 Gemini 2.5 Pro (Yêu cầu Billing)</option>
+                                <option value="auto">🔄 Tự động thông minh: Ưu tiên Flash rồi Pro</option>
+                            </select>
+                        </div>
+
+                        <div style="margin-top: 6px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.08);">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px;">
+                                <label style="font-size: 11px; color: #94a3b8;">🔑 Gemini API Key riêng (tùy chọn):</label>
+                                <a href="https://aistudio.google.com/app/apikey" target="_blank" style="font-size: 10.5px; color: #38bdf8; text-decoration: underline;">Lấy key tại đây ↗</a>
+                            </div>
+                            <div style="display: flex; gap: 6px;">
+                                <input type="password" id="inputCustomApiKey" class="studio-input" placeholder="AIzaSy... (để trống nếu dùng mặc định)" style="font-size: 11px; padding: 5px 8px; flex: 1;">
+                                <button type="button" class="studio-mini-btn" onclick="window.saveCustomApiKey(document.getElementById('inputCustomApiKey').value)" style="padding: 4px 8px; font-weight: 600;" title="Lưu API Key riêng">Lưu</button>
+                            </div>
+                            <div id="customKeyStatus" style="font-size: 10.5px; color: #10b981; display: none; margin-top: 3px;">
+                                ✓ Đang sử dụng API Key riêng do bạn cung cấp
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="studio-control-group">
+                        <div class="studio-group-title">Chế độ chỉnh sửa AI</div>
                         <div class="studio-ai-mode-selector">
                             <button type="button" class="ai-mode-chip active" id="chipModeReplace" onclick="window.setAiMode('replace')">🔤 Sửa chữ trên ảnh</button>
                             <button type="button" class="ai-mode-chip" id="chipModePrompt" onclick="window.setAiMode('prompt')">🎨 Chỉnh theo miêu tả</button>
@@ -2384,6 +2424,9 @@
             if (tasksEl) tasksEl.style.display = 'none';
             if (utilsEl) utilsEl.style.display = 'none';
             if (studioEl) studioEl.style.display = 'flex';
+            if (typeof window.initStudioModelUi === 'function') {
+                window.initStudioModelUi();
+            }
             if (typeof window.renderStudioCanvas === 'function') {
                 setTimeout(window.renderStudioCanvas, 50);
             }
@@ -3864,8 +3907,96 @@
     let isStudioCropActive = false;
     let cropBox = { x: 50, y: 50, w: 200, h: 150 };
 
+    // V2.1 Studio AI Model & API Key Management
+    window.getStudioSelectedModel = function() {
+        return localStorage.getItem('studio_ai_model') || 'flash_auto';
+    };
+
+    window.getStudioCustomApiKey = function() {
+        return localStorage.getItem('studio_custom_api_key') || '';
+    };
+
+    window.setStudioSelectedModel = function(model) {
+        localStorage.setItem('studio_ai_model', model);
+        const selHeader = document.getElementById('studioHeaderModelSelector');
+        const selPanel = document.getElementById('studioPanelModelSelector');
+        if (selHeader) selHeader.value = model;
+        if (selPanel) selPanel.value = model;
+
+        const badge = document.getElementById('badgeActiveModel');
+        if (badge) {
+            if (model === 'gemini-3.1-pro-preview') {
+                badge.textContent = 'Gemini 3.1 Pro';
+                badge.style.background = 'linear-gradient(135deg, #8b5cf6, #ec4899)';
+            } else if (model === 'gemini-2.5-pro') {
+                badge.textContent = 'Gemini 2.5 Pro';
+                badge.style.background = 'linear-gradient(135deg, #6366f1, #a855f7)';
+            } else if (model === 'auto') {
+                badge.textContent = 'Tự động (Auto)';
+                badge.style.background = 'linear-gradient(135deg, #0284c7, #06b6d4)';
+            } else {
+                badge.textContent = 'Flash 3.5/2.5';
+                badge.style.background = 'linear-gradient(135deg, #10b981, #06b6d4)';
+            }
+        }
+        const modelName = model === 'gemini-3.1-pro-preview' ? 'Gemini 3.1 Pro' : model === 'gemini-2.5-pro' ? 'Gemini 2.5 Pro' : model === 'auto' ? 'Tự động thông minh' : 'Gemini 3.5/2.5 Flash';
+        window.showToast(`🤖 Đã chuyển sang Engine: ${modelName}`);
+    };
+
+    window.saveCustomApiKey = function(rawKey) {
+        const trimmed = (rawKey || '').trim();
+        const st = document.getElementById('customKeyStatus');
+        const inp = document.getElementById('inputCustomApiKey');
+        if (trimmed) {
+            localStorage.setItem('studio_custom_api_key', trimmed);
+            if (inp) inp.value = trimmed;
+            if (st) st.style.display = 'block';
+            window.showToast('🔑 Đã lưu Gemini API Key riêng của bạn!');
+        } else {
+            localStorage.removeItem('studio_custom_api_key');
+            if (inp) inp.value = '';
+            if (st) st.style.display = 'none';
+            window.showToast('🔄 Đã xóa API Key riêng, hệ thống sẽ dùng key mặc định.');
+        }
+    };
+
+    window.initStudioModelUi = function() {
+        const savedModel = window.getStudioSelectedModel();
+        const savedKey = window.getStudioCustomApiKey();
+
+        const selHeader = document.getElementById('studioHeaderModelSelector');
+        const selPanel = document.getElementById('studioPanelModelSelector');
+        if (selHeader) selHeader.value = savedModel;
+        if (selPanel) selPanel.value = savedModel;
+
+        const badge = document.getElementById('badgeActiveModel');
+        if (badge) {
+            if (savedModel === 'gemini-3.1-pro-preview') {
+                badge.textContent = 'Gemini 3.1 Pro';
+                badge.style.background = 'linear-gradient(135deg, #8b5cf6, #ec4899)';
+            } else if (savedModel === 'gemini-2.5-pro') {
+                badge.textContent = 'Gemini 2.5 Pro';
+                badge.style.background = 'linear-gradient(135deg, #6366f1, #a855f7)';
+            } else if (savedModel === 'auto') {
+                badge.textContent = 'Tự động (Auto)';
+                badge.style.background = 'linear-gradient(135deg, #0284c7, #06b6d4)';
+            } else {
+                badge.textContent = 'Flash 3.5/2.5';
+                badge.style.background = 'linear-gradient(135deg, #10b981, #06b6d4)';
+            }
+        }
+
+        const inp = document.getElementById('inputCustomApiKey');
+        const st = document.getElementById('customKeyStatus');
+        if (inp && savedKey) {
+            inp.value = savedKey;
+            if (st) st.style.display = 'block';
+        }
+    };
+
     window.openImageStudio = function(optionalFile) {
         window.switchTab('Studio');
+        window.initStudioModelUi();
         if (optionalFile) {
             window.loadStudioFile(optionalFile);
         }
@@ -4526,7 +4657,9 @@
                 body: JSON.stringify({
                     action: 'ai_auto_crop',
                     imageBase64: imageBase64,
-                    mimeType: 'image/jpeg'
+                    mimeType: 'image/jpeg',
+                    selectedModel: window.getStudioSelectedModel(),
+                    customApiKey: window.getStudioCustomApiKey()
                 })
             });
 
@@ -4702,7 +4835,9 @@
                 body: JSON.stringify({
                     action: 'ai_auto_rotate',
                     imageBase64: imageBase64,
-                    mimeType: 'image/jpeg'
+                    mimeType: 'image/jpeg',
+                    selectedModel: window.getStudioSelectedModel(),
+                    customApiKey: window.getStudioCustomApiKey()
                 })
             });
 
@@ -4776,7 +4911,9 @@
                     imageBase64: imageBase64,
                     mimeType: 'image/jpeg',
                     oldText: oldText,
-                    newText: newText
+                    newText: newText,
+                    selectedModel: window.getStudioSelectedModel(),
+                    customApiKey: window.getStudioCustomApiKey()
                 })
             });
 
@@ -4894,7 +5031,9 @@
                     action: 'ai_prompt_edit',
                     imageBase64: imageBase64,
                     mimeType: 'image/jpeg',
-                    promptText: promptText
+                    promptText: promptText,
+                    selectedModel: window.getStudioSelectedModel(),
+                    customApiKey: window.getStudioCustomApiKey()
                 })
             });
 
@@ -4958,7 +5097,9 @@
                 body: JSON.stringify({
                     action: 'ocr_docx',
                     imageBase64: base64Data,
-                    mimeType: mimeType
+                    mimeType: mimeType,
+                    selectedModel: window.getStudioSelectedModel(),
+                    customApiKey: window.getStudioCustomApiKey()
                 })
             });
 
