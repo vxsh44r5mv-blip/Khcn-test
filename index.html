@@ -1587,8 +1587,7 @@
                TỐI ƯU CHIỀU DỌC (PORTRAIT) CHO 3 TAB: NIỀM VUI, RBT, BÁO CÁO
                ========================================================= */
             .layout-2col {
-                display: flex !important;
-                flex-direction: column !important;
+                grid-template-columns: 1fr !important;
                 gap: 14px !important;
             }
             .section-title {
@@ -2889,13 +2888,19 @@
         const studioEl = document.getElementById('studioWorkspaceView');
 
         if (cat === 'Tiện ích') {
-            if (tasksEl) tasksEl.style.display = 'none';
-            if (utilsEl) utilsEl.style.display = 'grid';
-            if (studioEl) studioEl.style.display = 'none';
+            if (tasksEl) tasksEl.style.setProperty('display', 'none', 'important');
+            if (utilsEl) {
+                utilsEl.style.removeProperty('display');
+                utilsEl.style.display = 'grid';
+            }
+            if (studioEl) studioEl.style.setProperty('display', 'none', 'important');
         } else if (cat === 'Studio') {
-            if (tasksEl) tasksEl.style.display = 'none';
-            if (utilsEl) utilsEl.style.display = 'none';
-            if (studioEl) studioEl.style.display = 'flex';
+            if (tasksEl) tasksEl.style.setProperty('display', 'none', 'important');
+            if (utilsEl) utilsEl.style.setProperty('display', 'none', 'important');
+            if (studioEl) {
+                studioEl.style.removeProperty('display');
+                studioEl.style.display = 'flex';
+            }
             if (typeof window.initStudioModelUi === 'function') {
                 window.initStudioModelUi();
             }
@@ -2903,9 +2908,12 @@
                 setTimeout(window.renderStudioCanvas, 50);
             }
         } else {
-            if (tasksEl) tasksEl.style.display = 'grid';
-            if (utilsEl) utilsEl.style.display = 'none';
-            if (studioEl) studioEl.style.display = 'none';
+            if (tasksEl) {
+                tasksEl.style.removeProperty('display');
+                tasksEl.style.display = 'grid';
+            }
+            if (utilsEl) utilsEl.style.setProperty('display', 'none', 'important');
+            if (studioEl) studioEl.style.setProperty('display', 'none', 'important');
             filterData();
         }
     };
