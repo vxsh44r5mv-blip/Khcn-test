@@ -1583,47 +1583,226 @@
                 border-radius: 18px !important;
             }
             
-            /* Cấu trúc Tabs tác vụ */
-            .tabs { width: 100% !important; justify-content: space-between !important; border-radius: 20px !important; padding: 4px !important; }
-            
-            /* Tăng độ lớn chạm và giãn cách */
-            .layout-2col { gap: 14px !important; }
-            .input-card, .people-section, .table-wrapper { padding: 14px !important; }
-            
-            /* Chỉnh khung Thêm nhanh */
-            .quick-add-group { flex-direction: column !important; align-items: stretch !important; gap: 0 !important; }
-            .quick-add-group > input { width: 100% !important; min-width: unset !important; margin: 0 !important; }
-            
-            .quick-add-extras-inner { flex-direction: column !important; align-items: stretch !important; gap: 10px !important; }
-            .quick-add-extras-inner > div:last-child { display: flex !important; width: 100% !important; }
-            .quick-add-extras-inner .btn-primary { flex: 1 !important; }
-            
-            .attach-wrapper { justify-content: flex-start !important; }
-            .attach-wrapper .btn { width: 100% !important; }
-
-            /* Nút thao tác tổng (Copy, Xuất CSV, Xóa) */
-            .controls-grid { flex-direction: column !important; gap: 8px !important; margin-bottom: 14px !important; }
-            .controls-grid .btn { width: 100% !important; }
-            
-            /* Bố cục người thực hiện */
-            .people-buttons { display: grid !important; grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
-            .btn-person { padding: 10px 8px !important; width: 100% !important; display: flex !important; justify-content: center !important; font-size: 13.5px !important; }
-            
-            /* Smart Input Card trên Mobile */
-            .smart-input-card { padding: 14px !important; }
-            .smart-people-chips { max-height: 85px !important; }
-            
-            /* Bảng dữ liệu: vuốt ngang mượt mà */
-            .table-wrapper {
-                overflow-x: auto !important;
-                -webkit-overflow-scrolling: touch !important;
-                width: 100% !important;
-                max-width: 100% !important;
+            /* =========================================================
+               TỐI ƯU CHIỀU DỌC (PORTRAIT) CHO 3 TAB: NIỀM VUI, RBT, BÁO CÁO
+               ========================================================= */
+            .layout-2col {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 14px !important;
             }
-            table { min-width: 540px !important; }
-            th, td { padding: 12px 10px !important; font-size: 13px !important; }
-            .action-btns { flex-direction: column !important; gap: 6px !important; }
-            .action-btns .btn-sm { width: 100% !important; text-align: center !important; padding: 8px !important; }
+            .section-title {
+                font-size: 1.05rem !important;
+                margin-bottom: 8px !important;
+                font-weight: 700 !important;
+            }
+
+            /* --- 1. KHUNG NHẬP LIỆU THÔNG MINH TRÊN MOBILE --- */
+            .smart-input-card {
+                padding: 14px 12px !important;
+                border-radius: 14px !important;
+                box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06) !important;
+                margin-bottom: 0 !important;
+            }
+            .smart-header {
+                margin-bottom: 8px !important;
+            }
+            .smart-title {
+                font-size: 0.9rem !important;
+            }
+            /* Danh sách chip người: dàn chip gọn gàng, tự cuộn khi nhiều người */
+            .smart-people-chips.people-buttons {
+                display: flex !important;
+                flex-wrap: wrap !important;
+                gap: 6px !important;
+                max-height: 90px !important;
+                overflow-y: auto !important;
+                margin-bottom: 10px !important;
+                padding-right: 2px !important;
+            }
+            .chip-person {
+                padding: 6px 12px !important;
+                font-size: 12.5px !important;
+                border-radius: 16px !important;
+                flex: 0 0 auto !important;
+            }
+            .smart-input-box {
+                margin-bottom: 10px !important;
+            }
+            .smart-input-field {
+                padding: 10px 14px !important;
+                font-size: 15px !important;
+                border-radius: 10px !important;
+            }
+            /* Hàng nút đính kèm & Thêm việc */
+            .smart-action-row {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 8px !important;
+                align-items: stretch !important;
+            }
+            .smart-attach-group {
+                display: flex !important;
+                gap: 6px !important;
+                width: 100% !important;
+            }
+            .smart-attach-group .btn {
+                flex: 1 1 auto !important;
+                justify-content: center !important;
+                padding: 8px 10px !important;
+                font-size: 12.5px !important;
+            }
+            .smart-attach-group .image-mode-segmented {
+                flex: 1 1 auto !important;
+                display: flex !important;
+            }
+            .smart-attach-group .image-mode-segmented .seg-btn {
+                flex: 1 !important;
+                padding: 6px 8px !important;
+                font-size: 11.5px !important;
+                text-align: center !important;
+            }
+            #smartSubmitBtn {
+                width: 100% !important;
+                padding: 11px !important;
+                font-size: 14px !important;
+                font-weight: 700 !important;
+                border-radius: 10px !important;
+                justify-content: center !important;
+                box-shadow: 0 3px 10px rgba(5, 150, 105, 0.3) !important;
+            }
+            .drag-hint {
+                display: none !important; /* Ẩn gợi ý kéo thả tệp máy tính trên màn hình điện thoại */
+            }
+
+            /* --- 2. BẢNG TỔNG HỢP & DANH SÁCH CÔNG VIỆC TRÊN MOBILE --- */
+            .table-wrapper {
+                padding: 14px 12px !important;
+                border-radius: 14px !important;
+                box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06) !important;
+                overflow: visible !important;
+            }
+            .table-toolbar {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 8px !important;
+                margin-bottom: 12px !important;
+            }
+            .search-box {
+                width: 100% !important;
+                min-width: unset !important;
+            }
+            .search-box input {
+                font-size: 14px !important;
+                padding: 9px 12px 9px 34px !important;
+            }
+            /* Thanh 4 công cụ (Chép bảng, Xuất CSV, Tải ZIP, Xóa) dàn dạng lưới 2x2 đẹp mắt */
+            .table-actions {
+                width: 100% !important;
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 6px !important;
+            }
+            .btn-tool {
+                width: 100% !important;
+                justify-content: center !important;
+                padding: 8px 6px !important;
+                font-size: 12px !important;
+            }
+
+            /* Chuyển đổi bảng HTML thành dạng THẺ CÔNG VIỆC (TASK CARDS) di động mượt mà */
+            .table-container {
+                overflow: visible !important;
+            }
+            .table-container table {
+                display: block !important;
+                width: 100% !important;
+                min-width: unset !important;
+                border-collapse: separate !important;
+                border-spacing: 0 10px !important;
+            }
+            .table-container thead {
+                display: none !important; /* Ẩn header bảng trên điện thoại */
+            }
+            .table-container tbody {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 10px !important;
+                width: 100% !important;
+            }
+            .table-container tr {
+                display: flex !important;
+                flex-direction: column !important;
+                background: #ffffff !important;
+                border: 1px solid var(--gray-200) !important;
+                border-radius: 12px !important;
+                padding: 12px 14px !important;
+                gap: 8px !important;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04) !important;
+                transition: transform 0.15s ease, box-shadow 0.15s ease !important;
+            }
+            .table-container tr:active {
+                transform: scale(0.99) !important;
+            }
+            .table-container td {
+                display: block !important;
+                padding: 0 !important;
+                border: none !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+            }
+            /* Cột 1: STT */
+            .table-container td:nth-child(1) {
+                display: none !important;
+            }
+            /* Cột 2: Tên người */
+            .table-container td:nth-child(2) {
+                font-size: 14.5px !important;
+                font-weight: 700 !important;
+                color: var(--primary) !important;
+                display: flex !important;
+                align-items: center !important;
+                gap: 6px !important;
+            }
+            .table-container td:nth-child(2)::before {
+                content: '👤 ';
+                font-size: 13px !important;
+            }
+            /* Cột 3: Nhiệm vụ & Tệp đính kèm */
+            .table-container td:nth-child(3) {
+                font-size: 13.5px !important;
+                color: var(--gray-800) !important;
+                line-height: 1.5 !important;
+                word-break: break-word !important;
+            }
+            .table-container td:nth-child(3) .badge-file {
+                font-size: 11.5px !important;
+                padding: 4px 8px !important;
+            }
+            /* Cột 4: Hàng nút thao tác (Tải zip / Sửa / Xóa) nằm ngang cuối thẻ */
+            .table-container td:nth-child(4) {
+                border-top: 1px solid var(--gray-100) !important;
+                padding-top: 8px !important;
+                margin-top: 2px !important;
+            }
+            .table-container .action-btns {
+                display: flex !important;
+                flex-direction: row !important;
+                justify-content: flex-end !important;
+                gap: 6px !important;
+                width: 100% !important;
+            }
+            .table-container .action-btns .btn-sm {
+                flex: 1 !important;
+                padding: 8px 10px !important;
+                font-size: 12px !important;
+                font-weight: 600 !important;
+                text-align: center !important;
+                border-radius: 8px !important;
+                justify-content: center !important;
+                display: inline-flex !important;
+                align-items: center !important;
+            }
             
             /* Tab Tiện ích (Utilities) trên mobile */
             .utilities-view {
