@@ -546,6 +546,458 @@
                 letter-spacing: -0.2px;
             }
         }
+
+        /* ===== V2.1 SLIM NAVBAR ===== */
+        .app-navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 24px;
+            padding: 10px 18px;
+            margin-bottom: 22px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .nav-logo {
+            font-size: 1.5rem;
+            line-height: 1;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
+        }
+        .nav-title-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .nav-title {
+            color: #ffffff;
+            font-size: 1.18rem;
+            font-weight: 800;
+            letter-spacing: -0.3px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.15);
+        }
+        .nav-version {
+            font-size: 0.72rem;
+            font-weight: 700;
+            background: rgba(255, 255, 255, 0.22);
+            color: #ffffff;
+            padding: 2px 8px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .nav-tabs {
+            display: inline-flex;
+            background: rgba(0, 0, 0, 0.14);
+            padding: 4px;
+            border-radius: 30px;
+            gap: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+        .nav-tabs .tab-btn {
+            background: transparent;
+            border: none;
+            padding: 7px 18px;
+            color: white;
+            font-size: 0.88rem;
+            font-weight: 700;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .nav-tabs .tab-btn:hover { background: rgba(255, 255, 255, 0.12); }
+        .nav-tabs .tab-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+        .nav-tabs .tab-btn.tab-util { color: #fef08a; }
+        .nav-tabs .tab-btn.tab-util.active { background: #fef08a; color: #854d0e; }
+        
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .nav-date-badge {
+            position: relative;
+            background: rgba(255, 255, 255, 0.18);
+            color: #ffffff;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.86rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: var(--transition);
+        }
+        .nav-date-badge:hover { background: rgba(255, 255, 255, 0.28); transform: translateY(-1px); }
+        .nav-date-badge input[type="date"] {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+        .nav-sync-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.15);
+            padding: 5px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .sync-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            display: inline-block;
+            background: #10b981;
+            box-shadow: 0 0 6px #10b981;
+            transition: all 0.3s ease;
+        }
+        .sync-dot.syncing { background: #f59e0b; box-shadow: 0 0 6px #f59e0b; }
+        .sync-dot.error { background: #ef4444; box-shadow: 0 0 6px #ef4444; }
+
+        /* ===== V2.1 SMART INPUT CARD ===== */
+        .smart-input-card {
+            background: var(--white);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            transition: all 0.2s ease;
+        }
+        .smart-input-card.dragover {
+            border: 2px dashed var(--primary);
+            background: #f0fdf4;
+            box-shadow: 0 0 0 4px var(--primary-light);
+        }
+        .smart-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .smart-title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: var(--gray-800);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .smart-people-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 14px;
+            max-height: 100px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        .chip-person {
+            padding: 5px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 18px;
+            border: 1.5px solid var(--gray-200);
+            background: var(--gray-50);
+            color: var(--gray-800);
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .chip-person:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: #f0fdf4;
+        }
+        .chip-person.selected {
+            background: var(--primary);
+            color: #ffffff;
+            border-color: var(--primary);
+            box-shadow: 0 2px 6px rgba(5, 150, 105, 0.35);
+        }
+        .chip-edit-people {
+            padding: 5px 10px;
+            font-size: 11.5px;
+            font-weight: 600;
+            border-radius: 18px;
+            border: 1px dashed #cbd5e1;
+            background: transparent;
+            color: var(--gray-600);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .chip-edit-people:hover { color: var(--primary); border-color: var(--primary); }
+        
+        .smart-input-box {
+            position: relative;
+            margin-bottom: 14px;
+        }
+        .smart-input-field {
+            width: 100%;
+            padding: 13px 16px;
+            border-radius: var(--radius-md);
+            border: 1.5px solid var(--gray-200);
+            background: var(--gray-50);
+            font-size: 15px;
+            color: var(--gray-800);
+            transition: var(--transition);
+        }
+        .smart-input-field:focus {
+            outline: none;
+            background: #fff;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--primary-light);
+        }
+        .selected-person-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--primary);
+            background: #ecfdf5;
+            padding: 2px 8px;
+            border-radius: 10px;
+            margin-bottom: 6px;
+        }
+
+        .smart-action-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .smart-attach-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .drag-hint {
+            font-size: 11px;
+            color: var(--gray-400);
+            font-weight: 500;
+            margin-top: 8px;
+            text-align: center;
+        }
+
+        /* ===== V2.1 TABLE TOOLBAR & LIVE SEARCH ===== */
+        .table-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+        .search-box {
+            position: relative;
+            flex: 1;
+            min-width: 180px;
+        }
+        .search-box input {
+            width: 100%;
+            padding: 8px 12px 8px 34px !important;
+            border-radius: 20px !important;
+            border: 1px solid var(--gray-200) !important;
+            background: var(--gray-50) !important;
+            font-size: 13.5px !important;
+            transition: all 0.2s;
+        }
+        .search-box input:focus {
+            background: #fff !important;
+            border-color: var(--primary) !important;
+            box-shadow: 0 0 0 3px var(--primary-light) !important;
+        }
+        .search-box .search-icon {
+            position: absolute;
+            left: 11px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0.5;
+            font-size: 13px;
+            pointer-events: none;
+        }
+        .table-actions {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .btn-tool {
+            padding: 7px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 8px;
+            border: 1px solid var(--gray-200);
+            background: #ffffff;
+            color: var(--gray-700);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.15s ease;
+        }
+        .btn-tool:hover {
+            background: var(--gray-50);
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-1px);
+        }
+        .btn-tool-del {
+            color: #ef4444;
+            border-color: #fca5a5;
+            background: #fef2f2;
+        }
+        .btn-tool-del:hover {
+            background: #fee2e2;
+            color: #b91c1c;
+            border-color: #f87171;
+        }
+
+        /* ===== FILE BADGES ===== */
+        .badge-file {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 11.5px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.15s;
+        }
+        .badge-pdf { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+        .badge-pdf:hover { background: #fecaca; }
+        .badge-img { background: #dbeafe; color: #1d4ed8; border: 1px solid #bfdbfe; }
+        .badge-img:hover { background: #bfdbfe; }
+        .badge-sheet { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+        .badge-sheet:hover { background: #bbf7d0; }
+        .badge-zip { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+        .badge-zip:hover { background: #fde68a; }
+        .badge-other { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+        .badge-other:hover { background: #e2e8f0; }
+
+        /* ===== V2.1 TAB TIỆN ÍCH (UTILITIES VIEW) ===== */
+        .utilities-view {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 20px;
+            animation: fadeIn 0.3s ease-out;
+            margin-bottom: 30px;
+        }
+        .util-card {
+            background: #ffffff;
+            border-radius: var(--radius-lg);
+            padding: 22px;
+            box-shadow: var(--shadow-md);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .util-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+        .util-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--gray-100);
+        }
+        .util-card-title {
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: var(--gray-800);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .util-badge {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 12px;
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+        .util-textarea {
+            width: 100%;
+            height: 110px;
+            padding: 10px 12px;
+            border-radius: var(--radius-md);
+            border: 1.5px solid var(--gray-200);
+            font-size: 14px;
+            resize: vertical;
+            font-family: inherit;
+        }
+        .util-textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+        .util-stats {
+            display: flex;
+            gap: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--gray-600);
+            background: var(--gray-50);
+            padding: 8px 12px;
+            border-radius: 8px;
+        }
+        .util-btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .util-btn {
+            padding: 6px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            border-radius: 8px;
+            border: 1px solid var(--gray-200);
+            background: #fff;
+            color: var(--gray-700);
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .util-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background: var(--gray-50);
+        }
+        .util-btn.primary {
+            background: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+        .util-btn.primary:hover { background: var(--primary-hover); }
+
     </style>
     <!-- Thư viện nén ZIP client-side -->
     <!-- Thư viện nén ZIP cục bộ không dùng Cloudflare, tránh bị chặn ở mạng cơ quan -->
@@ -554,101 +1006,180 @@
 <body>
 
 <div class="container">
-    <header>
-        <div style="display: flex; justify-content: center; align-items: center; gap: 15px; flex-wrap: wrap; margin-bottom: 8px;">
-            <h1 style="margin-bottom: 0;">⚡ KHCN Quản lý</h1>
-            <div class="date-badge" title="Nhấn để chọn ngày khác" style="padding: 8px 20px; font-size: 0.95rem; margin: 0;">
-                <span id="dateDisplay">📅 Chọn ngày</span>
-                <input type="date" id="dateInput" onchange="window.updateDate()">
+    <!-- V2.1 SLIM NAVBAR -->
+    <nav class="app-navbar">
+        <div class="nav-brand">
+            <span class="nav-logo">⚡</span>
+            <div class="nav-title-group">
+                <span class="nav-title">KHCN Quản lý</span>
+                <span class="nav-version">v2.1</span>
             </div>
         </div>
-        <p style="opacity: 0.85; font-size: 0.95rem; font-weight: 500;">Hệ thống lưu trữ và tổng hợp dữ liệu</p>
-        <div id="sync-status" class="sync-status sync-status-default" role="status" aria-live="polite">⏳ Đang kết nối đám mây...</div>
-    </header>
 
-    <div class="tabs-wrapper">
-        <div class="tabs">
+        <div class="nav-tabs tabs">
             <button class="tab-btn active" onclick="window.switchTab('Niềm vui')">Niềm vui</button>
             <button class="tab-btn" onclick="window.switchTab('RBT')">RBT</button>
             <button class="tab-btn" onclick="window.switchTab('Báo cáo')">Báo cáo</button>
+            <button class="tab-btn tab-util" onclick="window.switchTab('Tiện ích')">🛠️ Tiện ích</button>
         </div>
-    </div>
 
-        <div class="layout-2col">
-        <div>
-            <div class="section-title">✍️ Nhập Liệu</div>
-            <div class="input-card">
-                <label>Nhập nhanh (Tên + Nhiệm vụ)</label>
-                <div class="quick-add-group" style="display: flex; flex-wrap: wrap; align-items: center;">
-                    <input type="text" id="quickInput" placeholder="Nhấp để nhập nhanh (VD: Đạt trà đào cam xả)" onfocus="window.expandQuickAdd()" onkeypress="if(event.key==='Enter') window.quickAdd()" style="flex: 1; width: 100%; transition: all 0.25s;">
-                    
-                    <div id="quickAddExtras" class="quick-add-collapse">
-                        <div class="quick-add-extras-inner" style="display: flex; gap: 16px; justify-content: space-between; flex-wrap: wrap;">
-                            <div class="attach-wrapper" style="margin-top: 0; flex: 1; min-width: 240px;">
-                                <label class="btn btn-outline" for="attachInput" style="position: relative; overflow: hidden; white-space: nowrap;">
-                                    📎 Đính kèm
-                                    <input type="file" id="attachInput" style="position: absolute; left:0; top:0; width:100%; height:100%; opacity:0; cursor:pointer;" multiple onchange="window.handleAttachments(event)">
-                                </label>
-                                <div class="image-mode-segmented" title="Tùy chọn tải ảnh: Nén để tải nhanh hoặc giữ nguyên ảnh gốc">
-                                    <button type="button" class="seg-btn active seg-compress" onclick="window.setImageMode('compress')">⚡ Nén ảnh</button>
-                                    <button type="button" class="seg-btn seg-original" onclick="window.setImageMode('original')">📷 Ảnh gốc</button>
-                                </div>
-                                <span class="attach-preview" id="attachPreview" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 150px;">Không có tập tin nào.</span>
-                            </div>
-                            <div style="display: flex; gap: 8px; flex: 1; min-width: 300px;">
-                                <button class="btn btn-outline" style="padding: 0 16px;" onclick="window.collapseQuickAdd()" title="Thu gọn khung nhập">▲</button>
-                                <button class="btn btn-primary" id="quickAddSubmitBtn" style="flex: 1; padding: 0 24px;" onclick="window.quickAdd()">Thêm</button>
-                            </div>
-                        </div>
-                        <div class="attachment-list" id="attachmentList"></div>
-                        <p style="font-size: 11px; color: var(--gray-600); margin-top: 10px; font-weight: 500;">* Gõ phím Enter để thêm nhanh. Định dạng: [Tên] [Khoảng cách] [Nhiệm vụ]</p>
-                    </div>
-                </div>
+        <div class="nav-right">
+            <div class="nav-date-badge date-badge" title="Nhấp để đổi ngày làm việc">
+                <span id="dateDisplay">📅 Chọn ngày</span>
+                <input type="date" id="dateInput" onchange="window.updateDate()">
             </div>
+            <div id="sync-status" class="nav-sync-status sync-status sync-status-default" role="status" title="Trạng thái kết nối đám mây">
+                <span class="sync-dot" id="syncDot"></span>
+                <span id="syncText">Đang kết nối</span>
+            </div>
+        </div>
+    </nav>
 
-            <div style="padding: 0 2px;">
-                <div class="people-section">
-                    <div class="people-label">
-                        <span>👥 Chọn người thực hiện</span>
-                        <button class="btn-edit-people" onclick="window.editPeopleList()">⚙️ Chỉnh sửa</button>
+    <!-- TASKS LAYOUT (Niềm vui / RBT / Báo cáo) -->
+    <div id="tasksLayout" class="layout-2col">
+        <!-- CỘT TRÁI: KHUNG NHẬP LIỆU THÔNG MINH -->
+        <div>
+            <div class="section-title">✍️ Nhập Liệu Thông Minh</div>
+            <div class="smart-input-card" id="smartInputCard">
+                <div class="smart-header">
+                    <span class="smart-title">👥 Người thực hiện:</span>
+                    <button type="button" class="chip-edit-people" onclick="window.editPeopleList()">⚙️ Chỉnh sửa</button>
+                </div>
+                
+                <div class="smart-people-chips people-buttons" id="peopleButtons">
+                    <!-- Danh sách chip người -->
+                </div>
+
+                <div class="smart-input-box">
+                    <div id="selectedPersonTag" class="selected-person-tag" style="display: none;">
+                        <span>👤 Đang chọn: <b id="selectedPersonName"></b></span>
+                        <button type="button" onclick="window.clearSelectedPerson()" style="background:none;border:none;color:#047857;cursor:pointer;font-weight:bold;margin-left:4px;">×</button>
                     </div>
-                    <div class="people-buttons" id="peopleButtons"></div>
-                    
-                    <div class="form-group" style="margin-top: 16px;">
-                        <label>Nhiệm vụ / Ghi chú</label>
-                        <input type="text" id="taskInput" placeholder="Nhập chi tiết nhiệm vụ..." onkeypress="if(event.key==='Enter') window.manualAdd()">
-                    </div>
-                    <div class="attach-wrapper" style="margin-bottom: 12px;">
-                        <label class="btn btn-outline" for="manualAttachInput" style="position: relative; overflow: hidden;">
-                            📎 File đính kèm
-                            <input type="file" id="manualAttachInput" style="position: absolute; left:0; top:0; width:100%; height:100%; opacity:0; cursor:pointer;" multiple onchange="window.handleManualAttachment(event)">
+                    <input type="text" id="smartTaskInput" class="smart-input-field" placeholder="Nhấp chọn người ở trên, hoặc gõ nhanh: [Tên] [Nhiệm vụ] rồi Enter..." onkeypress="if(event.key==='Enter') window.smartAdd()">
+                </div>
+
+                <div class="smart-action-row">
+                    <div class="smart-attach-group">
+                        <label class="btn btn-outline" for="smartAttachInput" style="position: relative; overflow: hidden; padding: 7px 14px; font-size: 13px;">
+                            📎 Đính kèm
+                            <input type="file" id="smartAttachInput" style="position: absolute; left:0; top:0; width:100%; height:100%; opacity:0; cursor:pointer;" multiple onchange="window.handleSmartAttachments(event)">
                         </label>
                         <div class="image-mode-segmented" title="Tùy chọn tải ảnh: Nén để tải nhanh hoặc giữ nguyên ảnh gốc">
                             <button type="button" class="seg-btn active seg-compress" onclick="window.setImageMode('compress')">⚡ Nén ảnh</button>
                             <button type="button" class="seg-btn seg-original" onclick="window.setImageMode('original')">📷 Ảnh gốc</button>
                         </div>
-                        <span class="attach-preview" id="manualAttachPreview">Không có tập tin nào.</span>
                     </div>
-                    <div class="attachment-list" id="manualAttachmentList" style="margin-bottom: 12px;"></div>
-                    <button class="btn btn-primary" id="manualAddSubmitBtn" onclick="window.manualAdd()">Lưu vào danh sách</button>
+                    <button class="btn btn-primary" id="smartSubmitBtn" style="padding: 9px 24px; font-size: 14px; width: auto;" onclick="window.smartAdd()">➕ Thêm việc</button>
                 </div>
+
+                <div class="attachment-list" id="smartAttachmentList" style="margin-top: 10px;"></div>
+                <div class="drag-hint">💡 Kéo & thả tệp trực tiếp vào khung này hoặc nhấn Enter để thêm nhanh</div>
+                
+                <!-- Hidden inputs for backward compatibility -->
+                <input type="hidden" id="quickInput">
+                <input type="hidden" id="taskInput">
+                <input type="file" id="attachInput" style="display:none;" multiple>
+                <input type="file" id="manualAttachInput" style="display:none;" multiple>
             </div>
         </div>
 
+        <!-- CỘT PHẢI: BẢNG TỔNG HỢP VỚI LIVE SEARCH & TOOLBAR GỌN -->
         <div>
             <div class="section-title" style="display: flex; justify-content: space-between; align-items: center;">
-                <span>📊 Tổng Hợp</span>
+                <span>📊 Tổng Hợp Công Việc</span>
                 <span id="taskCountBadge" style="font-size: 0.8rem; background: rgba(255,255,255,0.25); padding: 2px 10px; border-radius: 12px; font-weight: 600;">0 việc</span>
             </div>
-            <div class="controls-grid">
-                <button class="btn btn-outline" onclick="window.copyTable(this)">📋 Sao chép</button>
-                <button class="btn btn-outline" onclick="window.exportCSV()">📥 Xuất CSV</button>
-                <button class="btn btn-outline" id="downloadZipAllBtn" onclick="window.downloadAllAttachments(this)">📦 Tải tất cả zip</button>
-                <button class="btn btn-outline" style="border-color: #fca5a5; color: #ef4444; background: #fef2f2;" onclick="window.clearData()">🗑️ Xóa hết</button>
+
+            <div class="table-wrapper" style="padding: 16px 20px;">
+                <div class="table-toolbar">
+                    <div class="search-box">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="tableSearchInput" placeholder="Tìm nhanh theo tên người hoặc việc..." oninput="window.handleLiveSearch(this.value)">
+                    </div>
+                    <div class="table-actions">
+                        <button class="btn-tool" onclick="window.copyTable(this)" title="Sao chép bảng vào bộ nhớ tạm">📋 Chép bảng</button>
+                        <button class="btn-tool" onclick="window.exportCSV()" title="Xuất dữ liệu ra file Excel CSV">📥 Xuất CSV</button>
+                        <button class="btn-tool" id="downloadZipAllBtn" onclick="window.downloadAllAttachments(this)" title="Tải tất cả đính kèm (.zip)">📦 Tải ZIP</button>
+                        <button class="btn-tool btn-tool-del" onclick="window.clearData()" title="Xóa toàn bộ việc trong ngày">🗑️ Xóa</button>
+                    </div>
+                </div>
+
+                <div id="tableWrapper">
+                    <!-- Table rendered here -->
+                </div>
             </div>
-            <div class="table-wrapper" id="tableWrapper">
-                <!-- Table rendered here -->
+        </div>
+    </div>
+
+    <!-- V2.1 TIỆN ÍCH WORKSPACE (TAB TIỆN ÍCH) -->
+    <div id="utilitiesView" class="utilities-view" style="display: none;">
+        <!-- Card 1: Chuẩn hóa & Đếm văn bản -->
+        <div class="util-card">
+            <div class="util-card-header">
+                <span class="util-card-title">📝 Chuẩn Hóa & Đếm Văn Bản</span>
+                <span class="util-badge">Tiện ích</span>
             </div>
+            <textarea id="utilTextarea" class="util-textarea" placeholder="Nhập hoặc dán văn bản vào đây để đếm từ hoặc định dạng..." oninput="window.updateUtilTextStats()"></textarea>
+            <div class="util-stats">
+                <span>Ký tự: <b id="statChars">0</b></span>
+                <span>Từ: <b id="statWords">0</b></span>
+                <span>Dòng: <b id="statLines">0</b></span>
+            </div>
+            <div class="util-btn-group">
+                <button type="button" class="util-btn" onclick="window.formatUtilText('upper')">VIẾT HOA</button>
+                <button type="button" class="util-btn" onclick="window.formatUtilText('lower')">viết thường</button>
+                <button type="button" class="util-btn" onclick="window.formatUtilText('capital')">Viết Hoa Đầu Từ</button>
+                <button type="button" class="util-btn" onclick="window.formatUtilText('clean')">Xóa Khoảng Trắng Thừa</button>
+                <button type="button" class="util-btn primary" onclick="window.copyUtilText(this)">📋 Sao chép</button>
+            </div>
+        </div>
+
+        <!-- Card 2: Tạo mã QR tức thì -->
+        <div class="util-card">
+            <div class="util-card-header">
+                <span class="util-card-title">📱 Tạo Mã QR Nhanh</span>
+                <span class="util-badge">Nhanh</span>
+            </div>
+            <div style="display: flex; gap: 8px;">
+                <input type="text" id="qrInput" class="smart-input-field" placeholder="Nhập đường link hoặc nội dung cần tạo QR..." onkeypress="if(event.key==='Enter') window.generateQrCode()">
+                <button type="button" class="btn btn-primary" style="width: auto; padding: 0 16px; white-space: nowrap;" onclick="window.generateQrCode()">Tạo QR</button>
+            </div>
+            <div id="qrResultArea" style="display: flex; justify-content: center; align-items: center; min-height: 130px; background: var(--gray-50); border-radius: 12px; border: 1px dashed var(--gray-200);">
+                <span style="font-size: 12px; color: var(--gray-400);">Nhập nội dung và bấm "Tạo QR"</span>
+            </div>
+        </div>
+
+        <!-- Card 3: Ghi chú nhanh (Scratchpad) tự lưu -->
+        <div class="util-card">
+            <div class="util-card-header">
+                <span class="util-card-title">📌 Ghi Chú Nhanh (Scratchpad)</span>
+                <span class="util-badge">Tự lưu</span>
+            </div>
+            <textarea id="utilScratchpad" class="util-textarea" style="height: 140px;" placeholder="Ghi chép nhanh công việc trong ngày, ý tưởng, số liệu... (Dữ liệu tự động lưu trên máy này)" oninput="window.saveScratchpad()"></textarea>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span id="scratchpadSaveStatus" style="font-size: 11px; color: var(--gray-400);">Đã lưu vào bộ nhớ</span>
+                <button type="button" class="util-btn" onclick="window.clearScratchpad()">Xóa ghi chú</button>
+            </div>
+        </div>
+
+        <!-- Card 4: Đo tốc độ mạng & Google Drive -->
+        <div class="util-card">
+            <div class="util-card-header">
+                <span class="util-card-title">⚡ Kiểm Tra Tốc Độ Đám Mây</span>
+                <span class="util-badge">Kiểm tra</span>
+            </div>
+            <p style="font-size: 12px; color: var(--gray-600); margin: 0;">Kiểm tra độ trễ mạng từ cơ quan tới máy chủ Google Apps Script & Google Drive.</p>
+            <div id="pingResultBox" style="background: var(--gray-50); padding: 12px; border-radius: 10px; font-size: 13px; font-weight: 600; text-align: center; color: var(--gray-600);">
+                Chưa kiểm tra
+            </div>
+            <button type="button" id="btnTestPing" class="btn btn-outline" onclick="window.checkCloudPing(this)">🚀 Kiểm tra độ trễ ngay</button>
+        </div>
+
+        <!-- Card 5: Không gian cắm tính năng mới -->
+        <div class="util-card" style="border: 2px dashed #cbd5e1; background: rgba(255,255,255,0.6); align-items: center; justify-content: center; text-align: center; padding: 30px 20px;">
+            <span style="font-size: 2.2rem; opacity: 0.6; margin-bottom: 6px;">🚀</span>
+            <div style="font-size: 1rem; font-weight: 700; color: var(--gray-700);">Không Gian Tính Năng Mới</div>
+            <p style="font-size: 12px; color: var(--gray-500); margin-top: 4px; max-width: 280px;">Bản 2.1 đã sẵn sàng để cắm thêm bất kỳ tiện ích nào bạn cần! Hãy nói cho tôi biết tính năng bạn muốn bổ sung.</p>
         </div>
     </div>
 
@@ -857,17 +1388,19 @@
         onAuthStateChanged(auth, (user) => {
             userAuth = user;
             if (user) {
-                const syncStatus = document.getElementById('sync-status');
-                syncStatus.innerHTML = '☁️ Đã đồng bộ';
-                syncStatus.className = 'sync-status sync-status-success';
+                const dot = document.getElementById('syncDot');
+                const text = document.getElementById('syncText');
+                if (dot) dot.className = 'sync-dot';
+                if (text) text.textContent = 'Đã kết nối';
                 setupRealtimeListener();
             }
         });
     } catch (error) {
         console.error("Lỗi kết nối Đám mây", error);
-        const syncStatus = document.getElementById('sync-status');
-        syncStatus.innerHTML = '⚠️ Lỗi kết nối đám mây';
-        syncStatus.className = 'sync-status sync-status-error';
+        const dot = document.getElementById('syncDot');
+        const text = document.getElementById('syncText');
+        if (dot) dot.className = 'sync-dot error';
+        if (text) text.textContent = 'Lỗi kết nối';
     }
 
     function setupRealtimeListener() {
@@ -879,6 +1412,7 @@
             snapshot.forEach(doc => { allTasks.push({ docId: doc.id, ...doc.data() }); });
             allTasks.sort((a, b) => a.id - b.id);
             isDataLoaded = true;
+            try { localStorage.setItem('khcn_tasks_cache_v2_1', JSON.stringify(allTasks)); } catch (e) {}
             filterData();
         }, (err) => {
             console.error("Snapshot error tasks:", err);
@@ -900,15 +1434,32 @@
         }, (err) => console.error("Snapshot error settings:", err));
     }
 
+    window.currentSearchQuery = '';
+
     function filterData() {
-        db = allTasks.filter(item => 
+        let filtered = allTasks.filter(item => 
             item.date === currentDate && 
             (item.category === currentCategory || (!item.category && currentCategory === 'Niềm vui'))
         );
+
+        if (window.currentSearchQuery) {
+            const q = window.currentSearchQuery;
+            filtered = filtered.filter(item => 
+                (item.name && item.name.toLowerCase().includes(q)) || 
+                (item.task && item.task.toLowerCase().includes(q))
+            );
+        }
+
+        db = filtered;
         const badge = document.getElementById('taskCountBadge');
         if (badge) badge.textContent = `${db.length} việc`;
         window.render();
     }
+
+    window.handleLiveSearch = function(query) {
+        window.currentSearchQuery = (query || '').toLowerCase().trim();
+        filterData();
+    };
 
     window.updateDate = function() {
         const input = document.getElementById('dateInput');
@@ -920,34 +1471,72 @@
             document.getElementById('dateDisplay').textContent = '📅 ' + formatted;
             filterData();
         }
-    }
+    };
 
     window.switchTab = function(cat) {
         currentCategory = cat;
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            if(btn.innerText.trim() === cat) btn.classList.add('active');
+        document.querySelectorAll('.nav-tabs .tab-btn').forEach(btn => {
+            if (btn.innerText.includes(cat)) btn.classList.add('active');
             else btn.classList.remove('active');
         });
-        filterData();
-    }
+
+        const tasksEl = document.getElementById('tasksLayout');
+        const utilsEl = document.getElementById('utilitiesView');
+
+        if (cat === 'Tiện ích') {
+            if (tasksEl) tasksEl.style.display = 'none';
+            if (utilsEl) utilsEl.style.display = 'grid';
+        } else {
+            if (tasksEl) tasksEl.style.display = 'grid';
+            if (utilsEl) utilsEl.style.display = 'none';
+            filterData();
+        }
+    };
 
     window.renderPeopleButtons = function() {
         const container = document.getElementById('peopleButtons');
+        if (!container) return;
         container.innerHTML = '';
         people.forEach(person => {
             const btn = document.createElement('button');
-            btn.className = 'btn-person' + (selectedPerson === person ? ' selected' : '');
-            btn.textContent = person;
+            btn.type = 'button';
+            btn.className = 'chip-person' + (selectedPerson === person ? ' selected' : '');
+            btn.textContent = (selectedPerson === person ? '✓ ' : '') + person;
             btn.onclick = () => window.selectPerson(person);
             container.appendChild(btn);
         });
-    }
+    };
 
     window.selectPerson = function(person) {
+        if (selectedPerson === person) {
+            window.clearSelectedPerson();
+            return;
+        }
         selectedPerson = person;
         window.renderPeopleButtons();
-        document.getElementById('taskInput').focus();
-    }
+        const tag = document.getElementById('selectedPersonTag');
+        const nameEl = document.getElementById('selectedPersonName');
+        const inputEl = document.getElementById('smartTaskInput');
+        if (tag && nameEl) {
+            tag.style.display = 'inline-flex';
+            nameEl.textContent = person;
+        }
+        if (inputEl) {
+            inputEl.placeholder = `Nhập nhiệm vụ cho ${person} (nhấn Enter để thêm)...`;
+            inputEl.focus();
+        }
+    };
+
+    window.clearSelectedPerson = function() {
+        selectedPerson = null;
+        window.renderPeopleButtons();
+        const tag = document.getElementById('selectedPersonTag');
+        const inputEl = document.getElementById('smartTaskInput');
+        if (tag) tag.style.display = 'none';
+        if (inputEl) {
+            inputEl.placeholder = 'Nhấp chọn người ở trên, hoặc gõ nhanh: [Tên] [Nhiệm vụ] rồi Enter...';
+        }
+    };
 
     let currentConfirmAction = null;
     window.openConfirmModal = function(title, message, action) {
@@ -1305,6 +1894,109 @@
         return results.filter(Boolean);
     }
 
+
+
+    // ===== V2.1 SMART ATTACHMENTS & DRAG AND DROP =====
+    window.pendingSmartFiles = [];
+    window.handleSmartAttachments = function(e) {
+        const newFiles = Array.from(e.target.files || []);
+        window.addFilesToSmartList(newFiles);
+        e.target.value = '';
+    };
+
+    window.addFilesToSmartList = function(files) {
+        if (window.pendingSmartFiles.length + files.length > 30) {
+            window.showToast("⚠️ Chỉ được đính kèm tối đa 30 tập tin!");
+            const allowed = 30 - window.pendingSmartFiles.length;
+            window.pendingSmartFiles.push(...files.slice(0, allowed));
+        } else {
+            window.pendingSmartFiles.push(...files);
+        }
+        window.renderSmartAttachmentList();
+        window.showToast(`📎 Đã đính kèm ${window.pendingSmartFiles.length} tệp`);
+    };
+
+    window.removeSmartAttachment = function(index) {
+        window.pendingSmartFiles.splice(index, 1);
+        window.renderSmartAttachmentList();
+    };
+
+    window.renderSmartAttachmentList = function() {
+        const listEl = document.getElementById('smartAttachmentList');
+        if (!listEl) return;
+        if (window.pendingSmartFiles.length === 0) {
+            listEl.innerHTML = '';
+            return;
+        }
+        listEl.innerHTML = window.pendingSmartFiles.map((att, idx) => {
+            const isImg = att.type && att.type.startsWith('image/');
+            const sizeKb = Math.round((att.size || 0) / 1024);
+            return `
+                <span class="attachment-pill" style="display:inline-flex;align-items:center;gap:6px;padding:4px 8px;margin:3px;background:#f1f5f9;border-radius:12px;font-size:12px;border:1px solid #cbd5e1;">
+                    <span>${isImg ? '🖼️' : '📎'} ${escapeHtml(att.name)} (${sizeKb}KB)</span>
+                    <button type="button" onclick="window.removeSmartAttachment(${idx})" style="background:none;border:none;color:#ef4444;cursor:pointer;font-weight:bold;padding:0 4px;font-size:14px;">×</button>
+                </span>
+            `;
+        }).join('');
+    };
+
+    window.smartAdd = async function() {
+        if (!userAuth) return window.showToast("⚠️ Chưa kết nối đám mây");
+        const inputEl = document.getElementById('smartTaskInput');
+        const val = inputEl ? inputEl.value.trim() : '';
+        if (!val) return window.showToast("⚠️ Vui lòng nhập nội dung nhiệm vụ!");
+
+        let name = selectedPerson;
+        let task = val;
+
+        // Nếu chưa chọn người thủ công từ chip, phân tích cú pháp [Tên] [Nhiệm vụ]
+        if (!name) {
+            const firstSpaceIndex = val.indexOf(' ');
+            if (firstSpaceIndex === -1) {
+                return window.showToast("⚠️ Hãy chọn người thực hiện hoặc gõ: [Tên] [Nhiệm vụ]!");
+            }
+            name = val.substring(0, firstSpaceIndex).trim();
+            task = val.substring(firstSpaceIndex + 1).trim();
+            if (!task) return window.showToast("⚠️ Vui lòng nhập chi tiết nhiệm vụ sau tên!");
+        }
+
+        const submitBtn = document.getElementById('smartSubmitBtn');
+        const hasFiles = window.pendingSmartFiles && window.pendingSmartFiles.length > 0;
+        if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = hasFiles ? `⏳ Đang tải (1/${window.pendingSmartFiles.length})...` : '⏳ Đang lưu...';
+        }
+
+        const timestampId = Date.now();
+        const dataPayload = { id: timestampId, date: currentDate, category: currentCategory, name, task };
+
+        try {
+            if (hasFiles) {
+                const uploaded = await uploadFilesWithProgress(window.pendingSmartFiles, submitBtn, 'smart');
+                if (uploaded.length) dataPayload.attachments = uploaded;
+            }
+            const taskRef = doc(db_firestore, 'artifacts', appId, 'public', 'data', 'khcn_tasks', timestampId.toString());
+            await setDoc(taskRef, dataPayload);
+            inputEl.value = '';
+            window.pendingSmartFiles = [];
+            window.renderSmartAttachmentList();
+            window.showToast("✅ Đã thêm công việc thành công!");
+        } catch (error) {
+            console.error("Lỗi thêm việc:", error);
+            window.showToast("⚠️ Lỗi lưu dữ liệu: " + (error.message || 'Thất bại'));
+        } finally {
+            if (submitBtn) {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '➕ Thêm việc';
+            }
+        }
+    };
+
+    // Backward compatibility aliases
+    window.quickAdd = window.smartAdd;
+    window.manualAdd = window.smartAdd;
+    window.pendingQuickFiles = window.pendingSmartFiles;
+    window.pendingManualFiles = window.pendingSmartFiles;
 
     // ==== Handlers cho Đính kèm ====
     window.handleAttachments = function(e) {
@@ -1905,6 +2597,20 @@
         }
     };
 
+
+    // Helper tạo huy hiệu tệp phân loại theo định dạng (PDF, Image, Excel, ZIP...)
+    window.renderFileBadge = function(att) {
+        const name = att.name || 'Tệp đính kèm';
+        const ext = name.split('.').pop().toLowerCase();
+        let badgeClass = 'badge-other';
+        let icon = '📎';
+        if (['pdf'].includes(ext)) { badgeClass = 'badge-pdf'; icon = '📄'; }
+        else if (['jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp'].includes(ext)) { badgeClass = 'badge-img'; icon = '🖼️'; }
+        else if (['xlsx', 'xls', 'csv'].includes(ext)) { badgeClass = 'badge-sheet'; icon = '📊'; }
+        else if (['zip', 'rar', '7z', 'tar', 'gz'].includes(ext)) { badgeClass = 'badge-zip'; icon = '📦'; }
+        return `<a class="badge-file ${badgeClass}" href="${escapeHtml(att.url)}" target="_blank" rel="noopener noreferrer">${icon} ${escapeHtml(name)}</a>`;
+    };
+
     window.render = function() {
         const container = document.getElementById('tableWrapper');
         if(!isDataLoaded) {
@@ -1967,7 +2673,7 @@
                         <div>${escapeHtml(item.task)}</div>
                         ${item.attachments && item.attachments.length ? `
                             <div style="margin-top:8px; display:flex; flex-wrap:wrap; gap:6px;">
-                                ${item.attachments.map(att => `<a class="btn-sm btn-attach" href="${escapeHtml(att.url)}" target="_blank" rel="noopener noreferrer">📎 ${escapeHtml(att.name || 'Tệp đính kèm')}</a>`).join('')}
+                                ${item.attachments.map(att => window.renderFileBadge(att)).join('')}
                             </div>
                         ` : ''}
                     </td>
@@ -2111,15 +2817,143 @@
         }
     }
 
+
+    // ===== V2.1 TIỆN ÍCH WORKSPACE LOGIC =====
+    window.updateUtilTextStats = function() {
+        const text = document.getElementById('utilTextarea').value || '';
+        const chars = text.length;
+        const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+        const lines = text ? text.split('\n').length : 0;
+        document.getElementById('statChars').textContent = chars;
+        document.getElementById('statWords').textContent = words;
+        document.getElementById('statLines').textContent = lines;
+    };
+
+    window.formatUtilText = function(type) {
+        const el = document.getElementById('utilTextarea');
+        if (!el) return;
+        let text = el.value || '';
+        if (type === 'upper') {
+            text = text.toUpperCase();
+        } else if (type === 'lower') {
+            text = text.toLowerCase();
+        } else if (type === 'capital') {
+            text = text.toLowerCase().replace(/(^|\s)\S/g, l => l.toUpperCase());
+        } else if (type === 'clean') {
+            text = text.replace(/[ \t]+/g, ' ').replace(/^\s+|\s+$/gm, '');
+        }
+        el.value = text;
+        window.updateUtilTextStats();
+        window.showToast('✨ Đã định dạng văn bản thành công!');
+    };
+
+    window.copyUtilText = function(btn) {
+        const el = document.getElementById('utilTextarea');
+        if (!el || !el.value) return window.showToast('⚠️ Chưa có nội dung để sao chép');
+        navigator.clipboard.writeText(el.value).then(() => {
+            const oldText = btn.textContent;
+            btn.textContent = '✓ Đã chép!';
+            setTimeout(() => btn.textContent = oldText, 2000);
+            window.showToast('📋 Đã sao chép vào bộ nhớ tạm');
+        });
+    };
+
+    window.generateQrCode = function() {
+        const input = document.getElementById('qrInput');
+        const val = input ? input.value.trim() : '';
+        if (!val) return window.showToast('⚠️ Vui lòng nhập link hoặc nội dung để tạo QR');
+        const area = document.getElementById('qrResultArea');
+        if (!area) return;
+        const qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=' + encodeURIComponent(val);
+        area.innerHTML = `
+            <div style="text-align:center;padding:12px;">
+                <img src="${qrUrl}" alt="QR Code" style="border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.1);max-width:140px;background:#fff;padding:6px;">
+                <div style="margin-top:8px;">
+                    <a href="${qrUrl}" download="qrcode.png" target="_blank" class="util-btn" style="text-decoration:none;display:inline-block;">📥 Tải ảnh QR</a>
+                </div>
+            </div>
+        `;
+        window.showToast('📱 Đã tạo mã QR thành công!');
+    };
+
+    window.saveScratchpad = function() {
+        const text = document.getElementById('utilScratchpad').value || '';
+        try {
+            localStorage.setItem('khcn_scratchpad_v2_1', text);
+            const status = document.getElementById('scratchpadSaveStatus');
+            if (status) status.textContent = 'Đã lưu lúc ' + new Date().toLocaleTimeString('vi-VN');
+        } catch(e) {}
+    };
+
+    window.clearScratchpad = function() {
+        if (confirm('Bạn có chắc chắn muốn xóa toàn bộ ghi chú này?')) {
+            document.getElementById('utilScratchpad').value = '';
+            window.saveScratchpad();
+            window.showToast('🗑️ Đã xóa ghi chú');
+        }
+    };
+
+    window.checkCloudPing = async function(btn) {
+        if (btn) btn.disabled = true;
+        const box = document.getElementById('pingResultBox');
+        if (box) box.innerHTML = '⏳ Đang đo tốc độ kết nối tới Google Cloud...';
+        const t0 = Date.now();
+        try {
+            await fetch(GAS_WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'ping' }), headers: { 'Content-Type': 'text/plain' } });
+            const duration = Date.now() - t0;
+            let statusQuality = '🟢 Cực tốt';
+            if (duration > 3000) statusQuality = '🟡 Khá (hơi trễ do mạng)';
+            if (duration > 7000) statusQuality = '🟠 Chậm';
+            box.innerHTML = `Độ trễ: <b style="color:var(--primary);">${duration} ms</b> — Trạng thái: <b>${statusQuality}</b>`;
+            window.showToast(`⚡ Kết nối ổn định (${duration}ms)`);
+        } catch(e) {
+            box.innerHTML = `<span style="color:#ef4444;">⚠️ Lỗi kết nối: ${e.message}</span>`;
+        } finally {
+            if (btn) btn.disabled = false;
+        }
+    };
+
     // ==== Khởi tạo chung ====
     const initDate = new Date(currentDate + 'T00:00:00');
     const initOptions = { year: 'numeric', month: '2-digit', day: '2-digit' };
     document.getElementById('dateDisplay').textContent = '📅 ' + initDate.toLocaleDateString('vi-VN', initOptions);
     document.getElementById('dateInput').value = currentDate;
     
+    // V2.1 Instant Cache: Hiển thị ngay lập tức trong 0.01s từ bộ nhớ đệm
+    try {
+        const cachedTasks = localStorage.getItem('khcn_tasks_cache_v2_1');
+        if (cachedTasks) {
+            allTasks = JSON.parse(cachedTasks);
+            isDataLoaded = true;
+            filterData();
+        }
+        const cachedScratch = localStorage.getItem('khcn_scratchpad_v2_1');
+        if (cachedScratch && document.getElementById('utilScratchpad')) {
+            document.getElementById('utilScratchpad').value = cachedScratch;
+        }
+    } catch(e) {}
+
     window.renderPeopleButtons();
     window.render();
     window.setImageMode(window.imageUploadMode, true);
+
+    // V2.1 Drag and Drop cho Smart Input Card
+    const dropTarget = document.getElementById('smartInputCard');
+    if (dropTarget) {
+        dropTarget.addEventListener('dragenter', (e) => { e.preventDefault(); e.stopPropagation(); dropTarget.classList.add('dragover'); }, false);
+        dropTarget.addEventListener('dragover', (e) => { e.preventDefault(); e.stopPropagation(); dropTarget.classList.add('dragover'); }, false);
+        dropTarget.addEventListener('dragleave', (e) => { e.preventDefault(); e.stopPropagation(); dropTarget.classList.remove('dragover'); }, false);
+        dropTarget.addEventListener('drop', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropTarget.classList.remove('dragover');
+            const dt = e.dataTransfer;
+            const files = dt ? Array.from(dt.files) : [];
+            if (files.length) {
+                window.addFilesToSmartList(files);
+            }
+        }, false);
+    }
 
     // Đóng modal khi click ra ngoài backdrop
     document.querySelectorAll('.modal').forEach(modal => {
