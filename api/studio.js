@@ -301,6 +301,55 @@ Phạm vi giá trị:
             return res.end(JSON.stringify(result));
         }
 
+        // 4. ACTION: AI AUTO CROP & PERSPECTIVE DESKEW (TỰ ĐỘNG CROP VÀ CĂN CHỈNH GÓC)
+        if (action === 'ai_auto_crop') {
+            const systemPrompt = `Bạn là chuyên gia thị giác máy tính và xử lý scan tài liệu, căn chỉnh góc ảnh (document deskew, perspective alignment & auto-crop).
+Nhiệm vụ: Phát hiện đối tượng chính (văn bản, trang giấy, tài liệu, bảng biểu, thiệp mời, chứng chỉ, thẻ, hoặc chủ thể chính) trong ảnh:
+1. Xác định góc nghiêng (skew angle / tilt) theo độ (từ -45 đến 45 độ, số thực ví dụ 0.0, 1.5, hoặc -2.0 độ) cần xoay để chữ và cạnh tài liệu hoàn toàn thẳng đứng và ngang ngay ngắn 90 độ.
+2. Xác định khung cắt [ymin, xmin, ymax, xmax] từ 0 đến 1000 ôm sát vùng tài liệu/chủ thể, loại bỏ các phần viền thừa (mặt bàn, bóng đổ, viền trống thừa ngoài rìa).
+Chỉ trả về DUY NHẤT 1 JSON hợp lệ (không bọc trong markdown \`\`\`json, không thêm text ngoài JSON):
+{
+  "deskew_angle": 0.0,
+  "crop_box": [ymin, xmin, ymax, xmax],
+  "explanation": "Đã phát hiện tài liệu, căn chỉnh góc nghiêng và cắt sát viền đối tượng."
+}`;
+
+            const contents = [{
+                role: 'user',
+                parts: [
+                    {
+                        inline_data: {
+                            mime_type: mimeType || 'image/jpeg',
+                            data: imageBase64
+                        }
+                    },
+                    {
+                        text: 'Tự động xác định góc nghiêng cần xoay để ngay ngắn và tọa độ khung cắt sát viền tài liệu.'
+                    }
+                ]
+            }];
+
+            const { text, modelUsed } = await callGemini(contents, systemPrompt, 0.1);
+            let cleanedJson = text.trim();
+            if (cleanedJson.startsWith('```json')) {
+                cleanedJson = cleanedJson.replace(/^```json\s*/i, '').replace(/\s*```$/, '');
+            } else if (cleanedJson.startsWith('```')) {
+                cleanedJson = cleanedJson.replace(/^```\s*/i, '').replace(/\s*```$/, '');
+            }
+
+            let cropData;
+            try {
+                cropData = JSON.parse(cleanedJson);
+            } catch (e) {
+                cropData = { deskew_angle: 0.0, crop_box: [100, 100, 900, 900], explanation: text };
+            }
+
+            const result = { status: 'success', cropResult: cropData, modelUsed };
+            if (res.status) return res.status(200).json(result);
+            res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8' });
+            return res.end(JSON.stringify(result));
+        }
+
         throw new Error('Hành động (action) không hợp lệ: ' + action);
 
     } catch (err) {
