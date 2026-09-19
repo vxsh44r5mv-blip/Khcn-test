@@ -999,7 +999,42 @@
         .util-btn.primary:hover { background: var(--primary-hover); }
 
     
-        /* ===== V2.1 FULLSCREEN IMAGE & DOCX STUDIO ===== */
+        /* ===== V2.1 TAB STUDIO ẢNH & DOCX ===== */
+        .nav-tabs .tab-btn.tab-studio {
+            color: #a5f3fc;
+        }
+        .nav-tabs .tab-btn.tab-studio:hover {
+            background: rgba(6, 182, 212, 0.18);
+            color: #ffffff;
+        }
+        .nav-tabs .tab-btn.tab-studio.active {
+            background: linear-gradient(135deg, #0284c7, #6366f1);
+            color: #ffffff;
+            box-shadow: 0 2px 10px rgba(99, 102, 241, 0.4);
+        }
+        .studio-workspace-view {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: calc(100vh - 125px);
+            min-height: 650px;
+            background: #0f172a;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
+            overflow: hidden;
+            animation: fadeIn 0.25s ease-out;
+            margin-bottom: 24px;
+        }
+        .studio-workspace-view.is-fullscreen {
+            position: fixed !important;
+            inset: 0 !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 99999 !important;
+            border-radius: 0 !important;
+            margin: 0 !important;
+        }
         .studio-fullscreen-modal {
             position: fixed;
             inset: 0;
@@ -1524,6 +1559,7 @@
             <button class="tab-btn" onclick="window.switchTab('RBT')">RBT</button>
             <button class="tab-btn" onclick="window.switchTab('Báo cáo')">Báo cáo</button>
             <button class="tab-btn tab-util" onclick="window.switchTab('Tiện ích')">🛠️ Tiện ích</button>
+            <button class="tab-btn tab-studio" onclick="window.switchTab('Studio')">🎨 Studio Ảnh & DOCX</button>
         </div>
 
         <div class="nav-right">
@@ -1711,123 +1747,17 @@
             </div>
 
             <div style="display: flex; gap: 12px; align-items: center; justify-content: flex-end; margin-top: 10px; flex-wrap: wrap;">
-                <button type="button" class="btn btn-primary" onclick="window.openImageStudio()" style="background: linear-gradient(135deg, #059669, #10b981); border: none; padding: 10px 24px; font-weight: 700; font-size: 0.95rem; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4); cursor: pointer;">
-                    🚀 Mở Không Gian Studio Toàn Màn Hình
+                <button type="button" class="btn btn-primary" onclick="window.switchTab('Studio')" style="background: linear-gradient(135deg, #0284c7, #6366f1); border: none; padding: 10px 24px; font-weight: 700; font-size: 0.95rem; box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4); cursor: pointer;">
+                    🚀 Đi Đến Tab Studio Ảnh & DOCX
                 </button>
             </div>
         </div>
 
     </div>
 
-    <div class="app-footer">
-        Nhập nhanh <span>|</span> Tiện lợi <span>|</span> Chat Pro
-    </div>
-</div>
-
-<!-- Nút Trợ lý AI -->
-<button class="chat-fab" onclick="window.toggleChat()" title="Mở Trợ lý AI">
-    <span style="font-size: 1.2rem;">✨</span> Chat <span class="pro-badge">Pro</span>
-</button>
-
-<!-- Khung Chat AI -->
-<div class="chat-panel" id="chatPanel">
-    <div class="chat-header">
-        <h3>✨ AI Assistant</h3>
-        <div class="actions">
-            <button onclick="window.clearChat()" title="Xóa cuộc trò chuyện mới">🔄</button>
-            <button onclick="window.toggleChat()" title="Đóng">✖</button>
-        </div>
-    </div>
-    
-    <div class="chat-messages" id="chatMessages">
-        <div class="chat-msg ai">Xin chào! 👋 Mình là trợ lý AI. Mình có thể giúp gì cho công việc của bạn hôm nay? Bạn có thể hỏi đáp hoặc đính kèm một bức ảnh để mình phân tích nhé.</div>
-    </div>
-    
-    <div class="chat-input-container">
-        <div id="chatAttachPreview" class="chat-attach-preview-box">
-            <img id="chatPreviewImg" src="" alt="preview">
-            <button onclick="window.removeChatAttach()" title="Xóa ảnh đính kèm">×</button>
-        </div>
-        
-        <div class="chat-input-wrapper">
-            <label for="chatAttachInput" class="chat-attach-btn" title="Đính kèm ảnh">
-                📎
-            </label>
-            <input type="file" id="chatAttachInput" accept="image/png, image/jpeg, image/jpg, image/webp" style="display:none;" onchange="window.handleChatAttach(event)">
-            
-            <textarea id="chatInput" placeholder="Nhập tin nhắn cho AI..." rows="1" 
-                oninput="this.style.height = ''; this.style.height = Math.min(this.scrollHeight, 120) + 'px'" 
-                onkeypress="if(event.key==='Enter' && !event.shiftKey){ event.preventDefault(); window.sendChatMessage(); }"></textarea>
-            
-            <button class="chat-send-btn" onclick="window.sendChatMessage()" title="Gửi">➤</button>
-        </div>
-        <p style="font-size: 10px; color: var(--gray-400); text-align: center; margin-top: 8px;">Dữ liệu chat được bảo mật & xử lý qua Google Apps Script</p>
-    </div>
-</div>
-
-<!-- Modal Chỉnh sửa danh sách người -->
-<div id="editModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-title">Chỉnh sửa danh sách người</div>
-        <input type="text" id="modalInput" class="modal-input" placeholder="Nhập danh sách tên (cách nhau bởi phẩy)">
-        <div class="modal-buttons">
-            <button class="modal-btn modal-btn-cancel" onclick="window.closeModal()">Hủy</button>
-            <button class="modal-btn modal-btn-primary" onclick="window.saveModal()">Lưu</button>
-        </div>
-    </div>
-</div>
-
-<!-- Modal Chỉnh sửa nhiệm vụ -->
-<div id="taskEditModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-title">Chỉnh sửa nhiệm vụ</div>
-        <div class="form-group">
-            <label>Người thực hiện</label>
-            <input type="text" id="editTaskName" class="modal-input" placeholder="Tên người thực hiện">
-        </div>
-        <div class="form-group">
-            <label>Nhiệm vụ</label>
-            <input type="text" id="editTaskContent" class="modal-input" placeholder="Chi tiết nhiệm vụ" onkeypress="if(event.key==='Enter') window.saveTaskEdit()">
-        </div>
-        <div class="form-group">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
-                <label style="margin-bottom: 0;">Đính kèm file (thay file cũ nếu chọn mới)</label>
-                <div class="image-mode-segmented" title="Tùy chọn tải ảnh: Nén để tải nhanh hoặc giữ nguyên ảnh gốc">
-                    <button type="button" class="seg-btn active seg-compress" onclick="window.setImageMode('compress')">⚡ Nén ảnh</button>
-                    <button type="button" class="seg-btn seg-original" onclick="window.setImageMode('original')">📷 Ảnh gốc</button>
-                </div>
-            </div>
-            <div class="attach-wrapper">
-                <label class="btn btn-outline" for="editAttachInput" style="position: relative; overflow: hidden; width: 100%; justify-content:center;">
-                    📎 Chọn file mới
-                    <input type="file" id="editAttachInput" style="position: absolute; left:0; top:0; width:100%; height:100%; opacity:0; cursor:pointer;" multiple onchange="window.handleEditAttachment(event)">
-                </label>
-            </div>
-            <span class="attach-preview" id="editAttachPreview">Không có tập tin nào được chọn.</span>
-            <div class="attachment-list" id="editAttachmentList"></div>
-            <p id="currentAttachment" style="font-size: 12px; margin-top: 6px; color: var(--gray-600);"></p>
-        </div>
-        <input type="hidden" id="editTaskId">
-        <div class="modal-buttons">
-            <button class="modal-btn modal-btn-cancel" onclick="window.closeTaskEditModal()">Hủy</button>
-            <button class="modal-btn modal-btn-primary" id="saveTaskEditBtn" onclick="window.saveTaskEdit()">Lưu</button>
-        </div>
-    </div>
-</div>
-
-<!-- Modal Xác nhận -->
-<div id="confirmModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-title" id="confirmTitle">Xác nhận</div>
-        <p id="confirmMessage" style="margin-bottom: 20px; color: var(--gray-600); line-height: 1.5;"></p>
-        <div class="modal-buttons">
-            <button class="modal-btn modal-btn-cancel" onclick="window.closeConfirmModal()">Hủy</button>
-            <button class="modal-btn" style="background: #ef4444; color: white;" onclick="window.executeConfirm()">Đồng ý</button>
-        </div>
-    </div>
-
+    <!-- V2.1 TAB STUDIO ẢNH & DOCX WORKSPACE -->
 <!-- FULLSCREEN STUDIO CHỈNH SỬA ẢNH & CHUYỂN ĐỔI DOCX -->
-<div id="imageStudioModal" class="studio-fullscreen-modal" style="display: none;">
+    <div id="studioWorkspaceView" class="studio-workspace-view" style="display: none;">
     <div class="studio-container">
         <!-- Studio Header -->
         <div class="studio-header">
@@ -1853,7 +1783,7 @@
                 <button type="button" class="studio-btn studio-btn-save" onclick="window.downloadStudioImage()" id="studioDownloadBtn" disabled title="Tải ảnh đã chỉnh sửa">
                     💾 Tải ảnh
                 </button>
-                <button type="button" class="studio-btn-close" onclick="window.closeImageStudio()" title="Đóng Studio (Esc)">✕</button>
+                <button type="button" class="studio-btn studio-btn-upload" id="btnStudioFullscreen" onclick="window.toggleStudioFullscreen()" title="Mở rộng toàn màn hình">⛶ Toàn màn hình</button>
             </div>
         </div>
 
@@ -2059,7 +1989,115 @@
     </div>
 </div>
 
+
+    <div class="app-footer">
+        Nhập nhanh <span>|</span> Tiện lợi <span>|</span> Chat Pro
+    </div>
 </div>
+
+<!-- Nút Trợ lý AI -->
+<button class="chat-fab" onclick="window.toggleChat()" title="Mở Trợ lý AI">
+    <span style="font-size: 1.2rem;">✨</span> Chat <span class="pro-badge">Pro</span>
+</button>
+
+<!-- Khung Chat AI -->
+<div class="chat-panel" id="chatPanel">
+    <div class="chat-header">
+        <h3>✨ AI Assistant</h3>
+        <div class="actions">
+            <button onclick="window.clearChat()" title="Xóa cuộc trò chuyện mới">🔄</button>
+            <button onclick="window.toggleChat()" title="Đóng">✖</button>
+        </div>
+    </div>
+    
+    <div class="chat-messages" id="chatMessages">
+        <div class="chat-msg ai">Xin chào! 👋 Mình là trợ lý AI. Mình có thể giúp gì cho công việc của bạn hôm nay? Bạn có thể hỏi đáp hoặc đính kèm một bức ảnh để mình phân tích nhé.</div>
+    </div>
+    
+    <div class="chat-input-container">
+        <div id="chatAttachPreview" class="chat-attach-preview-box">
+            <img id="chatPreviewImg" src="" alt="preview">
+            <button onclick="window.removeChatAttach()" title="Xóa ảnh đính kèm">×</button>
+        </div>
+        
+        <div class="chat-input-wrapper">
+            <label for="chatAttachInput" class="chat-attach-btn" title="Đính kèm ảnh">
+                📎
+            </label>
+            <input type="file" id="chatAttachInput" accept="image/png, image/jpeg, image/jpg, image/webp" style="display:none;" onchange="window.handleChatAttach(event)">
+            
+            <textarea id="chatInput" placeholder="Nhập tin nhắn cho AI..." rows="1" 
+                oninput="this.style.height = ''; this.style.height = Math.min(this.scrollHeight, 120) + 'px'" 
+                onkeypress="if(event.key==='Enter' && !event.shiftKey){ event.preventDefault(); window.sendChatMessage(); }"></textarea>
+            
+            <button class="chat-send-btn" onclick="window.sendChatMessage()" title="Gửi">➤</button>
+        </div>
+        <p style="font-size: 10px; color: var(--gray-400); text-align: center; margin-top: 8px;">Dữ liệu chat được bảo mật & xử lý qua Google Apps Script</p>
+    </div>
+</div>
+
+<!-- Modal Chỉnh sửa danh sách người -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-title">Chỉnh sửa danh sách người</div>
+        <input type="text" id="modalInput" class="modal-input" placeholder="Nhập danh sách tên (cách nhau bởi phẩy)">
+        <div class="modal-buttons">
+            <button class="modal-btn modal-btn-cancel" onclick="window.closeModal()">Hủy</button>
+            <button class="modal-btn modal-btn-primary" onclick="window.saveModal()">Lưu</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Chỉnh sửa nhiệm vụ -->
+<div id="taskEditModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-title">Chỉnh sửa nhiệm vụ</div>
+        <div class="form-group">
+            <label>Người thực hiện</label>
+            <input type="text" id="editTaskName" class="modal-input" placeholder="Tên người thực hiện">
+        </div>
+        <div class="form-group">
+            <label>Nhiệm vụ</label>
+            <input type="text" id="editTaskContent" class="modal-input" placeholder="Chi tiết nhiệm vụ" onkeypress="if(event.key==='Enter') window.saveTaskEdit()">
+        </div>
+        <div class="form-group">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 8px;">
+                <label style="margin-bottom: 0;">Đính kèm file (thay file cũ nếu chọn mới)</label>
+                <div class="image-mode-segmented" title="Tùy chọn tải ảnh: Nén để tải nhanh hoặc giữ nguyên ảnh gốc">
+                    <button type="button" class="seg-btn active seg-compress" onclick="window.setImageMode('compress')">⚡ Nén ảnh</button>
+                    <button type="button" class="seg-btn seg-original" onclick="window.setImageMode('original')">📷 Ảnh gốc</button>
+                </div>
+            </div>
+            <div class="attach-wrapper">
+                <label class="btn btn-outline" for="editAttachInput" style="position: relative; overflow: hidden; width: 100%; justify-content:center;">
+                    📎 Chọn file mới
+                    <input type="file" id="editAttachInput" style="position: absolute; left:0; top:0; width:100%; height:100%; opacity:0; cursor:pointer;" multiple onchange="window.handleEditAttachment(event)">
+                </label>
+            </div>
+            <span class="attach-preview" id="editAttachPreview">Không có tập tin nào được chọn.</span>
+            <div class="attachment-list" id="editAttachmentList"></div>
+            <p id="currentAttachment" style="font-size: 12px; margin-top: 6px; color: var(--gray-600);"></p>
+        </div>
+        <input type="hidden" id="editTaskId">
+        <div class="modal-buttons">
+            <button class="modal-btn modal-btn-cancel" onclick="window.closeTaskEditModal()">Hủy</button>
+            <button class="modal-btn modal-btn-primary" id="saveTaskEditBtn" onclick="window.saveTaskEdit()">Lưu</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Xác nhận -->
+<div id="confirmModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-title" id="confirmTitle">Xác nhận</div>
+        <p id="confirmMessage" style="margin-bottom: 20px; color: var(--gray-600); line-height: 1.5;"></p>
+        <div class="modal-buttons">
+            <button class="modal-btn modal-btn-cancel" onclick="window.closeConfirmModal()">Hủy</button>
+            <button class="modal-btn" style="background: #ef4444; color: white;" onclick="window.executeConfirm()">Đồng ý</button>
+        </div>
+    </div>
+    </div>
+
 
 <div id="toast">
     <span>✅</span>
@@ -2252,14 +2290,45 @@
 
         const tasksEl = document.getElementById('tasksLayout');
         const utilsEl = document.getElementById('utilitiesView');
+        const studioEl = document.getElementById('studioWorkspaceView');
 
         if (cat === 'Tiện ích') {
             if (tasksEl) tasksEl.style.display = 'none';
             if (utilsEl) utilsEl.style.display = 'grid';
+            if (studioEl) studioEl.style.display = 'none';
+        } else if (cat === 'Studio') {
+            if (tasksEl) tasksEl.style.display = 'none';
+            if (utilsEl) utilsEl.style.display = 'none';
+            if (studioEl) studioEl.style.display = 'flex';
+            if (typeof window.renderStudioCanvas === 'function') {
+                setTimeout(window.renderStudioCanvas, 50);
+            }
         } else {
             if (tasksEl) tasksEl.style.display = 'grid';
             if (utilsEl) utilsEl.style.display = 'none';
+            if (studioEl) studioEl.style.display = 'none';
             filterData();
+        }
+    };
+
+    window.toggleStudioFullscreen = function() {
+        const studio = document.getElementById('studioWorkspaceView');
+        if (!studio) return;
+        studio.classList.toggle('is-fullscreen');
+        const btn = document.getElementById('btnStudioFullscreen');
+        if (btn) {
+            if (studio.classList.contains('is-fullscreen')) {
+                btn.innerHTML = '🗗 Thu nhỏ';
+                btn.title = 'Thoát toàn màn hình (Esc)';
+                document.body.style.overflow = 'hidden';
+            } else {
+                btn.innerHTML = '⛶ Toàn màn hình';
+                btn.title = 'Mở rộng toàn màn hình';
+                document.body.style.overflow = '';
+            }
+        }
+        if (typeof window.updateCropBoxPosition === 'function') {
+            setTimeout(window.updateCropBoxPosition, 100);
         }
     };
 
@@ -3711,22 +3780,19 @@
     let cropBox = { x: 50, y: 50, w: 200, h: 150 };
 
     window.openImageStudio = function(optionalFile) {
-        const modal = document.getElementById('imageStudioModal');
-        if (!modal) return;
-        modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-
+        window.switchTab('Studio');
         if (optionalFile) {
             window.loadStudioFile(optionalFile);
         }
     };
 
     window.closeImageStudio = function() {
-        const modal = document.getElementById('imageStudioModal');
-        if (!modal) return;
-        modal.style.display = 'none';
-        document.body.style.overflow = '';
-        if (isStudioCropActive) window.toggleStudioCrop();
+        const studio = document.getElementById('studioWorkspaceView');
+        if (studio && studio.classList.contains('is-fullscreen')) {
+            window.toggleStudioFullscreen();
+        } else {
+            window.switchTab('Niềm vui');
+        }
     };
 
     window.switchStudioTab = function(tabName) {
@@ -4454,8 +4520,8 @@
 
     // Hỗ trợ Paste ảnh từ Clipboard (Ctrl + V) khi Studio đang mở
     document.addEventListener('paste', function(e) {
-        const modal = document.getElementById('imageStudioModal');
-        if (!modal || modal.style.display === 'none') return;
+        const studio = document.getElementById('studioWorkspaceView');
+        if (!studio || studio.style.display === 'none') return;
         const items = (e.clipboardData || e.originalEvent.clipboardData).items;
         for (let index in items) {
             const item = items[index];
@@ -4541,6 +4607,11 @@
 
     document.addEventListener('keydown', function(e) {
         if(e.key === 'Escape') {
+            const studio = document.getElementById('studioWorkspaceView');
+            if (studio && studio.classList.contains('is-fullscreen')) {
+                window.toggleStudioFullscreen();
+                return;
+            }
             window.closeModal();
             window.closeTaskEditModal();
             window.closeConfirmModal();
