@@ -287,8 +287,8 @@
         .attach-preview { font-size: 0.85rem; color: var(--gray-600); }
         .attach-preview strong { color: var(--primary); }
 
-        .attachment-list { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 6px; }
-        .attachment-pill { font-size: 12px; padding: 4px 10px; border-radius: 999px; background: #eef2ff; color: #1e3a8a; display: inline-flex; align-items: center; gap: 6px; }
+        .attachment-list { margin-top: 6px; display: flex; flex-wrap: wrap; gap: 6px; max-width: 100%; }
+        .attachment-pill { font-size: 12px; padding: 4px 10px; border-radius: 999px; background: #eef2ff; color: #1e3a8a; display: inline-flex; align-items: center; gap: 6px; max-width: 100%; box-sizing: border-box; }
 
         .people-label { font-size: 0.9rem; font-weight: 600; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
         .people-buttons { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
@@ -652,8 +652,9 @@
             flex-wrap: wrap;
             gap: 6px;
             margin-bottom: 14px;
-            max-height: 100px;
+            max-height: 140px;
             overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
             padding-right: 4px;
         }
         .chip-person {
@@ -833,6 +834,12 @@
             font-weight: 600;
             text-decoration: none;
             transition: all 0.15s;
+            max-width: 100%;
+            box-sizing: border-box;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            word-break: break-all;
         }
         .badge-pdf { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
         .badge-pdf:hover { background: #fecaca; }
@@ -1609,13 +1616,14 @@
             .smart-title {
                 font-size: 0.9rem !important;
             }
-            /* Danh sách chip người: dàn chip gọn gàng, tự cuộn khi nhiều người */
+            /* Danh sách chip người: dàn chip gọn gàng, hỗ trợ cuộn mượt khi nhiều người */
             .smart-people-chips.people-buttons {
                 display: flex !important;
                 flex-wrap: wrap !important;
                 gap: 6px !important;
-                max-height: 90px !important;
+                max-height: 160px !important;
                 overflow-y: auto !important;
+                -webkit-overflow-scrolling: touch !important;
                 margin-bottom: 10px !important;
                 padding-right: 2px !important;
             }
@@ -1680,6 +1688,8 @@
                 border-radius: 14px !important;
                 box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06) !important;
                 overflow: visible !important;
+                max-height: none !important;
+                contain: none !important;
             }
             .table-toolbar {
                 display: flex !important;
@@ -1712,6 +1722,10 @@
             /* Chuyển đổi bảng HTML thành dạng THẺ CÔNG VIỆC (TASK CARDS) di động mượt mà */
             .table-container {
                 overflow: visible !important;
+                max-height: none !important;
+                contain: none !important;
+                will-change: auto !important;
+                border: none !important;
             }
             .table-container table {
                 display: block !important;
@@ -1767,16 +1781,23 @@
                 content: '👤 ';
                 font-size: 13px !important;
             }
-            /* Cột 3: Nhiệm vụ & Tệp đính kèm */
+            /* Cột 3: Nhiệm vụ, Ghi chú & Tệp đính kèm */
             .table-container td:nth-child(3) {
                 font-size: 13.5px !important;
                 color: var(--gray-800) !important;
                 line-height: 1.5 !important;
                 word-break: break-word !important;
+                overflow-wrap: anywhere !important;
+                white-space: pre-wrap !important;
             }
             .table-container td:nth-child(3) .badge-file {
                 font-size: 11.5px !important;
                 padding: 4px 8px !important;
+                max-width: 100% !important;
+                box-sizing: border-box !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                white-space: nowrap !important;
             }
             /* Cột 4: Hàng nút thao tác (Tải zip / Sửa / Xóa) nằm ngang cuối thẻ */
             .table-container td:nth-child(4) {
@@ -1801,6 +1822,7 @@
                 justify-content: center !important;
                 display: inline-flex !important;
                 align-items: center !important;
+                min-width: 0 !important;
             }
             
             /* Tab Tiện ích (Utilities) trên mobile */
@@ -3378,9 +3400,9 @@
             const isImg = att.type && att.type.startsWith('image/');
             const sizeKb = Math.round((att.size || 0) / 1024);
             return `
-                <span class="attachment-pill" style="display:inline-flex;align-items:center;gap:6px;padding:4px 8px;margin:3px;background:#f1f5f9;border-radius:12px;font-size:12px;border:1px solid #cbd5e1;">
-                    <span>${isImg ? '🖼️' : '📎'} ${escapeHtml(att.name)} (${sizeKb}KB)</span>
-                    <button type="button" onclick="window.removeSmartAttachment(${idx})" style="background:none;border:none;color:#ef4444;cursor:pointer;font-weight:bold;padding:0 4px;font-size:14px;">×</button>
+                <span class="attachment-pill" style="display:inline-flex;align-items:center;gap:6px;padding:4px 8px;margin:3px;background:#f1f5f9;border-radius:12px;font-size:12px;border:1px solid #cbd5e1;max-width:100%;box-sizing:border-box;">
+                    <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:calc(100% - 22px);">${isImg ? '🖼️' : '📎'} ${escapeHtml(att.name)} (${sizeKb}KB)</span>
+                    <button type="button" onclick="window.removeSmartAttachment(${idx})" style="background:none;border:none;color:#ef4444;cursor:pointer;font-weight:bold;padding:0 4px;font-size:14px;flex-shrink:0;">×</button>
                 </span>
             `;
         }).join('');
@@ -4116,9 +4138,9 @@
                     <td style="color:#9ca3af; text-align: center; font-weight: 500;">${index + 1}</td>
                     <td style="font-weight: 600; color: var(--primary);">${escapeHtml(item.name)}</td>
                     <td>
-                        <div>${escapeHtml(item.task)}</div>
+                        <div style="white-space: pre-wrap; word-break: break-word; overflow-wrap: anywhere;">${escapeHtml(item.task)}</div>
                         ${item.attachments && item.attachments.length ? `
-                            <div style="margin-top:8px; display:flex; flex-wrap:wrap; gap:6px;">
+                            <div style="margin-top:8px; display:flex; flex-wrap:wrap; gap:6px; max-width:100%;">
                                 ${item.attachments.map(att => window.renderFileBadge(att)).join('')}
                             </div>
                         ` : ''}
