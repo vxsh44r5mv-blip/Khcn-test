@@ -192,8 +192,10 @@ Quy tắc định dạng bắt buộc:
          </tr>
        </tbody>
      </table>
-   - Đảm bảo đầy đủ số hàng, số cột. Nếu có gộp ô, dùng thuộc tính colspan="..." hoặc rowspan="...".
-   - Căn lề từng cột trong bảng: Số/STT căn giữa, Tên/Nội dung căn trái, Số tiền/Ngày tháng căn phải hoặc giữa.
+   - Đảm bảo đầy đủ số hàng, số cột. Nếu có gộp ô, bắt buộc dùng thuộc tính colspan="..." hoặc rowspan="...".
+   - Bắt buộc dùng <th> cho hàng tiêu đề cột của bảng để được áp dụng định dạng Header chuyên nghiệp trong Word.
+   - Căn lề từng cột trong bảng: Số/STT căn giữa, Tên/Nội dung căn trái, Số tiền/Ngày tháng/Tỷ lệ căn phải hoặc giữa.
+   - Nếu trong một ô có nhiều dòng hoặc nội dung xuống dòng, hãy dùng thẻ <br> để ngắt dòng chuẩn xác.
 3. DANH SÁCH & KÝ HIỆU:
    - Dùng <ul><li> hoặc <ol><li> cho các mục liệt kê.
 4. CHÍNH TẢ & DẤU TIẾNG VIỆT:

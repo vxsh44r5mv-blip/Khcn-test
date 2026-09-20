@@ -2017,6 +2017,25 @@
                 box-sizing: border-box !important;
             }
 
+            /* Floating Zoom Bar trên thiết bị di động: gọn gàng ở góc dưới viewport ảnh, không che sidebar */
+            #studioZoomController {
+                bottom: 8px !important;
+                right: 8px !important;
+                padding: 4px 8px !important;
+                gap: 6px !important;
+                border-radius: 8px !important;
+                background: rgba(15, 23, 42, 0.92) !important;
+                box-shadow: 0 4px 16px rgba(0,0,0,0.6) !important;
+                z-index: 40 !important;
+            }
+            #studioZoomSlider {
+                width: 70px !important;
+            }
+            #studioZoomValue {
+                font-size: 11px !important;
+                min-width: 32px !important;
+            }
+
             /* Crop handles dễ kéo chạm bằng ngón tay trên điện thoại */
             .crop-handle {
                 width: 24px !important;
@@ -2667,15 +2686,15 @@
                     <div class="studio-spinner"></div>
                     <div id="studioLoadingText" style="font-weight: 600; font-size: 14px; color: #fff;">Đang xử lý qua Gemini AI...</div>
                 </div>
-            </div>
 
-            <!-- Zoom Controller UI -->
-            <div id="studioZoomController" style="display: none; position: absolute; bottom: 24px; right: 24px; background: rgba(15,23,42,0.85); border: 1px solid rgba(255,255,255,0.15); padding: 8px 16px; border-radius: 12px; align-items: center; gap: 12px; z-index: 100; backdrop-filter: blur(10px); box-shadow: 0 8px 32px rgba(0,0,0,0.5);">
-                <button type="button" class="studio-mini-btn" style="padding: 4px 8px; font-size: 16px;" onclick="window.zoomStudioCanvas(-0.1)" title="Thu nhỏ">➖</button>
-                <input type="range" id="studioZoomSlider" min="10" max="500" value="100" style="width: 120px; accent-color: #38bdf8; cursor: pointer;" oninput="window.updateStudioCanvasZoom(this.value)">
-                <span id="studioZoomValue" style="font-size: 13px; font-weight: 700; color: #f8fafc; min-width: 45px; text-align: right; user-select: none;">100%</span>
-                <button type="button" class="studio-mini-btn" style="padding: 4px 8px; font-size: 16px;" onclick="window.zoomStudioCanvas(0.1)" title="Phóng to">➕</button>
-                <button type="button" class="studio-mini-btn" style="margin-left: 8px; padding: 4px 10px; background: rgba(56, 189, 248, 0.2); color: #38bdf8;" onclick="window.resetStudioCanvasZoom()" title="Vừa vặn màn hình">Mặc định</button>
+                <!-- Zoom Controller UI (Nằm gọn trong studioViewport để không che các panel khác) -->
+                <div id="studioZoomController" style="display: none; position: absolute; bottom: 16px; right: 16px; background: rgba(15,23,42,0.85); border: 1px solid rgba(255,255,255,0.15); padding: 8px 16px; border-radius: 12px; align-items: center; gap: 12px; z-index: 45; backdrop-filter: blur(10px); box-shadow: 0 8px 32px rgba(0,0,0,0.5);">
+                    <button type="button" class="studio-mini-btn" style="padding: 4px 8px; font-size: 16px;" onclick="window.zoomStudioCanvas(-0.1)" title="Thu nhỏ">➖</button>
+                    <input type="range" id="studioZoomSlider" min="10" max="500" value="100" style="width: 120px; accent-color: #38bdf8; cursor: pointer;" oninput="window.updateStudioCanvasZoom(this.value)">
+                    <span id="studioZoomValue" style="font-size: 13px; font-weight: 700; color: #f8fafc; min-width: 45px; text-align: right; user-select: none;">100%</span>
+                    <button type="button" class="studio-mini-btn" style="padding: 4px 8px; font-size: 16px;" onclick="window.zoomStudioCanvas(0.1)" title="Phóng to">➕</button>
+                    <button type="button" class="studio-mini-btn" style="margin-left: 8px; padding: 4px 10px; background: rgba(56, 189, 248, 0.2); color: #38bdf8;" onclick="window.resetStudioCanvasZoom()" title="Vừa vặn màn hình">Mặc định</button>
+                </div>
             </div>
 
         </div>
@@ -4887,6 +4906,16 @@
             if (p) p.classList.add('active');
         }
 
+        // Quản lý hiển thị thanh Zoom: ẩn khi sang tab docx để không che nút tải word, hiện khi ở tab adjust/ai nếu đã có ảnh
+        const zoomCtrl = document.getElementById('studioZoomController');
+        if (zoomCtrl) {
+            if (tabName === 'docx' || !studioRawImage) {
+                zoomCtrl.style.display = 'none';
+            } else {
+                zoomCtrl.style.display = 'flex';
+            }
+        }
+
         if (activeBtn && typeof window.isMobileDevice === 'function' && window.isMobileDevice()) {
             try { activeBtn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' }); } catch(e) {}
             const sidebar = document.querySelector('.studio-sidebar');
@@ -6295,6 +6324,10 @@
                     runsXml += `<w:r>${rPr ? `<w:rPr>${rPr}</w:rPr>` : ''}<w:t xml:space="preserve">${escapeXml(text)}</w:t></w:r>`;
                 } else if (child.nodeType === Node.ELEMENT_NODE) {
                     const tag = child.tagName.toLowerCase();
+                    if (tag === 'br') {
+                        runsXml += '<w:r><w:br/></w:r>';
+                        return;
+                    }
                     const isB = inheritB || tag === 'b' || tag === 'strong' || tag === 'th';
                     const isI = inheritI || tag === 'i' || tag === 'em';
                     const isU = inheritU || tag === 'u';
@@ -6335,20 +6368,101 @@
                 const rows = Array.from(el.querySelectorAll('tr'));
                 if (rows.length === 0) return;
 
-                // Tính số cột tối đa của bảng
-                let maxCols = 1;
-                rows.forEach(r => {
-                    const cnt = r.querySelectorAll('th, td').length;
-                    if (cnt > maxCols) maxCols = cnt;
+                // 1. Xây dựng ma trận lưới (Grid Matrix) xử lý triệt để Colspan & Rowspan
+                // grid[r][c] = { cell, colspan, rowspan, isStart, originR, originC }
+                const grid = [];
+                rows.forEach((tr, rIdx) => {
+                    if (!grid[rIdx]) grid[rIdx] = [];
+                    const cells = Array.from(tr.querySelectorAll('th, td'));
+                    let cIdx = 0;
+
+                    cells.forEach(cell => {
+                        while (grid[rIdx][cIdx]) {
+                            cIdx++;
+                        }
+
+                        const colspan = parseInt(cell.getAttribute('colspan') || '1', 10) || 1;
+                        const rowspan = parseInt(cell.getAttribute('rowspan') || '1', 10) || 1;
+
+                        for (let r = 0; r < rowspan; r++) {
+                            const targetR = rIdx + r;
+                            if (!grid[targetR]) grid[targetR] = [];
+                            for (let c = 0; c < colspan; c++) {
+                                const targetC = cIdx + c;
+                                const isStart = (r === 0 && c === 0);
+                                grid[targetR][targetC] = {
+                                    cell: cell,
+                                    colspan: colspan,
+                                    rowspan: rowspan,
+                                    isStart: isStart,
+                                    originR: rIdx,
+                                    originC: cIdx
+                                };
+                            }
+                        }
+                        cIdx += colspan;
+                    });
                 });
 
-                // Tổng chiều rộng vùng in chuẩn A4 = 9071 twips (11906 - 1701 - 1134)
+                // Xác định số cột tối đa thực tế
+                let maxCols = 1;
+                grid.forEach(r => {
+                    if (r && r.length > maxCols) maxCols = r.length;
+                });
+
+                for (let r = 0; r < grid.length; r++) {
+                    if (!grid[r]) grid[r] = [];
+                    for (let c = 0; c < maxCols; c++) {
+                        if (!grid[r][c]) grid[r][c] = null;
+                    }
+                }
+
+                // 2. Tính toán độ rộng từng cột thông minh theo tỉ lệ nội dung (Intelligent Column Widths)
+                // Tổng chiều rộng vùng in chuẩn A4 = 9071 twips
                 const totalTableWidth = 9071;
-                const colWidth = Math.floor(totalTableWidth / maxCols);
+                const colWeights = new Array(maxCols).fill(0);
+
+                for (let c = 0; c < maxCols; c++) {
+                    let maxCellLen = 0;
+                    let isNumericOrStt = true;
+                    let count = 0;
+
+                    for (let r = 0; r < grid.length; r++) {
+                        const item = grid[r][c];
+                        if (item && item.isStart && item.colspan === 1) {
+                            count++;
+                            const txt = (item.cell.textContent || '').trim();
+                            if (txt.length > maxCellLen) maxCellLen = txt.length;
+                            if (!/^[\d\.\-\/\s%]+$/.test(txt) && txt.length > 5) {
+                                isNumericOrStt = false;
+                            }
+                        }
+                    }
+
+                    if (count === 0) {
+                        colWeights[c] = 2.0;
+                    } else if (isNumericOrStt && maxCellLen <= 6) {
+                        colWeights[c] = 1.0; // Cột STT hoặc số ngắn: gọn gàng
+                    } else if (maxCellLen <= 15) {
+                        colWeights[c] = 2.2; // Tên ngắn, ngày tháng
+                    } else if (maxCellLen <= 40) {
+                        colWeights[c] = 3.8; // Họ tên, chức vụ, đơn vị
+                    } else {
+                        colWeights[c] = Math.min(8.5, 4.5 + (maxCellLen / 25)); // Nội dung, mô tả dài
+                    }
+                }
+
+                const totalWeight = colWeights.reduce((sum, w) => sum + w, 0) || 1;
+                const colWidths = colWeights.map(w => Math.max(500, Math.round((w / totalWeight) * totalTableWidth)));
+
+                // Cân chỉnh bù trừ làm tròn để đúng chuẩn 9071 twips
+                const currentTotal = colWidths.reduce((sum, w) => sum + w, 0);
+                const diff = totalTableWidth - currentTotal;
+                colWidths[colWidths.length - 1] += diff;
 
                 let gridXml = '';
                 for (let c = 0; c < maxCols; c++) {
-                    gridXml += `<w:gridCol w:w="${colWidth}"/>`;
+                    gridXml += `<w:gridCol w:w="${colWidths[c]}"/>`;
                 }
 
                 bodyXml += `<w:tbl>
@@ -6372,24 +6486,103 @@
                     </w:tblPr>
                     <w:tblGrid>${gridXml}</w:tblGrid>`;
 
-                rows.forEach((tr, rIdx) => {
-                    const isHeaderRow = tr.closest('thead') !== null || (rIdx === 0 && tr.querySelector('th') !== null);
+                // 3. Render các hàng và các ô trong bảng
+                for (let r = 0; r < grid.length; r++) {
+                    const tr = rows[r];
+                    const isHeaderRow = tr ? (tr.closest('thead') !== null || (r === 0 && tr.querySelector('th') !== null)) : false;
                     const trPrXml = isHeaderRow 
                         ? '<w:trPr><w:tblHeader/><w:cantSplit/></w:trPr>' 
                         : '<w:trPr><w:cantSplit/></w:trPr>';
 
                     bodyXml += `<w:tr>${trPrXml}`;
 
-                    const cells = Array.from(tr.querySelectorAll('th, td'));
-                    cells.forEach(cell => {
+                    for (let c = 0; c < maxCols; c++) {
+                        const item = grid[r][c];
+
+                        if (!item) {
+                            bodyXml += `<w:tc><w:tcPr><w:tcW w:w="${colWidths[c]}" w:type="dxa"/></w:tcPr><w:p/></w:tc>`;
+                            continue;
+                        }
+
+                        // Nếu là ô mở rộng theo chiều ngang (colspan continuation) -> OpenXML tự gộp, không sinh thẻ <w:tc>
+                        if (!item.isStart && item.originR === r) {
+                            continue;
+                        }
+
+                        // Nếu là ô mở rộng theo chiều dọc (rowspan continuation) -> Sinh <w:tc> với <w:vMerge/>
+                        if (item.originR < r) {
+                            let spanW = 0;
+                            for (let sc = item.originC; sc < item.originC + item.colspan; sc++) {
+                                spanW += colWidths[sc] || 0;
+                            }
+                            const gridSpanXml = item.colspan > 1 ? `<w:gridSpan w:val="${item.colspan}"/>` : '';
+                            bodyXml += `<w:tc>
+                                <w:tcPr>
+                                    <w:tcW w:w="${spanW}" w:type="dxa"/>
+                                    ${gridSpanXml}
+                                    <w:vMerge/>
+                                    <w:tcMar><w:top w:w="120" w:type="dxa"/><w:bottom w:w="120" w:type="dxa"/><w:left w:w="160" w:type="dxa"/><w:right w:w="160" w:type="dxa"/></w:tcMar>
+                                </w:tcPr>
+                                <w:p/>
+                            </w:tc>`;
+                            continue;
+                        }
+
+                        // Ô bắt đầu (Starting Cell)
+                        const cell = item.cell;
                         const isTh = cell.tagName.toLowerCase() === 'th' || isHeaderRow;
                         const cellAlign = getAlignment(cell) || (isTh ? 'center' : 'left');
-                        const runs = parseRuns(cell, isTh, false, false, null, isTh ? '24' : '24');
-                        const bgXml = isTh ? '<w:shd w:val="clear" w:color="auto" w:fill="F1F5F9"/>' : '';
+
+                        let cellWidth = 0;
+                        for (let sc = c; sc < c + item.colspan; sc++) {
+                            cellWidth += colWidths[sc] || 0;
+                        }
+
+                        const gridSpanXml = item.colspan > 1 ? `<w:gridSpan w:val="${item.colspan}"/>` : '';
+                        const vMergeXml = item.rowspan > 1 ? '<w:vMerge w:val="restart"/>' : '';
+
+                        let bgHex = isTh ? 'F1F5F9' : null;
+                        if (cell.style && cell.style.backgroundColor) {
+                            const m = cell.style.backgroundColor.match(/#([0-9a-f]{6})/i);
+                            if (m) bgHex = m[1].toUpperCase();
+                        } else if (cell.getAttribute('bgcolor')) {
+                            const bgAttr = cell.getAttribute('bgcolor').replace('#', '');
+                            if (/^[0-9a-f]{6}$/i.test(bgAttr)) bgHex = bgAttr.toUpperCase();
+                        }
+                        const bgXml = bgHex ? `<w:shd w:val="clear" w:color="auto" w:fill="${bgHex}"/>` : '';
+
+                        // Xử lý nội dung ô: bảo toàn nhiều đoạn, <br>, <p>
+                        let cellParasXml = '';
+                        const childParas = cell.querySelectorAll('p, div');
+                        if (childParas.length > 0) {
+                            childParas.forEach(pEl => {
+                                const pAlign = getAlignment(pEl) || cellAlign;
+                                const runs = parseRuns(pEl, isTh, false, false, null, isTh ? '24' : '24');
+                                cellParasXml += `<w:p>
+                                    <w:pPr>
+                                        <w:jc w:val="${pAlign}"/>
+                                        <w:spacing w:before="30" w:after="30" w:line="240" w:lineRule="auto"/>
+                                    </w:pPr>
+                                    ${runs || '<w:r><w:t></w:t></w:r>'}
+                                </w:p>`;
+                            });
+                        } else {
+                            const runs = parseRuns(cell, isTh, false, false, null, isTh ? '24' : '24');
+                            cellParasXml = `<w:p>
+                                <w:pPr>
+                                    <w:jc w:val="${cellAlign}"/>
+                                    <w:spacing w:before="40" w:after="40" w:line="240" w:lineRule="auto"/>
+                                </w:pPr>
+                                ${runs || '<w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:sz w:val="24"/><w:szCs w:val="24"/></w:rPr><w:t></w:t></w:r>'}
+                            </w:p>`;
+                        }
 
                         bodyXml += `<w:tc>
                             <w:tcPr>
-                                <w:tcW w:w="${colWidth}" w:type="dxa"/>
+                                <w:tcW w:w="${cellWidth}" w:type="dxa"/>
+                                ${gridSpanXml}
+                                ${vMergeXml}
+                                <w:vAlign w:val="center"/>
                                 <w:tcMar>
                                     <w:top w:w="120" w:type="dxa"/>
                                     <w:bottom w:w="120" w:type="dxa"/>
@@ -6398,18 +6591,12 @@
                                 </w:tcMar>
                                 ${bgXml}
                             </w:tcPr>
-                            <w:p>
-                                <w:pPr>
-                                    <w:jc w:val="${cellAlign}"/>
-                                    <w:spacing w:before="40" w:after="40" w:line="240" w:lineRule="auto"/>
-                                </w:pPr>
-                                ${runs || '<w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:sz w:val="24"/><w:szCs w:val="24"/></w:rPr><w:t></w:t></w:r>'}
-                            </w:p>
+                            ${cellParasXml}
                         </w:tc>`;
-                    });
+                    }
 
                     bodyXml += '</w:tr>';
-                });
+                }
 
                 bodyXml += '</w:tbl>';
                 bodyXml += '<w:p><w:pPr><w:spacing w:before="60" w:after="80"/></w:pPr></w:p>';
