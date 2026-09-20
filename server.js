@@ -8,15 +8,18 @@ const studioHandler = require('./api/studio.js');
 const PORT = 3000;
 
 const server = http.createServer(async (req, res) => {
-    // 1. Route API Proxy, Chat & Studio
+    // 1. Route API Proxy, Chat & Studio (Hot-reload in local dev)
     if (req.url.startsWith('/api/proxy')) {
-        return proxyHandler(req, res);
+        delete require.cache[require.resolve('./api/proxy.js')];
+        return require('./api/proxy.js')(req, res);
     }
     if (req.url.startsWith('/api/chat')) {
-        return chatHandler(req, res);
+        delete require.cache[require.resolve('./api/chat.js')];
+        return require('./api/chat.js')(req, res);
     }
     if (req.url.startsWith('/api/studio')) {
-        return studioHandler(req, res);
+        delete require.cache[require.resolve('./api/studio.js')];
+        return require('./api/studio.js')(req, res);
     }
 
     // 2. Static files

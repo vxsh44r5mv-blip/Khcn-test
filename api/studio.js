@@ -22,19 +22,31 @@ function resolveApiKey() {
 
 function getCandidateModels(selectedModel) {
     if (selectedModel === 'gemini-3.1-pro-preview') {
-        return ['gemini-3.1-pro-preview'];
+        return ['gemini-3.1-pro-preview', 'gemini-3.5-flash', 'gemini-2.5-pro'];
     }
     if (selectedModel === 'gemini-2.5-pro') {
-        return ['gemini-2.5-pro', 'gemini-3.1-pro-preview'];
+        return ['gemini-2.5-pro', 'gemini-3.5-flash', 'gemini-3.1-pro-preview'];
     }
-    if (selectedModel === 'flash_auto' || selectedModel === 'gemini-flash') {
-        return ['gemini-3.5-flash', 'gemini-2.5-flash', 'gemini-3-flash-preview'];
+    if (selectedModel === 'gemini-3.8-flash') {
+        return ['gemini-3.8-flash', 'gemini-3.7-flash', 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-2.5-flash'];
+    }
+    if (selectedModel === 'gemini-3.7-flash') {
+        return ['gemini-3.7-flash', 'gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.8-flash', 'gemini-2.5-flash'];
+    }
+    if (selectedModel === 'gemini-3.6-flash') {
+        return ['gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-3.7-flash', 'gemini-3.8-flash', 'gemini-2.5-flash'];
+    }
+    if (selectedModel === 'gemini-3.5-flash' || selectedModel === 'flash_auto' || selectedModel === 'gemini-flash') {
+        return ['gemini-3.5-flash', 'gemini-3.6-flash', 'gemini-3.7-flash', 'gemini-3.8-flash', 'gemini-2.5-flash'];
+    }
+    if (selectedModel === 'gemini-2.5-flash') {
+        return ['gemini-2.5-flash', 'gemini-3.5-flash', 'gemini-3.6-flash', 'gemini-3.7-flash', 'gemini-3.8-flash'];
     }
     if (selectedModel && selectedModel !== 'auto') {
-        return [selectedModel, 'gemini-3.5-flash', 'gemini-2.5-flash'];
+        return [selectedModel, 'gemini-3.5-flash', 'gemini-3.6-flash', 'gemini-3.7-flash', 'gemini-3.8-flash', 'gemini-2.5-flash'];
     }
-    // Mặc định auto: Ưu tiên Flash 3.5 và Flash 2.5 cực nhanh
-    return ['gemini-3.5-flash', 'gemini-2.5-flash', 'gemini-3.1-pro-preview'];
+    // Mặc định auto: Luôn ưu tiên Gemini 3.5 Flash trước tiên, fallback sang 3.6, 3.7, 3.8 và Flash 2.5
+    return ['gemini-3.5-flash', 'gemini-3.6-flash', 'gemini-3.7-flash', 'gemini-3.8-flash', 'gemini-2.5-flash'];
 }
 
 async function callGemini(contents, systemInstruction, temperature = 0.2, selectedModel = null, customApiKey = null) {
@@ -66,7 +78,16 @@ async function callGemini(contents, systemInstruction, temperature = 0.2, select
 
             if (response.ok) {
                 const data = await response.json();
-                const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                const parts = data.candidates?.[0]?.content?.parts || [];
+                let text = '';
+                for (const p of parts) {
+                    if (p.text && !p.thought) {
+                        text += p.text;
+                    }
+                }
+                if (!text && parts[0]?.text) {
+                    text = parts[0].text;
+                }
                 if (text) {
                     return { text, modelUsed: model };
                 }
@@ -131,26 +152,54 @@ module.exports = async function handler(req, res) {
     const { action, imageBase64, mimeType, oldText, newText, promptText, selectedModel, customApiKey } = body || {};
 
     try {
+        // 0. HEALTH CHECK & PING ACTION
+        if (action === 'ping' || action === 'health') {
+            const result = { status: 'success', message: 'Studio API v3.0 is healthy', version: '3.0' };
+            if (res.status) return res.status(200).json(result);
+            res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8' });
+            return res.end(JSON.stringify(result));
+        }
+
         if (!imageBase64 && !body.pdfBase64) {
             throw new Error('Chưa cung cấp dữ liệu hình ảnh hoặc file PDF.');
         }
 
-        // 1. ACTION: OCR & CONVERT TO DOCX HTML
+        // 1. ACTION: OCR TRÍCH XUẤT VĂN BẢN VÀ CHUYỂN ĐỔI SANG WORD (.DOCX)
         if (action === 'ocr_docx') {
-            const systemPrompt = `Bạn là chuyên gia trích xuất tài liệu văn bản, hình ảnh, trang sách, biểu mẫu sang Word (.docx).
-Nhiệm vụ của bạn là nhận diện chính xác 100% nội dung chữ, cấu trúc tiêu đề, đoạn văn và bảng biểu của tài liệu trong ảnh/PDF để trả về mã HTML sạch (semantic HTML).
-Quy tắc định dạng:
-1. Tiêu đề lớn dùng <h1>, tiêu đề phụ dùng <h2>, mục nhỏ dùng <h3>.
-2. Đoạn văn dùng thẻ <p>.
-3. In đậm dùng <b>, in nghiêng <i>, gạch chân <u> đúng theo bản gốc.
-4. Với bảng biểu, tạo đúng chuẩn HTML:
-   <table>
-     <thead><tr><th>Tiêu đề cột 1</th><th>Tiêu đề cột 2</th></tr></thead>
-     <tbody><tr><td>Ô 1</td><td>Ô 2</td></tr></tbody>
-   </table>
-5. Với danh sách liệt kê, dùng <ul><li> hoặc <ol><li>.
-6. Cố gắng giữ trật tự và độ chính xác tối đa của ký tự tiếng Việt.
-7. QUAN TRỌNG: Chỉ trả về nội dung HTML thuần túy. Tuyệt đối KHÔNG bọc mã trong markdown \`\`\`html và không thêm văn bản giải thích.`;
+            const systemPrompt = `Bạn là chuyên gia trích xuất tài liệu văn bản, biểu mẫu hành chính, hợp đồng, chứng chỉ sang Word (.docx) chuẩn trang giấy A4.
+Nhiệm vụ: Nhận diện chính xác 100% nội dung chữ, dấu tiếng Việt, bố cục đoạn văn, tiêu đề và cấu trúc bảng biểu của tài liệu để chuyển thành mã HTML cấu trúc sạch (semantic HTML).
+Quy tắc định dạng bắt buộc:
+1. BỐ CỤC CHUẨN A4:
+   - Quốc hiệu, tiêu ngữ, tiêu đề tài liệu ở đầu trang: dùng <p style="text-align: center;"><b>...</b></p> hoặc <h1>, <h2>.
+   - Tiêu đề phụ, đề mục dùng <h3>, <h4>.
+   - Đoạn văn chuẩn dùng thẻ <p>. Nếu văn bản được căn đều hoặc căn giữa trong ảnh, thêm thuộc tính style tương ứng (ví dụ: style="text-align: center;" hoặc style="text-align: right;").
+   - Giữ nguyên định dạng chữ in đậm <b>, in nghiêng <i>, gạch chân <u>.
+2. BẢNG BIỂU (TABLES) — ĐẶC BIỆT QUAN TRỌNG:
+   - Nếu tài liệu có bảng biểu, bạn PHẢI tạo đúng cấu trúc chuẩn:
+     <table>
+       <thead>
+         <tr>
+           <th style="text-align: center;">STT</th>
+           <th style="text-align: center;">Họ và tên</th>
+           <th style="text-align: center;">Chức vụ</th>
+         </tr>
+       </thead>
+       <tbody>
+         <tr>
+           <td style="text-align: center;">1</td>
+           <td>Nguyễn Văn A</td>
+           <td>Trưởng phòng</td>
+         </tr>
+       </tbody>
+     </table>
+   - Đảm bảo đầy đủ số hàng, số cột. Nếu có gộp ô, dùng thuộc tính colspan="..." hoặc rowspan="...".
+   - Căn lề từng cột trong bảng: Số/STT căn giữa, Tên/Nội dung căn trái, Số tiền/Ngày tháng căn phải hoặc giữa.
+3. DANH SÁCH & KÝ HIỆU:
+   - Dùng <ul><li> hoặc <ol><li> cho các mục liệt kê.
+4. CHÍNH TẢ & DẤU TIẾNG VIỆT:
+   - Giữ chính xác 100% từng ký tự, dấu tiếng Việt (kể cả dấu hỏi, ngã, nặng), chữ số và ký hiệu đặc biệt.
+5. ĐẦU RA:
+   - QUAN TRỌNG: Chỉ trả về mã HTML sạch thuần túy. Tuyệt đối KHÔNG bọc trong khối markdown \`\`\`html và không kèm bất kỳ câu chữ giải thích nào.`;
 
             const contents = [{
                 role: 'user',
@@ -162,7 +211,7 @@ Quy tắc định dạng:
                         }
                     },
                     {
-                        text: 'Hãy trích xuất toàn bộ tài liệu này thành mã HTML sạch để đưa vào tài liệu Word (.docx).'
+                        text: 'Hãy trích xuất toàn bộ tài liệu này thành mã HTML sạch để đưa vào tài liệu Word (.docx) chuẩn khổ A4 và bảo toàn bảng biểu.'
                     }
                 ]
             }];
@@ -181,12 +230,16 @@ Quy tắc định dạng:
             return res.end(JSON.stringify(result));
         }
 
-        // 2. ACTION: AI EDIT TEXT (THAY THẾ CHỮ TRÊN ẢNH GIỮ NỀN)
+        // 2. ACTION: AI EDIT TEXT (THAY THẾ CHỮ TRÊN ẢNH GIỮ NỀN VÀ MÀU GỐC)
         if (action === 'ai_edit_text') {
             if (!oldText) throw new Error('Vui lòng nhập chữ/thông tin cần thay thế (oldText).');
 
-            const systemPrompt = `Bạn là chuyên gia phân tích ảnh đồ họa và phát hiện vị trí văn bản.
-Nhiệm vụ: Tìm chính xác vị trí của đoạn chữ "${oldText}" trên ảnh và phân tích màu nền xung quanh để thay thế bằng nội dung mới "${newText || ''}".
+            const regionBoxInfo = body.regionBox 
+                ? `\nCHÚ Ý QUAN TRỌNG: Người dùng đã khoanh vùng chọn chứa đoạn chữ cần sửa tại tọa độ chuẩn hóa box_2d: [${body.regionBox.join(', ')}]. Bạn CHỈ ĐƯỢC PHÉP tìm và thay thế đoạn chữ "${oldText}" nằm BÊN TRONG hoặc giao cắt với vùng chọn này, bỏ qua các đoạn chữ giống hệt nằm ở vị trí khác trên ảnh.` 
+                : '';
+
+            const systemPrompt = `Bạn là chuyên gia phân tích thị giác đồ họa, typography và màu sắc ảnh.
+Nhiệm vụ: Tìm chính xác vị trí của đoạn chữ "${oldText}" trên ảnh và phân tích chi tiết màu chữ, màu nền xung quanh để thay thế bằng nội dung mới "${newText || ''}".${regionBoxInfo}
 Bạn PHẢI trả về duy nhất 1 chuỗi JSON hợp lệ (không bọc trong markdown \`\`\`json, không thêm text ngoài JSON):
 {
   "found": true,
@@ -202,14 +255,14 @@ Bạn PHẢI trả về duy nhất 1 chuỗi JSON hợp lệ (không bọc trong
   "bg_color_end": "#ffffff",
   "text_align": "center"
 }
-Quy ước:
-- box_2d: tọa độ chuẩn hóa từ 0 đến 1000 theo dạng [ymin, xmin, ymax, xmax].
+Quy ước độ chính xác:
+- box_2d: tọa độ chuẩn hóa từ 0 đến 1000 theo dạng [ymin, xmin, ymax, xmax]. Khoanh VỪA KHÍT bao quanh đoạn chữ "${oldText}", không khoanh quá rộng làm lem nền xung quanh.
 - font_size_ratio: tỉ lệ chiều cao chữ xấp xỉ so với chiều cao ảnh (ví dụ 0.03 = 3% chiều cao ảnh).
-- font_family: "sans-serif" (Arial/Roboto) hoặc "serif" (Times New Roman).
+- font_family: "sans-serif" (Arial, Roboto, Helvetica) hoặc "serif" (Times New Roman, Georgia).
 - font_weight: "bold" hoặc "normal".
-- font_color: mã màu HEX của chữ (ví dụ #000000, #ff0000).
-- bg_type: "solid" hoặc "gradient_horizontal" hoặc "gradient_vertical".
-- bg_color_start và bg_color_end: mã màu HEX của nền xung quanh chữ.
+- font_color: mã màu HEX chuẩn xác của nét chữ gốc trong ảnh (ví dụ #0f172a, #1e293b, #b91c1c, #047857).
+- bg_type: "solid" (nền màu đơn sắc), "gradient_horizontal" (nền chuyển màu ngang) hoặc "gradient_vertical" (nền chuyển màu dọc).
+- bg_color_start và bg_color_end: mã màu HEX thực tế của nền giấy/ảnh xung quanh ngay sát viền chữ (chú ý độ ngả vàng của giấy cũ hoặc màu sắc nền trang trí).
 - text_align: "center", "left", hoặc "right".
 - Nếu hoàn toàn không thấy cụm từ đó trong ảnh: { "found": false, "message": "Không tìm thấy đoạn chữ trong ảnh" }.`;
 
@@ -223,7 +276,7 @@ Quy ước:
                         }
                     },
                     {
-                        text: 'Phát hiện vị trí và màu sắc chữ "' + oldText + '" để thay thế.'
+                        text: 'Phát hiện vị trí và màu sắc chữ "' + oldText + '" để thay thế.' + (body.regionBox ? ' Hãy chú ý vùng chọn box_2d đã được chỉ định.' : '')
                     }
                 ]
             }];
@@ -253,34 +306,54 @@ Quy ước:
         // 3. ACTION: AI PROMPT EDIT (CHỈNH SỬA / LÀM ĐẸP / BỘ LỌC THEO MIÊU TẢ TEXT)
         if (action === 'ai_prompt_edit') {
             const userPrompt = promptText || 'Làm đẹp ảnh, nâng cao chất lượng và tối ưu màu sắc';
-            const systemPrompt = `Bạn là chuyên gia đồ họa và color grading ảnh AI.
+            const systemPrompt = `Bạn là chuyên gia đồ họa, chỉnh sửa ảnh và AI.
 Người dùng yêu cầu: "${userPrompt}".
-Hãy phân tích hình ảnh và yêu cầu trên, đưa ra nhận xét và các thông số điều chỉnh bộ lọc màu sắc, ánh sáng, tương phản phù hợp nhất.
+Dựa vào yêu cầu và hình ảnh, hãy phân tích và quyết định danh sách các hành động cần thực hiện.
+Các hành động có thể bao gồm:
+1. "filters": Điều chỉnh độ sáng, tương phản, màu sắc. (Hành động này luôn nên có nếu người dùng miêu tả việc làm đẹp ảnh).
+2. "crop": Cắt ảnh tự động theo yêu cầu (ví dụ: cắt sát viền, cắt bỏ nền thừa). Trả về tọa độ "box_2d": [ymin, xmin, ymax, xmax] chuẩn hóa 0-1000.
+3. "replace_text": Thay thế chữ. Trả về "old_text", "new_text" và "box_2d" của vị trí chữ cũ (chuẩn hóa 0-1000). Cần phân tích chi tiết "font_size_ratio", "font_family", "font_weight", "font_color", "bg_type", "bg_color_start", "bg_color_end", "text_align" giống như AI Edit Text.
+
 Chỉ trả về duy nhất 1 chuỗi JSON (không bọc trong markdown \`\`\`json):
 {
-  "explanation": "Lời giải thích ngắn gọn bằng tiếng Việt về những gì AI đã cân chỉnh cho bức ảnh",
-  "filters": {
-    "brightness": 0,
-    "contrast": 0,
-    "blackPoint": 0,
-    "whitePoint": 255,
-    "saturation": 0,
-    "sepia": 0,
-    "warmth": 0,
-    "sharpen": false,
-    "grayscale": false,
-    "invert": false
-  }
+  "explanation": "Lời giải thích ngắn gọn bằng tiếng Việt về những gì AI đã làm",
+  "actions": [
+    {
+      "action": "filters",
+      "filters": {
+        "brightness": 0,
+        "contrast": 0,
+        "blackPoint": 0,
+        "whitePoint": 255,
+        "saturation": 0,
+        "sepia": 0,
+        "warmth": 0,
+        "sharpen": false,
+        "grayscale": false,
+        "invert": false
+      }
+    },
+    {
+      "action": "crop",
+      "box_2d": [100, 100, 900, 900]
+    },
+    {
+      "action": "replace_text",
+      "old_text": "chữ cũ",
+      "new_text": "chữ mới",
+      "box_2d": [ymin, xmin, ymax, xmax],
+      "font_size_ratio": 0.035,
+      "font_family": "sans-serif",
+      "font_weight": "bold",
+      "font_color": "#111827",
+      "bg_type": "solid",
+      "bg_color_start": "#ffffff",
+      "bg_color_end": "#ffffff",
+      "text_align": "center"
+    }
+  ]
 }
-Phạm vi giá trị:
-- brightness: từ -100 đến 100
-- contrast: từ -100 đến 100
-- blackPoint: từ 0 đến 100
-- whitePoint: từ 150 đến 255
-- saturation: từ -100 đến 100
-- sepia: từ 0 đến 100
-- warmth: từ -100 đến 100
-- sharpen, grayscale, invert: boolean true/false.`;
+Chỉ bao gồm các action cần thiết theo yêu cầu. Phạm vi giá trị filters: brightness/contrast/saturation/warmth (-100 đến 100), blackPoint (0-100), whitePoint (150-255), sepia (0-100).`;
 
             const contents = [{
                 role: 'user',

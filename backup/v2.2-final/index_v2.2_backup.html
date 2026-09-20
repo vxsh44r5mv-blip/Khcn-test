@@ -1122,47 +1122,6 @@
             cursor: not-allowed;
             box-shadow: none;
         }
-        .studio-btn-history {
-            background: rgba(255, 255, 255, 0.08);
-            color: #f1f5f9;
-            border: 1px solid rgba(255, 255, 255, 0.16);
-            padding: 6px 12px;
-            font-size: 12px;
-        }
-        .studio-btn-history:hover:not(:disabled) {
-            background: rgba(255, 255, 255, 0.18);
-            color: #ffffff;
-            border-color: rgba(255, 255, 255, 0.3);
-        }
-        .studio-btn-history:disabled {
-            opacity: 0.35;
-            cursor: not-allowed;
-            background: rgba(255, 255, 255, 0.04);
-            border-color: transparent;
-        }
-        .studio-btn-original {
-            background: rgba(14, 165, 233, 0.15);
-            color: #38bdf8;
-            border: 1px solid rgba(14, 165, 233, 0.35);
-            padding: 6px 12px;
-            font-size: 12px;
-            user-select: none;
-        }
-        .studio-btn-original:hover:not(:disabled) {
-            background: rgba(14, 165, 233, 0.28);
-            color: #ffffff;
-            border-color: #38bdf8;
-        }
-        .studio-btn-original.active {
-            background: #0284c7 !important;
-            color: #ffffff !important;
-            box-shadow: 0 0 10px rgba(14, 165, 233, 0.5);
-        }
-        .studio-btn-original:disabled {
-            opacity: 0.35;
-            cursor: not-allowed;
-            border-color: transparent;
-        }
         .studio-btn-close {
             width: 32px;
             height: 32px;
@@ -1549,7 +1508,7 @@
             animation: spin 0.8s linear infinite;
         }
         /* ==============================================================
-           MASTER MOBILE & TOUCH RESPONSIVE STYLESHEET (V3.0)
+           MASTER MOBILE & TOUCH RESPONSIVE STYLESHEET (V2.2)
            Đặt ở cuối <style> để đảm bảo quyền ưu tiên ghi đè tuyệt đối
            ============================================================== */
         @media (max-width: 820px), (pointer: coarse) and (max-width: 1024px) {
@@ -2100,7 +2059,7 @@
             <span class="nav-logo">⚡</span>
             <div class="nav-title-group">
                 <span class="nav-title">KHCN Quản lý</span>
-                <span class="nav-version">v3.0</span>
+                <span class="nav-version">v2.2</span>
             </div>
         </div>
 
@@ -2314,7 +2273,7 @@
             <div class="studio-header-left">
                 <span class="studio-icon">🎨</span>
                 <div>
-                    <div class="studio-title">Studio Chỉnh Sửa Ảnh & Chuyển Đổi DOCX <span class="studio-pill">Pro v3.0</span></div>
+                    <div class="studio-title">Studio Chỉnh Sửa Ảnh & Chuyển Đổi DOCX <span class="studio-pill">Pro v2.2</span></div>
                     <div class="studio-sub" id="studioFileInfo">Chưa có ảnh nào được tải lên</div>
                 </div>
             </div>
@@ -2326,22 +2285,15 @@
             </div>
 
             <div class="studio-header-right">
-                <button type="button" class="studio-btn studio-btn-history" id="btnStudioUndo" onclick="window.studioUndo()" disabled title="Hoàn tác thao tác trước (Ctrl + Z)">
-                    ↶ Hoàn tác
-                </button>
-                <button type="button" class="studio-btn studio-btn-history" id="btnStudioRedo" onclick="window.studioRedo()" disabled title="Làm lại thao tác vừa hoàn tác (Ctrl + Y)">
-                    ↷ Làm lại
-                </button>
-                <button type="button" class="studio-btn studio-btn-original" id="btnStudioViewOriginal" 
-                    onmousedown="window.holdOriginalImage(true)" 
-                    onmouseup="window.holdOriginalImage(false)"
-                    onmouseleave="window.holdOriginalImage(false)"
-                    ontouchstart="window.holdOriginalImage(true)"
-                    ontouchend="window.holdOriginalImage(false)"
-                    onclick="window.toggleOriginalCompare()"
-                    disabled title="Nhấn giữ để so sánh ảnh gốc ban đầu, hoặc bấm click để bật/tắt so sánh">
-                    👁️ Xem ảnh gốc
-                </button>
+                <div class="studio-model-selector-box" style="display: flex; align-items: center; gap: 6px; background: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255,255,255,0.14); border-radius: 8px; padding: 4px 10px;" title="Lựa chọn mô hình AI (Gemini Engine)">
+                    <span style="font-size: 13px;">🤖</span>
+                    <select id="studioHeaderModelSelector" onchange="window.setStudioSelectedModel(this.value)" style="background: transparent; color: #f8fafc; border: none; font-size: 11.5px; font-weight: 600; outline: none; cursor: pointer;">
+                        <option value="flash_auto" selected>⚡ Gemini 3.5/2.5 Flash (Miễn phí, 1-2s)</option>
+                        <option value="gemini-3.1-pro-preview">🧠 Gemini 3.1 Pro (Cần Billing)</option>
+                        <option value="gemini-2.5-pro">💎 Gemini 2.5 Pro (Cần Billing)</option>
+                        <option value="auto">🔄 Tự động (Auto-Fallback)</option>
+                    </select>
+                </div>
                 <label class="studio-btn studio-btn-upload" title="Mở ảnh hoặc tài liệu mới">
                     📂 Mở tệp
                     <input type="file" id="studioFileInput" accept="image/*,application/pdf" style="display:none;" onchange="window.handleStudioUpload(event)">
@@ -2502,14 +2454,10 @@
                         <div style="display: flex; flex-direction: column; gap: 4px;">
                             <label style="font-size: 11.5px; font-weight: 600; color: #cbd5e1;">Chọn Engine xử lý AI:</label>
                             <select id="studioPanelModelSelector" class="studio-input" onchange="window.setStudioSelectedModel(this.value)" style="padding: 7px 10px; font-size: 12px; font-weight: 600;">
-                                <option value="gemini-3.5-flash" selected>⚡ Gemini 3.5 Flash (Ưu tiên, 1-2s)</option>
-                                <option value="gemini-3.6-flash">⚡ Gemini 3.6 Flash</option>
-                                <option value="gemini-3.7-flash">⚡ Gemini 3.7 Flash</option>
-                                <option value="gemini-3.8-flash">⚡ Gemini 3.8 Flash</option>
-                                <option value="gemini-2.5-flash">⚡ Gemini 2.5 Flash</option>
-                                <option value="gemini-3.1-pro-preview">🧠 Gemini 3.1 Pro (Cần Billing)</option>
-                                <option value="gemini-2.5-pro">💎 Gemini 2.5 Pro (Cần Billing)</option>
-                                <option value="auto">🔄 Tự động (Auto-Fallback)</option>
+                                <option value="flash_auto" selected>⚡ Siêu tốc: Gemini 3.5 / 2.5 Flash (Miễn phí, 1-2s)</option>
+                                <option value="gemini-3.1-pro-preview">🧠 Chuyên sâu: Gemini 3.1 Pro Preview (Yêu cầu Billing)</option>
+                                <option value="gemini-2.5-pro">💎 Gemini 2.5 Pro (Yêu cầu Billing)</option>
+                                <option value="auto">🔄 Tự động thông minh: Ưu tiên Flash rồi Pro</option>
                             </select>
                         </div>
 
@@ -2540,14 +2488,10 @@
                     <div id="aiModeReplaceBox">
                         <div class="studio-control-group">
                             <div class="studio-group-title">Thay chữ/thông tin (Giữ nền gốc)</div>
-                            <p style="font-size: 11.5px; color: #94a3b8; line-height: 1.4; margin: 0; margin-bottom: 8px;">
+                            <p style="font-size: 11.5px; color: #94a3b8; line-height: 1.4; margin: 0;">
                                 Thích hợp sửa tên, ngày tháng, nội dung trên thiệp mời, chứng chỉ, văn bản mà vẫn giữ màu nền gradient gốc.
                             </p>
                             
-                            <button type="button" id="btnToggleAiRegion" class="studio-btn" onclick="window.toggleAiRegion()" style="margin-bottom: 12px; background: rgba(59, 130, 246, 0.2); color: #93c5fd; border-color: rgba(59, 130, 246, 0.4);">
-                                📍 [ST-05] Khoanh vùng chữ
-                            </button>
-
                             <div>
                                 <label style="font-size: 11.5px; font-weight: 600; color: #cbd5e1; display: block; margin-bottom: 4px;">Đoạn chữ cũ cần xóa:</label>
                                 <input type="text" id="aiOldText" class="studio-input" placeholder="Ví dụ: Nguyễn Văn A hoặc 19/09/2026">
@@ -2631,10 +2575,6 @@
                     </button>
                 </div>
 
-                <div id="studioOriginalBadge" style="display: none; position: absolute; top: 16px; left: 50%; transform: translateX(-50%); background: rgba(14, 165, 233, 0.95); color: #ffffff; padding: 6px 18px; border-radius: 20px; font-weight: 700; font-size: 12.5px; box-shadow: 0 4px 15px rgba(0,0,0,0.4); z-index: 50; pointer-events: none; border: 1px solid rgba(255,255,255,0.3);">
-                    👁️ Đang xem ảnh gốc ban đầu (Nhả chuột để quay lại ảnh đang sửa)
-                </div>
-
                 <div id="studioCanvasContainer" class="studio-canvas-container" style="display: none;">
                     <canvas id="studioMainCanvas"></canvas>
                     <div id="cropOverlayBox" class="crop-overlay-box" style="display: none;">
@@ -2648,18 +2588,6 @@
                         <div class="crop-handle sw" data-handle="sw"></div>
                         <div class="crop-handle w" data-handle="w"></div>
                     </div>
-                    <!-- [ST-05] Box khoanh vùng chữ -->
-                    <div id="aiRegionOverlayBox" class="crop-overlay-box" style="display: none; border-color: #3b82f6; background: rgba(59, 130, 246, 0.1); box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.4);">
-                        <div class="crop-size-badge" id="aiRegionSizeBadge" style="background: #3b82f6;">Vùng cần sửa</div>
-                        <div class="crop-handle nw" data-handle="nw" style="border-color: #3b82f6;"></div>
-                        <div class="crop-handle n" data-handle="n" style="border-color: #3b82f6;"></div>
-                        <div class="crop-handle ne" data-handle="ne" style="border-color: #3b82f6;"></div>
-                        <div class="crop-handle e" data-handle="e" style="border-color: #3b82f6;"></div>
-                        <div class="crop-handle se" data-handle="se" style="border-color: #3b82f6;"></div>
-                        <div class="crop-handle s" data-handle="s" style="border-color: #3b82f6;"></div>
-                        <div class="crop-handle sw" data-handle="sw" style="border-color: #3b82f6;"></div>
-                        <div class="crop-handle w" data-handle="w" style="border-color: #3b82f6;"></div>
-                    </div>
                 </div>
 
                 <!-- Loading overlay for AI / DOCX conversion -->
@@ -2668,16 +2596,6 @@
                     <div id="studioLoadingText" style="font-weight: 600; font-size: 14px; color: #fff;">Đang xử lý qua Gemini AI...</div>
                 </div>
             </div>
-
-            <!-- Zoom Controller UI -->
-            <div id="studioZoomController" style="display: none; position: absolute; bottom: 24px; right: 24px; background: rgba(15,23,42,0.85); border: 1px solid rgba(255,255,255,0.15); padding: 8px 16px; border-radius: 12px; align-items: center; gap: 12px; z-index: 100; backdrop-filter: blur(10px); box-shadow: 0 8px 32px rgba(0,0,0,0.5);">
-                <button type="button" class="studio-mini-btn" style="padding: 4px 8px; font-size: 16px;" onclick="window.zoomStudioCanvas(-0.1)" title="Thu nhỏ">➖</button>
-                <input type="range" id="studioZoomSlider" min="10" max="500" value="100" style="width: 120px; accent-color: #38bdf8; cursor: pointer;" oninput="window.updateStudioCanvasZoom(this.value)">
-                <span id="studioZoomValue" style="font-size: 13px; font-weight: 700; color: #f8fafc; min-width: 45px; text-align: right; user-select: none;">100%</span>
-                <button type="button" class="studio-mini-btn" style="padding: 4px 8px; font-size: 16px;" onclick="window.zoomStudioCanvas(0.1)" title="Phóng to">➕</button>
-                <button type="button" class="studio-mini-btn" style="margin-left: 8px; padding: 4px 10px; background: rgba(56, 189, 248, 0.2); color: #38bdf8;" onclick="window.resetStudioCanvasZoom()" title="Vừa vặn màn hình">Mặc định</button>
-            </div>
-
         </div>
     </div>
 </div>
@@ -4477,10 +4395,9 @@
 
     
     /* ===================================================================
-       V3.0 STUDIO CHỈNH SỬA ẢNH & CHUYỂN ĐỔI DOCX
+       V2.1 STUDIO CHỈNH SỬA ẢNH & CHUYỂN ĐỔI DOCX
        =================================================================== */
     let studioRawImage = null;
-    let studioInitialOriginalImage = null; // Ảnh gốc ban đầu nguyên bản
     let studioRotation = 0;
     let studioFineTilt = 0;
     let studioFlipH = 1;
@@ -4489,265 +4406,12 @@
     let studioCurrentMimeType = 'image/png';
     let studioCurrentPdfBase64 = null;
     let studioLastDocxHtml = '';
-
-    // Các biến cho tính năng Crop (Cắt ảnh)
     let isStudioCropActive = false;
     let cropBox = { x: 50, y: 50, w: 200, h: 150 };
 
-    // [ST-05] Biến cho tính năng Khoanh vùng chữ AI
-    let isAiRegionActive = false;
-    let aiRegionBox = null; // {x, y, w, h}
-
-    // Lịch sử hoàn tác & làm lại (Undo / Redo)
-    let studioUndoStack = [];
-    let studioRedoStack = [];
-    const MAX_STUDIO_HISTORY = 25;
-    let isComparingOriginal = false;
-
-    // Tính năng Thu phóng ảnh (Zoom)
-    window.studioCurrentZoom = 'fit';
-
-    window.updateStudioCanvasZoom = function(val) {
-        if (val === 'fit') {
-            window.resetStudioCanvasZoom();
-            return;
-        }
-        window.studioCurrentZoom = parseInt(val);
-        document.getElementById('studioZoomValue').textContent = window.studioCurrentZoom + '%';
-        document.getElementById('studioZoomSlider').value = window.studioCurrentZoom;
-        window.applyStudioCanvasZoom();
-    };
-
-    window.zoomStudioCanvas = function(delta) {
-        let currentScale = window.studioCurrentZoom;
-        if (currentScale === 'fit') {
-            const canvas = document.getElementById('studioMainCanvas');
-            if (canvas && canvas.width > 0) {
-                const rect = canvas.getBoundingClientRect();
-                currentScale = Math.round((rect.width / canvas.width) * 100);
-            } else {
-                currentScale = 100;
-            }
-        }
-        let newVal = Math.round(currentScale + delta * 100);
-        // Làm tròn tới bội số của 10 để mượt hơn
-        newVal = Math.round(newVal / 10) * 10;
-        newVal = Math.max(10, Math.min(500, newVal));
-        window.updateStudioCanvasZoom(newVal);
-    };
-
-    window.resetStudioCanvasZoom = function() {
-        window.studioCurrentZoom = 'fit';
-        document.getElementById('studioZoomValue').textContent = '100%';
-        document.getElementById('studioZoomSlider').value = 100;
-        window.applyStudioCanvasZoom();
-    };
-
-    window.applyStudioCanvasZoom = function() {
-        const container = document.getElementById('studioCanvasContainer');
-        const canvas = document.getElementById('studioMainCanvas');
-        if (!container || !canvas) return;
-
-        if (window.studioCurrentZoom === 'fit') {
-            container.style.width = '100%';
-            container.style.height = '100%';
-            canvas.style.maxWidth = '100%';
-            canvas.style.maxHeight = 'calc(100vh - 120px)';
-            canvas.style.width = '';
-            canvas.style.height = '';
-        } else {
-            const scale = window.studioCurrentZoom / 100;
-            // Thay vì dùng transform scale, chúng ta set trực tiếp width và height của canvas bằng pixel
-            // để scrollbar hoạt động đúng.
-            // Chiều rộng/cao thật sự của canvas nằm ở canvas.width / canvas.height
-            container.style.width = 'max-content';
-            container.style.height = 'max-content';
-            canvas.style.maxWidth = 'none';
-            canvas.style.maxHeight = 'none';
-            canvas.style.width = Math.round(canvas.width * scale) + 'px';
-            canvas.style.height = Math.round(canvas.height * scale) + 'px';
-        }
-        // Cập nhật lại các vùng crop overlay
-        if (typeof window.updateCropBoxPosition === 'function') window.updateCropBoxPosition();
-        if (typeof window.updateAiRegionBoxPosition === 'function') window.updateAiRegionBoxPosition();
-    };
-
-    // Cập nhật trạng thái nút Undo, Redo, View Original
-    window.updateStudioHistoryButtons = function() {
-        const btnUndo = document.getElementById('btnStudioUndo');
-        const btnRedo = document.getElementById('btnStudioRedo');
-        const btnOrig = document.getElementById('btnStudioViewOriginal');
-
-        if (btnUndo) {
-            btnUndo.disabled = studioUndoStack.length === 0;
-            btnUndo.title = studioUndoStack.length > 0 
-                ? `Hoàn tác: ${studioUndoStack[studioUndoStack.length - 1].actionName || 'Thao tác trước'} (Ctrl + Z)` 
-                : 'Chưa có thao tác để hoàn tác (Ctrl + Z)';
-        }
-        if (btnRedo) {
-            btnRedo.disabled = studioRedoStack.length === 0;
-            btnRedo.title = studioRedoStack.length > 0 
-                ? `Làm lại: ${studioRedoStack[studioRedoStack.length - 1].actionName || 'Thao tác kế'} (Ctrl + Y)` 
-                : 'Chưa có thao tác để làm lại (Ctrl + Y)';
-        }
-        if (btnOrig) {
-            btnOrig.disabled = !studioInitialOriginalImage;
-        }
-    };
-
-    // Lưu snapshot vào Undo Stack
-    window.pushStudioState = function(actionName = 'Chỉnh sửa ảnh') {
-        if (!studioRawImage) return;
-
-        const snapshot = {
-            actionName: actionName,
-            imageSrc: studioRawImage.src,
-            rotation: studioRotation,
-            fineTilt: studioFineTilt,
-            flipH: studioFlipH,
-            flipV: studioFlipV,
-            filters: {
-                brightness: parseInt(document.getElementById('sliderBrightness')?.value, 10) || 0,
-                contrast: parseInt(document.getElementById('sliderContrast')?.value, 10) || 0,
-                blackPoint: parseInt(document.getElementById('sliderBlackPoint')?.value, 10) || 0,
-                whitePoint: parseInt(document.getElementById('sliderWhitePoint')?.value, 10) || 255,
-                saturation: parseInt(document.getElementById('sliderSaturation')?.value, 10) || 0
-            }
-        };
-
-        studioUndoStack.push(snapshot);
-        if (studioUndoStack.length > MAX_STUDIO_HISTORY) {
-            studioUndoStack.shift();
-        }
-        studioRedoStack = [];
-        window.updateStudioHistoryButtons();
-    };
-
-    // Hoàn tác (Undo)
-    window.studioUndo = async function() {
-        if (studioUndoStack.length === 0 || !studioRawImage) return;
-
-        const currentSnapshot = {
-            actionName: 'Hiện tại',
-            imageSrc: studioRawImage.src,
-            rotation: studioRotation,
-            fineTilt: studioFineTilt,
-            flipH: studioFlipH,
-            flipV: studioFlipV,
-            filters: {
-                brightness: parseInt(document.getElementById('sliderBrightness')?.value, 10) || 0,
-                contrast: parseInt(document.getElementById('sliderContrast')?.value, 10) || 0,
-                blackPoint: parseInt(document.getElementById('sliderBlackPoint')?.value, 10) || 0,
-                whitePoint: parseInt(document.getElementById('sliderWhitePoint')?.value, 10) || 255,
-                saturation: parseInt(document.getElementById('sliderSaturation')?.value, 10) || 0
-            }
-        };
-        studioRedoStack.push(currentSnapshot);
-
-        const prevState = studioUndoStack.pop();
-        await window.applyStudioSnapshot(prevState);
-        window.updateStudioHistoryButtons();
-        window.showToast(`↶ Đã hoàn tác: ${prevState.actionName}`);
-    };
-
-    // Làm lại (Redo)
-    window.studioRedo = async function() {
-        if (studioRedoStack.length === 0 || !studioRawImage) return;
-
-        const currentSnapshot = {
-            actionName: 'Trước khi làm lại',
-            imageSrc: studioRawImage.src,
-            rotation: studioRotation,
-            fineTilt: studioFineTilt,
-            flipH: studioFlipH,
-            flipV: studioFlipV,
-            filters: {
-                brightness: parseInt(document.getElementById('sliderBrightness')?.value, 10) || 0,
-                contrast: parseInt(document.getElementById('sliderContrast')?.value, 10) || 0,
-                blackPoint: parseInt(document.getElementById('sliderBlackPoint')?.value, 10) || 0,
-                whitePoint: parseInt(document.getElementById('sliderWhitePoint')?.value, 10) || 255,
-                saturation: parseInt(document.getElementById('sliderSaturation')?.value, 10) || 0
-            }
-        };
-        studioUndoStack.push(currentSnapshot);
-
-        const nextState = studioRedoStack.pop();
-        await window.applyStudioSnapshot(nextState);
-        window.updateStudioHistoryButtons();
-        window.showToast(`↷ Đã làm lại: ${nextState.actionName}`);
-    };
-
-    // Áp dụng trạng thái snapshot phục hồi
-    window.applyStudioSnapshot = async function(state) {
-        if (!state) return;
-        studioRotation = state.rotation !== undefined ? state.rotation : 0;
-        studioFineTilt = state.fineTilt !== undefined ? state.fineTilt : 0;
-        studioFlipH = state.flipH !== undefined ? state.flipH : 1;
-        studioFlipV = state.flipV !== undefined ? state.flipV : 1;
-
-        if (state.filters) {
-            const f = state.filters;
-            if (document.getElementById('sliderBrightness')) document.getElementById('sliderBrightness').value = f.brightness || 0;
-            if (document.getElementById('sliderContrast')) document.getElementById('sliderContrast').value = f.contrast || 0;
-            if (document.getElementById('sliderBlackPoint')) document.getElementById('sliderBlackPoint').value = f.blackPoint || 0;
-            if (document.getElementById('sliderWhitePoint')) document.getElementById('sliderWhitePoint').value = f.whitePoint !== undefined ? f.whitePoint : 255;
-            if (document.getElementById('sliderSaturation')) document.getElementById('sliderSaturation').value = f.saturation || 0;
-        }
-
-        if (document.getElementById('sliderFineTilt')) document.getElementById('sliderFineTilt').value = studioFineTilt;
-        if (document.getElementById('valFineTilt')) document.getElementById('valFineTilt').textContent = `${studioFineTilt >= 0 ? '+' : ''}${studioFineTilt.toFixed(1)}°`;
-
-        if (state.imageSrc) {
-            const restoredImg = new Image();
-            await new Promise(resolve => {
-                restoredImg.onload = resolve;
-                restoredImg.src = state.imageSrc;
-            });
-            studioRawImage = restoredImg;
-        }
-
-        window.renderStudioCanvas();
-    };
-
-    // Xem lại ảnh gốc ban đầu (Hold hoặc Click so sánh)
-    window.holdOriginalImage = function(isHolding) {
-        if (!studioInitialOriginalImage) return;
-        const canvas = document.getElementById('studioMainCanvas');
-        const badge = document.getElementById('studioOriginalBadge');
-        const btn = document.getElementById('btnStudioViewOriginal');
-        if (!canvas) return;
-
-        if (isHolding) {
-            isComparingOriginal = true;
-            if (badge) badge.style.display = 'block';
-            if (btn) btn.classList.add('active');
-
-            // Vẽ ảnh gốc nguyên bản
-            canvas.width = studioInitialOriginalImage.width;
-            canvas.height = studioInitialOriginalImage.height;
-            const ctx = canvas.getContext('2d');
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(studioInitialOriginalImage, 0, 0);
-        } else {
-            if (isComparingOriginal) {
-                isComparingOriginal = false;
-                if (badge) badge.style.display = 'none';
-                if (btn) btn.classList.remove('active');
-                window.renderStudioCanvas();
-            }
-        }
-    };
-
-    window.toggleOriginalCompare = function() {
-        if (!studioInitialOriginalImage) return;
-        window.holdOriginalImage(!isComparingOriginal);
-    };
-
     // V2.1 Studio AI Model & API Key Management
     window.getStudioSelectedModel = function() {
-        const m = localStorage.getItem('studio_ai_model');
-        if (!m || m === 'flash_auto' || m === 'gemini-flash') return 'gemini-3.5-flash';
-        return m;
+        return localStorage.getItem('studio_ai_model') || 'flash_auto';
     };
 
     window.getStudioCustomApiKey = function() {
@@ -4761,25 +4425,24 @@
         if (selHeader) selHeader.value = model;
         if (selPanel) selPanel.value = model;
 
-        function getModelInfo(m) {
-            if (m === 'gemini-3.8-flash') return { name: 'Gemini 3.8 Flash', badge: 'Flash 3.8', bg: 'linear-gradient(135deg, #059669, #10b981)' };
-            if (m === 'gemini-3.7-flash') return { name: 'Gemini 3.7 Flash', badge: 'Flash 3.7', bg: 'linear-gradient(135deg, #0d9488, #14b8a6)' };
-            if (m === 'gemini-3.6-flash') return { name: 'Gemini 3.6 Flash', badge: 'Flash 3.6', bg: 'linear-gradient(135deg, #0284c7, #38bdf8)' };
-            if (m === 'gemini-3.5-flash') return { name: 'Gemini 3.5 Flash', badge: 'Flash 3.5', bg: 'linear-gradient(135deg, #10b981, #06b6d4)' };
-            if (m === 'gemini-2.5-flash') return { name: 'Gemini 2.5 Flash', badge: 'Flash 2.5', bg: 'linear-gradient(135deg, #475569, #64748b)' };
-            if (m === 'gemini-3.1-pro-preview') return { name: 'Gemini 3.1 Pro', badge: 'Gemini 3.1 Pro', bg: 'linear-gradient(135deg, #8b5cf6, #ec4899)' };
-            if (m === 'gemini-2.5-pro') return { name: 'Gemini 2.5 Pro', badge: 'Gemini 2.5 Pro', bg: 'linear-gradient(135deg, #6366f1, #a855f7)' };
-            if (m === 'auto') return { name: 'Tự động thông minh', badge: 'Tự động (Auto)', bg: 'linear-gradient(135deg, #0284c7, #06b6d4)' };
-            return { name: m, badge: m, bg: 'linear-gradient(135deg, #10b981, #06b6d4)' };
-        }
-
-        const info = getModelInfo(model);
         const badge = document.getElementById('badgeActiveModel');
         if (badge) {
-            badge.textContent = info.badge;
-            badge.style.background = info.bg;
+            if (model === 'gemini-3.1-pro-preview') {
+                badge.textContent = 'Gemini 3.1 Pro';
+                badge.style.background = 'linear-gradient(135deg, #8b5cf6, #ec4899)';
+            } else if (model === 'gemini-2.5-pro') {
+                badge.textContent = 'Gemini 2.5 Pro';
+                badge.style.background = 'linear-gradient(135deg, #6366f1, #a855f7)';
+            } else if (model === 'auto') {
+                badge.textContent = 'Tự động (Auto)';
+                badge.style.background = 'linear-gradient(135deg, #0284c7, #06b6d4)';
+            } else {
+                badge.textContent = 'Flash 3.5/2.5';
+                badge.style.background = 'linear-gradient(135deg, #10b981, #06b6d4)';
+            }
         }
-        window.showToast(`🤖 Đã chuyển sang Engine: ${info.name}`);
+        const modelName = model === 'gemini-3.1-pro-preview' ? 'Gemini 3.1 Pro' : model === 'gemini-2.5-pro' ? 'Gemini 2.5 Pro' : model === 'auto' ? 'Tự động thông minh' : 'Gemini 3.5/2.5 Flash';
+        window.showToast(`🤖 Đã chuyển sang Engine: ${modelName}`);
     };
 
     window.saveCustomApiKey = function(rawKey) {
@@ -4810,22 +4473,7 @@
 
         const badge = document.getElementById('badgeActiveModel');
         if (badge) {
-            if (savedModel === 'gemini-3.8-flash') {
-                badge.textContent = 'Flash 3.8';
-                badge.style.background = 'linear-gradient(135deg, #059669, #10b981)';
-            } else if (savedModel === 'gemini-3.7-flash') {
-                badge.textContent = 'Flash 3.7';
-                badge.style.background = 'linear-gradient(135deg, #0d9488, #14b8a6)';
-            } else if (savedModel === 'gemini-3.6-flash') {
-                badge.textContent = 'Flash 3.6';
-                badge.style.background = 'linear-gradient(135deg, #0284c7, #38bdf8)';
-            } else if (savedModel === 'gemini-3.5-flash') {
-                badge.textContent = 'Flash 3.5';
-                badge.style.background = 'linear-gradient(135deg, #10b981, #06b6d4)';
-            } else if (savedModel === 'gemini-2.5-flash') {
-                badge.textContent = 'Flash 2.5';
-                badge.style.background = 'linear-gradient(135deg, #475569, #64748b)';
-            } else if (savedModel === 'gemini-3.1-pro-preview') {
+            if (savedModel === 'gemini-3.1-pro-preview') {
                 badge.textContent = 'Gemini 3.1 Pro';
                 badge.style.background = 'linear-gradient(135deg, #8b5cf6, #ec4899)';
             } else if (savedModel === 'gemini-2.5-pro') {
@@ -4835,7 +4483,7 @@
                 badge.textContent = 'Tự động (Auto)';
                 badge.style.background = 'linear-gradient(135deg, #0284c7, #06b6d4)';
             } else {
-                badge.textContent = savedModel;
+                badge.textContent = 'Flash 3.5/2.5';
                 badge.style.background = 'linear-gradient(135deg, #10b981, #06b6d4)';
             }
         }
@@ -4957,18 +4605,6 @@
             const img = new Image();
             img.onload = function() {
                 studioRawImage = img;
-                
-                // Lưu bản sao nguyên gốc ban đầu để xem lại bất kỳ lúc nào
-                const origImg = new Image();
-                origImg.src = e.target.result;
-                studioInitialOriginalImage = origImg;
-
-                // Khởi tạo lại ngăn xếp lịch sử
-                studioUndoStack = [];
-                studioRedoStack = [];
-                isComparingOriginal = false;
-                window.updateStudioHistoryButtons();
-
                 studioRotation = 0;
                 studioFineTilt = 0;
                 studioFlipH = 1;
@@ -4980,9 +4616,6 @@
                 if (document.getElementById('btnApplyFineTilt')) document.getElementById('btnApplyFineTilt').style.display = 'none';
                 document.getElementById('studioEmptyState').style.display = 'none';
                 document.getElementById('studioCanvasContainer').style.display = 'block';
-                if (document.getElementById('studioZoomController')) {
-                    document.getElementById('studioZoomController').style.display = 'flex';
-                }
                 document.getElementById('studioDownloadBtn').disabled = false;
                 window.renderStudioCanvas();
                 window.showToast('🖼️ Đã mở ảnh trong Studio thành công!');
@@ -5124,7 +4757,6 @@
     window.applyStudioPreset = function(type) {
         if (!studioRawImage) return;
         if (type === 'doc_clean') {
-            window.pushStudioState('Bộ lọc Nét Văn Bản');
             // Tối ưu hóa văn bản/tài liệu chụp
             document.getElementById('sliderBrightness').value = 15;
             document.getElementById('sliderContrast').value = 35;
@@ -5133,7 +4765,6 @@
             document.getElementById('sliderSaturation').value = -40;
             window.showToast('📝 Đã áp dụng bộ lọc Nét Văn Bản');
         } else if (type === 'vivid') {
-            window.pushStudioState('Bộ lọc Rực Rỡ');
             document.getElementById('sliderBrightness').value = 5;
             document.getElementById('sliderContrast').value = 15;
             document.getElementById('sliderBlackPoint').value = 0;
@@ -5141,7 +4772,6 @@
             document.getElementById('sliderSaturation').value = 25;
             window.showToast('✨ Đã áp dụng bộ lọc Rực Rỡ');
         } else if (type === 'bw') {
-            window.pushStudioState('Bộ lọc Trắng Đen');
             document.getElementById('sliderBrightness').value = 0;
             document.getElementById('sliderContrast').value = 20;
             document.getElementById('sliderBlackPoint').value = 15;
@@ -5154,14 +4784,12 @@
 
     window.rotateStudioImage = function(deg) {
         if (!studioRawImage) return;
-        window.pushStudioState(deg > 0 ? 'Xoay phải 90°' : 'Xoay trái 90°');
         studioRotation = (studioRotation + deg) % 360;
         window.renderStudioCanvas();
     };
 
     window.flipStudioImage = function(axis) {
         if (!studioRawImage) return;
-        window.pushStudioState(axis === 'horizontal' ? 'Lật ngang' : 'Lật dọc');
         if (axis === 'horizontal') studioFlipH = -studioFlipH;
         if (axis === 'vertical') studioFlipV = -studioFlipV;
         window.renderStudioCanvas();
@@ -5247,7 +4875,6 @@
 
     window.applyFineTilt = async function() {
         if (!studioRawImage || Math.abs(studioFineTilt) < 0.1) return;
-        window.pushStudioState('Căn góc nghiêng');
         await window.bakeCurrentRotationIntoRawImage();
         window.showToast('✓ Đã áp dụng góc nghiêng vào ảnh!');
     };
@@ -5370,59 +4997,6 @@
         }
     };
 
-    // [ST-05]
-    window.toggleAiRegion = function() {
-        if (!studioRawImage) return window.showToast('⚠️ Vui lòng mở ảnh trước khi sử dụng Khoanh vùng!');
-        const regionBoxEl = document.getElementById('aiRegionOverlayBox');
-        const btnToggle = document.getElementById('btnToggleAiRegion');
-        const container = document.getElementById('studioCanvasContainer');
-
-        if (isStudioCropActive) {
-            window.toggleStudioCrop(); // Tắt crop nếu đang mở
-        }
-
-        isAiRegionActive = !isAiRegionActive;
-
-        if (isAiRegionActive) {
-            btnToggle.classList.add('active');
-            btnToggle.textContent = '✕ Hủy khoanh vùng';
-            if (container) container.style.cursor = 'crosshair';
-
-            const canvas = document.getElementById('studioMainCanvas');
-            if (!aiRegionBox || aiRegionBox.w < 20 || aiRegionBox.x >= canvas.width || aiRegionBox.y >= canvas.height) {
-                aiRegionBox = {
-                    x: Math.round(canvas.width * 0.2),
-                    y: Math.round(canvas.height * 0.4),
-                    w: Math.round(canvas.width * 0.6),
-                    h: Math.round(canvas.height * 0.2)
-                };
-            }
-            regionBoxEl.style.display = 'block';
-            window.updateAiRegionBoxPosition();
-            window.showToast('📍 Kéo chuột vẽ khung bao quanh đoạn chữ cần sửa');
-        } else {
-            btnToggle.classList.remove('active');
-            btnToggle.textContent = '📍 [ST-05] Khoanh vùng chữ';
-            if (regionBoxEl) regionBoxEl.style.display = 'none';
-            if (container) container.style.cursor = 'default';
-        }
-    };
-
-    window.updateAiRegionBoxPosition = function() {
-        const canvas = document.getElementById('studioMainCanvas');
-        const regionBoxEl = document.getElementById('aiRegionOverlayBox');
-        if (!canvas || !regionBoxEl || !isAiRegionActive || !aiRegionBox) return;
-
-        const rect = canvas.getBoundingClientRect();
-        const scaleX = rect.width / canvas.width;
-        const scaleY = rect.height / canvas.height;
-
-        regionBoxEl.style.left = (aiRegionBox.x * scaleX) + 'px';
-        regionBoxEl.style.top = (aiRegionBox.y * scaleY) + 'px';
-        regionBoxEl.style.width = (aiRegionBox.w * scaleX) + 'px';
-        regionBoxEl.style.height = (aiRegionBox.h * scaleY) + 'px';
-    };
-
     function getCanvasCoordinates(e) {
         const canvas = document.getElementById('studioMainCanvas');
         if (!canvas) return { x: 0, y: 0 };
@@ -5451,24 +5025,23 @@
     // Kéo thả chọn vùng & co giãn 8 hướng hoàn chỉnh (Hỗ trợ cả Chuột và Cảm ứng Mobile/Tablet)
     (function setupCropInteraction() {
         function handlePointerDown(e) {
-            if (!isStudioCropActive && !isAiRegionActive) return;
+            if (!isStudioCropActive) return;
 
-            const activeBoxId = isStudioCropActive ? '#cropOverlayBox' : '#aiRegionOverlayBox';
-            const handle = e.target.closest(activeBoxId + ' .crop-handle');
+            const handle = e.target.closest('.crop-handle');
             if (handle) {
                 cropDragAction = handle.getAttribute('data-handle');
                 cropDragStartMouse = getCanvasCoordinates(e);
-                cropDragStartBox = isStudioCropActive ? { ...cropBox } : { ...aiRegionBox };
+                cropDragStartBox = { ...cropBox };
                 if (e.cancelable) e.preventDefault();
                 e.stopPropagation();
                 return;
             }
 
-            const inCropBox = e.target.closest(activeBoxId);
+            const inCropBox = e.target.closest('#cropOverlayBox');
             if (inCropBox) {
                 cropDragAction = 'move';
                 cropDragStartMouse = getCanvasCoordinates(e);
-                cropDragStartBox = isStudioCropActive ? { ...cropBox } : { ...aiRegionBox };
+                cropDragStartBox = { ...cropBox };
                 if (e.cancelable) e.preventDefault();
                 e.stopPropagation();
                 return;
@@ -5479,24 +5052,16 @@
                 cropDragAction = 'create';
                 const pos = getCanvasCoordinates(e);
                 cropDragStartMouse = pos;
-                const newBox = { x: pos.x, y: pos.y, w: 1, h: 1 };
-                if (isStudioCropActive) {
-                    cropBox = newBox;
-                } else {
-                    aiRegionBox = newBox;
-                }
-                cropDragStartBox = { ...newBox };
-                
-                if (isStudioCropActive) window.updateCropBoxPosition();
-                else window.updateAiRegionBoxPosition();
-                
+                cropBox = { x: pos.x, y: pos.y, w: 1, h: 1 };
+                cropDragStartBox = { ...cropBox };
+                window.updateCropBoxPosition();
                 if (e.cancelable) e.preventDefault();
                 e.stopPropagation();
             }
         }
 
         function handlePointerMove(e) {
-            if ((!isStudioCropActive && !isAiRegionActive) || !cropDragAction) return;
+            if (!isStudioCropActive || !cropDragAction) return;
             const canvas = document.getElementById('studioMainCanvas');
             if (!canvas) return;
 
@@ -5506,29 +5071,28 @@
             const dx = cur.x - cropDragStartMouse.x;
             const dy = cur.y - cropDragStartMouse.y;
 
-            let b = { ...cropDragStartBox };
-
             if (cropDragAction === 'move') {
-                b.x = Math.max(0, Math.min(canvas.width - b.w, cropDragStartBox.x + dx));
-                b.y = Math.max(0, Math.min(canvas.height - b.h, cropDragStartBox.y + dy));
+                cropBox.x = Math.max(0, Math.min(canvas.width - cropDragStartBox.w, cropDragStartBox.x + dx));
+                cropBox.y = Math.max(0, Math.min(canvas.height - cropDragStartBox.h, cropDragStartBox.y + dy));
             } else if (cropDragAction === 'create') {
                 let x = Math.min(cropDragStartMouse.x, cur.x);
                 let y = Math.min(cropDragStartMouse.y, cur.y);
                 let w = Math.abs(cur.x - cropDragStartMouse.x);
                 let h = Math.abs(cur.y - cropDragStartMouse.y);
 
-                if (isStudioCropActive && cropAspectRatio) {
+                if (cropAspectRatio) {
                     h = Math.round(w / cropAspectRatio);
                     if (y + h > canvas.height) {
                         h = canvas.height - y;
                         w = Math.round(h * cropAspectRatio);
                     }
                 }
-                b.x = x;
-                b.y = y;
-                b.w = Math.max(10, w);
-                b.h = Math.max(10, h);
+                cropBox.x = x;
+                cropBox.y = y;
+                cropBox.w = Math.max(10, w);
+                cropBox.h = Math.max(10, h);
             } else {
+                let b = { ...cropDragStartBox };
                 if (cropDragAction.includes('e')) {
                     b.w = Math.max(20, Math.min(canvas.width - b.x, cropDragStartBox.w + dx));
                 }
@@ -5541,41 +5105,30 @@
                     b.x = newX;
                 }
                 if (cropDragAction.includes('n')) {
-                    const newY = Math.max(0, Math.min(cropDragStartBox.y + cropDragStartBox.h - 20, cropDragStartBox.y + dy));
+                    const newY = Math.max(0, Math.min(cropDragStartBox.y + cropDragStartBox.h - 20, cropDragStartBox.h + dy));
                     b.h = (cropDragStartBox.y + cropDragStartBox.h) - newY;
                     b.y = newY;
                 }
 
-                if (isStudioCropActive && cropAspectRatio) {
+                if (cropAspectRatio) {
                     if (cropDragAction === 'n' || cropDragAction === 's') {
                         b.w = Math.round(b.h * cropAspectRatio);
                     } else {
                         b.h = Math.round(b.w / cropAspectRatio);
                     }
                 }
+                cropBox = b;
             }
 
-            if (isStudioCropActive) {
-                cropBox = b;
-                window.updateCropBoxPosition();
-            } else {
-                aiRegionBox = b;
-                window.updateAiRegionBoxPosition();
-            }
+            window.updateCropBoxPosition();
         }
 
         function handlePointerUp() {
             if (cropDragAction) {
                 cropDragAction = null;
-                if (isStudioCropActive) {
-                    if (cropBox.w < 20) cropBox.w = 20;
-                    if (cropBox.h < 20) cropBox.h = 20;
-                    window.updateCropBoxPosition();
-                } else if (isAiRegionActive && aiRegionBox) {
-                    if (aiRegionBox.w < 20) aiRegionBox.w = 20;
-                    if (aiRegionBox.h < 20) aiRegionBox.h = 20;
-                    window.updateAiRegionBoxPosition();
-                }
+                if (cropBox.w < 20) cropBox.w = 20;
+                if (cropBox.h < 20) cropBox.h = 20;
+                window.updateCropBoxPosition();
             }
         }
 
@@ -5595,8 +5148,6 @@
         if (!studioRawImage || !isStudioCropActive) return;
         const canvas = document.getElementById('studioMainCanvas');
         if (!canvas) return;
-
-        window.pushStudioState('Cắt ảnh (Crop)');
 
         const cropW = Math.max(10, Math.round(cropBox.w));
         const cropH = Math.max(10, Math.round(cropBox.h));
@@ -5842,7 +5393,6 @@
                 return;
             }
 
-            window.pushStudioState(`Tự động xoay AI (${totalAngle > 0 ? '+' : ''}${totalAngle.toFixed(1)}°)`);
             // Xoay thêm góc totalAngle do AI tính toán
             studioRotation = (studioRotation + totalAngle) % 360;
             await window.bakeCurrentRotationIntoRawImage();
@@ -5871,145 +5421,6 @@
     };
 
     // V2.1 AI EDITING LOGIC (GEMINI 3.1 PRO / VISION)
-    window.applyAiCanvasPatch = async function(patch, canvas) {
-        return new Promise((resolve) => {
-            const oldText = patch.old_text || '';
-            const newText = patch.new_text || '';
-            const box = patch.box_2d || [0,0,0,0];
-            const y1 = Math.round((box[0] * canvas.height) / 1000);
-            const x1 = Math.round((box[1] * canvas.width) / 1000);
-            const y2 = Math.round((box[2] * canvas.height) / 1000);
-            const x2 = Math.round((box[3] * canvas.width) / 1000);
-            const padX = 2;
-            const padY = 2;
-            const patchW = Math.max(4, (x2 - x1) + padX * 2);
-            const patchH = Math.max(4, (y2 - y1) + padY * 2);
-            const startX = Math.max(0, x1 - padX);
-            const startY = Math.max(0, y1 - padY);
-
-            const ctx = canvas.getContext('2d');
-            const samplePad = 3;
-            const bTopY = Math.max(0, Math.round(startY - samplePad));
-            const bBottomY = Math.min(canvas.height - 1, Math.round(startY + patchH + samplePad));
-            const bLeftX = Math.max(0, Math.round(startX - samplePad));
-            const bRightX = Math.min(canvas.width - 1, Math.round(startX + patchW + samplePad));
-
-            function getAverageColor(x, y, w, h) {
-                try {
-                    const imgD = ctx.getImageData(x, y, Math.max(1, w), Math.max(1, h)).data;
-                    let r = 0, g = 0, b = 0, count = 0;
-                    for (let i = 0; i < imgD.length; i += 4) {
-                        if (imgD[i+3] > 40) {
-                            r += imgD[i];
-                            g += imgD[i+1];
-                            b += imgD[i+2];
-                            count++;
-                        }
-                    }
-                    if (count === 0) return null;
-                    return [Math.round(r / count), Math.round(g / count), Math.round(b / count)];
-                } catch(e) { return null; }
-            }
-
-            const cTop = getAverageColor(startX, bTopY, patchW, 2);
-            const cBottom = getAverageColor(startX, bBottomY, patchW, 2);
-            const cLeft = getAverageColor(bLeftX, startY, 2, patchH);
-            const cRight = getAverageColor(bRightX, startY, 2, patchH);
-
-            function rgbToHex(rgb) {
-                if (!rgb) return null;
-                return '#' + rgb.map(v => Math.max(0, Math.min(255, v)).toString(16).padStart(2, '0')).join('');
-            }
-
-            let detectedInkColor = null;
-            try {
-                const oldTextImgData = ctx.getImageData(startX, startY, patchW, patchH).data;
-                let darkestLuma = 255;
-                let darkR = 0, darkG = 0, darkB = 0, darkCount = 0;
-                for (let i = 0; i < oldTextImgData.length; i += 4) {
-                    const luma = 0.299 * oldTextImgData[i] + 0.587 * oldTextImgData[i+1] + 0.114 * oldTextImgData[i+2];
-                    if (luma < darkestLuma) darkestLuma = luma;
-                }
-                const inkThreshold = darkestLuma + 35;
-                for (let i = 0; i < oldTextImgData.length; i += 4) {
-                    const luma = 0.299 * oldTextImgData[i] + 0.587 * oldTextImgData[i+1] + 0.114 * oldTextImgData[i+2];
-                    if (luma <= inkThreshold) {
-                        darkR += oldTextImgData[i];
-                        darkG += oldTextImgData[i+1];
-                        darkB += oldTextImgData[i+2];
-                        darkCount++;
-                    }
-                }
-                if (darkCount > 0) detectedInkColor = [Math.round(darkR / darkCount), Math.round(darkG / darkCount), Math.round(darkB / darkCount)];
-            } catch(e) {}
-
-            let fillStyle = null;
-            const topColorHex = rgbToHex(cTop) || patch.bg_color_start || '#ffffff';
-            const bottomColorHex = rgbToHex(cBottom) || patch.bg_color_end || topColorHex;
-            const leftColorHex = rgbToHex(cLeft) || patch.bg_color_start || '#ffffff';
-            const rightColorHex = rgbToHex(cRight) || patch.bg_color_end || leftColorHex;
-
-            const deltaV = (cTop && cBottom) ? Math.abs(cTop[0] - cBottom[0]) + Math.abs(cTop[1] - cBottom[1]) + Math.abs(cTop[2] - cBottom[2]) : 0;
-            const deltaH = (cLeft && cRight) ? Math.abs(cLeft[0] - cRight[0]) + Math.abs(cLeft[1] - cRight[1]) + Math.abs(cLeft[2] - cRight[2]) : 0;
-
-            if (deltaV > 12 || patch.bg_type === 'gradient_vertical') {
-                const grad = ctx.createLinearGradient(startX, startY, startX, startY + patchH);
-                grad.addColorStop(0, topColorHex);
-                grad.addColorStop(1, bottomColorHex);
-                fillStyle = grad;
-            } else if (deltaH > 12 || patch.bg_type === 'gradient_horizontal') {
-                const grad = ctx.createLinearGradient(startX, startY, startX + patchW, startY);
-                grad.addColorStop(0, leftColorHex);
-                grad.addColorStop(1, rightColorHex);
-                fillStyle = grad;
-            } else {
-                const validEdges = [cTop, cBottom, cLeft, cRight].filter(Boolean);
-                if (validEdges.length > 0) {
-                    const avgR = Math.round(validEdges.reduce((sum, c) => sum + c[0], 0) / validEdges.length);
-                    const avgG = Math.round(validEdges.reduce((sum, c) => sum + c[1], 0) / validEdges.length);
-                    const avgB = Math.round(validEdges.reduce((sum, c) => sum + c[2], 0) / validEdges.length);
-                    fillStyle = `rgb(${avgR}, ${avgG}, ${avgB})`;
-                } else {
-                    fillStyle = patch.bg_color_start || '#ffffff';
-                }
-            }
-
-            ctx.fillStyle = fillStyle;
-            ctx.fillRect(startX, startY, patchW, patchH);
-
-            if (newText) {
-                const fontSize = Math.round(patch.font_size_ratio ? patch.font_size_ratio * canvas.height : patchH * 0.78);
-                const fontFamily = patch.font_family === 'serif' ? 'Times New Roman, serif' : 'Arial, sans-serif';
-                const fontWeight = patch.font_weight || 'bold';
-
-                ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
-                const finalFontColor = detectedInkColor ? rgbToHex(detectedInkColor) : (patch.font_color || '#111827');
-                ctx.fillStyle = finalFontColor;
-                ctx.textBaseline = 'middle';
-
-                let targetX = startX + patchW / 2;
-                if (patch.text_align === 'left') {
-                    ctx.textAlign = 'left';
-                    targetX = startX + 4;
-                } else if (patch.text_align === 'right') {
-                    ctx.textAlign = 'right';
-                    targetX = startX + patchW - 4;
-                } else {
-                    ctx.textAlign = 'center';
-                }
-                ctx.fillText(newText, targetX, startY + patchH / 2);
-            }
-
-            const updatedImg = new Image();
-            updatedImg.onload = function() {
-                studioRawImage = updatedImg;
-                window.updateStudioHistoryButtons();
-                resolve();
-            };
-            updatedImg.src = canvas.toDataURL('image/png');
-        });
-    };
-
     window.executeAiTextReplace = async function() {
         const canvas = document.getElementById('studioMainCanvas');
         if (!canvas) return window.showToast('⚠️ Vui lòng mở ảnh trước khi thay chữ!');
@@ -6039,12 +5450,6 @@
                     mimeType: 'image/jpeg',
                     oldText: oldText,
                     newText: newText,
-                    regionBox: (isAiRegionActive && aiRegionBox) ? [
-                        (aiRegionBox.y / canvas.height) * 1000,
-                        (aiRegionBox.x / canvas.width) * 1000,
-                        ((aiRegionBox.y + aiRegionBox.h) / canvas.height) * 1000,
-                        ((aiRegionBox.x + aiRegionBox.w) / canvas.width) * 1000
-                    ] : null,
                     selectedModel: window.getStudioSelectedModel(),
                     customApiKey: window.getStudioCustomApiKey()
                 })
@@ -6063,13 +5468,67 @@
                 return;
             }
 
-            window.pushStudioState(`Sửa chữ AI: "${oldText}" → "${newText}"`);
+            // Tọa độ chuẩn hóa box_2d [ymin, xmin, ymax, xmax] 0..1000
+            const box = patch.box_2d || [0,0,0,0];
+            const y1 = (box[0] * canvas.height) / 1000;
+            const x1 = (box[1] * canvas.width) / 1000;
+            const y2 = (box[2] * canvas.height) / 1000;
+            const x2 = (box[3] * canvas.width) / 1000;
+            const padX = 2;
+            const padY = 2;
+            const patchW = Math.max(4, (x2 - x1) + padX * 2);
+            const patchH = Math.max(4, (y2 - y1) + padY * 2);
+            const startX = Math.max(0, x1 - padX);
+            const startY = Math.max(0, y1 - padY);
 
-            await window.applyAiCanvasPatch(patch, canvas);
+            const ctx = canvas.getContext('2d');
 
-            if (isAiRegionActive) {
-                window.toggleAiRegion(); // Tắt khoanh vùng sau khi dùng xong
+            // 1. Phục hồi nền gradient hoặc màu đơn sắc xung quanh chữ
+            if (patch.bg_type === 'gradient_vertical') {
+                const grad = ctx.createLinearGradient(startX, startY, startX, startY + patchH);
+                grad.addColorStop(0, patch.bg_color_start || '#ffffff');
+                grad.addColorStop(1, patch.bg_color_end || '#ffffff');
+                ctx.fillStyle = grad;
+            } else if (patch.bg_type === 'gradient_horizontal') {
+                const grad = ctx.createLinearGradient(startX, startY, startX + patchW, startY);
+                grad.addColorStop(0, patch.bg_color_start || '#ffffff');
+                grad.addColorStop(1, patch.bg_color_end || '#ffffff');
+                ctx.fillStyle = grad;
+            } else {
+                ctx.fillStyle = patch.bg_color_start || '#ffffff';
             }
+            ctx.fillRect(startX, startY, patchW, patchH);
+
+            // 2. Viết chữ mới thay thế
+            if (newText) {
+                const fontSize = Math.round(patch.font_size_ratio ? patch.font_size_ratio * canvas.height : patchH * 0.78);
+                const fontFamily = patch.font_family === 'serif' ? 'Times New Roman, serif' : 'Arial, sans-serif';
+                const fontWeight = patch.font_weight || 'bold';
+
+                ctx.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+                ctx.fillStyle = patch.font_color || '#111827';
+                ctx.textBaseline = 'middle';
+
+                let targetX = startX + patchW / 2;
+                if (patch.text_align === 'left') {
+                    ctx.textAlign = 'left';
+                    targetX = startX + 4;
+                } else if (patch.text_align === 'right') {
+                    ctx.textAlign = 'right';
+                    targetX = startX + patchW - 4;
+                } else {
+                    ctx.textAlign = 'center';
+                }
+
+                ctx.fillText(newText, targetX, startY + patchH / 2);
+            }
+
+            // Cập nhật lại rawImage để lưu giữ kết quả
+            const updatedImg = new Image();
+            updatedImg.onload = function() {
+                studioRawImage = updatedImg;
+            };
+            updatedImg.src = canvas.toDataURL('image/png');
 
             fb.style.display = 'block';
             fb.innerHTML = `✨ Đã thay thế thành công chữ <b>"${escapeHtml(oldText)}"</b> thành <b>"${escapeHtml(newText)}"</b>! (Model: ${data.modelUsed})`;
@@ -6098,7 +5557,7 @@
         const btn = document.getElementById('btnRunAiPrompt');
 
         overlay.style.display = 'flex';
-        loadText.textContent = 'Gemini AI đang phân tích và thực thi đa tác vụ...';
+        loadText.textContent = 'Gemini AI đang phân tích và tối ưu hóa hình ảnh...';
         btn.disabled = true;
 
         try {
@@ -6122,48 +5581,19 @@
             }
 
             const aiEdit = data.aiEdit || {};
-            const actions = aiEdit.actions || [];
-            
-            if (actions.length > 0) {
-                window.pushStudioState('AI Prompt Edit: ' + promptText.substring(0, 20));
-            }
+            const filters = aiEdit.filters || {};
 
-            for (const act of actions) {
-                if (act.action === 'filters' && act.filters) {
-                    const filters = act.filters;
-                    if (filters.brightness !== undefined) document.getElementById('sliderBrightness').value = filters.brightness;
-                    if (filters.contrast !== undefined) document.getElementById('sliderContrast').value = filters.contrast;
-                    if (filters.blackPoint !== undefined) document.getElementById('sliderBlackPoint').value = filters.blackPoint;
-                    if (filters.whitePoint !== undefined) document.getElementById('sliderWhitePoint').value = filters.whitePoint;
-                    if (filters.saturation !== undefined) document.getElementById('sliderSaturation').value = filters.saturation;
-                    window.renderStudioCanvas();
-                } else if (act.action === 'replace_text' && act.box_2d) {
-                    await window.applyAiCanvasPatch(act, canvas);
-                } else if (act.action === 'crop' && act.box_2d) {
-                    const b = act.box_2d;
-                    const y1 = Math.round((b[0] * canvas.height) / 1000);
-                    const x1 = Math.round((b[1] * canvas.width) / 1000);
-                    const y2 = Math.round((b[2] * canvas.height) / 1000);
-                    const x2 = Math.round((b[3] * canvas.width) / 1000);
-                    
-                    cropBox = {
-                        x: Math.max(0, x1),
-                        y: Math.max(0, y1),
-                        w: Math.max(40, x2 - x1),
-                        h: Math.max(40, y2 - y1)
-                    };
-                    
-                    if (!isStudioCropActive) window.toggleStudioCrop();
-                    else window.updateCropBoxPosition();
-                    
-                    // Tự động apply crop để prompt edit trơn tru
-                    window.applyStudioCrop();
-                }
-            }
+            if (filters.brightness !== undefined) document.getElementById('sliderBrightness').value = filters.brightness;
+            if (filters.contrast !== undefined) document.getElementById('sliderContrast').value = filters.contrast;
+            if (filters.blackPoint !== undefined) document.getElementById('sliderBlackPoint').value = filters.blackPoint;
+            if (filters.whitePoint !== undefined) document.getElementById('sliderWhitePoint').value = filters.whitePoint;
+            if (filters.saturation !== undefined) document.getElementById('sliderSaturation').value = filters.saturation;
+
+            window.renderStudioCanvas();
 
             fb.style.display = 'block';
-            fb.innerHTML = `🤖 <b>AI Đánh giá:</b> ${escapeHtml(aiEdit.explanation || 'Đã áp dụng các thay đổi.')} <br><small style="color:#94a3b8;">(Model: ${data.modelUsed})</small>`;
-            window.showToast('🚀 AI đã xử lý xong yêu cầu!');
+            fb.innerHTML = `🤖 <b>AI Đánh giá:</b> ${escapeHtml(aiEdit.explanation || 'Đã áp dụng các thông số tối ưu.')} <br><small style="color:#94a3b8;">(Model: ${data.modelUsed})</small>`;
+            window.showToast('🚀 AI đã tinh chỉnh ảnh theo yêu cầu!');
 
         } catch (err) {
             fb.style.display = 'block';
@@ -6256,7 +5686,7 @@
   <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
 </Relationships>`);
 
-        // 3. Parser HTML to DOCX XML chuẩn khổ A4 và bảo toàn bảng biểu
+        // 3. Parser HTML to DOCX XML
         function escapeXml(str) {
             return (str || '')
                 .replace(/&/g, '&amp;')
@@ -6266,44 +5696,27 @@
                 .replace(/'/g, '&apos;');
         }
 
-        function getAlignment(node) {
-            if (!node || !node.getAttribute) return 'left';
-            const style = (node.getAttribute('style') || '').toLowerCase();
-            const alignAttr = (node.getAttribute('align') || '').toLowerCase();
-            if (style.includes('text-align: center') || style.includes('text-align:center') || alignAttr === 'center') return 'center';
-            if (style.includes('text-align: right') || style.includes('text-align:right') || alignAttr === 'right') return 'right';
-            if (style.includes('text-align: justify') || style.includes('text-align:justify') || alignAttr === 'justify') return 'both';
-            return 'left';
-        }
-
         const parser = new DOMParser();
         const doc = parser.parseFromString(`<div>${studioLastDocxHtml}</div>`, 'text/html');
         let bodyXml = '';
 
-        function parseRuns(node, inheritB = false, inheritI = false, inheritU = false, customColor = null, customSz = '26') {
+        function parseRuns(node, inheritB = false, inheritI = false, inheritU = false) {
             let runsXml = '';
             node.childNodes.forEach(child => {
                 if (child.nodeType === Node.TEXT_NODE) {
                     const text = child.textContent;
                     if (!text) return;
-                    let rPr = `<w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman" w:cs="Times New Roman"/>`;
-                    if (customSz) rPr += `<w:sz w:val="${customSz}"/><w:szCs w:val="${customSz}"/>`;
-                    if (inheritB) rPr += '<w:b/><w:bCs/>';
-                    if (inheritI) rPr += '<w:i/><w:iCs/>';
+                    let rPr = '';
+                    if (inheritB) rPr += '<w:b/>';
+                    if (inheritI) rPr += '<w:i/>';
                     if (inheritU) rPr += '<w:u w:val="single"/>';
-                    if (customColor) rPr += `<w:color w:val="${customColor}"/>`;
                     runsXml += `<w:r>${rPr ? `<w:rPr>${rPr}</w:rPr>` : ''}<w:t xml:space="preserve">${escapeXml(text)}</w:t></w:r>`;
                 } else if (child.nodeType === Node.ELEMENT_NODE) {
                     const tag = child.tagName.toLowerCase();
-                    const isB = inheritB || tag === 'b' || tag === 'strong' || tag === 'th';
+                    const isB = inheritB || tag === 'b' || tag === 'strong';
                     const isI = inheritI || tag === 'i' || tag === 'em';
                     const isU = inheritU || tag === 'u';
-                    let cColor = customColor;
-                    if (child.style && child.style.color) {
-                        const m = child.style.color.match(/#([0-9a-f]{6})/i);
-                        if (m) cColor = m[1].toUpperCase();
-                    }
-                    runsXml += parseRuns(child, isB, isI, isU, cColor, customSz);
+                    runsXml += parseRuns(child, isB, isI, isU);
                 }
             });
             return runsXml;
@@ -6311,133 +5724,53 @@
 
         function processElement(el) {
             const tag = el.tagName ? el.tagName.toLowerCase() : '';
-            const align = getAlignment(el);
-
             if (tag === 'h1') {
-                const runs = parseRuns(el, true, false, false, '0F172A', '32');
-                bodyXml += `<w:p><w:pPr><w:jc w:val="${align || 'center'}"/><w:spacing w:before="240" w:after="120" w:line="280" w:lineRule="auto"/></w:pPr>${runs || `<w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:b/><w:sz w:val="32"/><w:szCs w:val="32"/></w:rPr><w:t>${escapeXml(el.textContent)}</w:t></w:r>`}</w:p>`;
+                const runs = parseRuns(el, true);
+                bodyXml += `<w:p><w:pPr><w:jc w:val="center"/><w:spacing w:before="240" w:after="120"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="34"/><w:color w:val="111827"/></w:rPr><w:t>${escapeXml(el.textContent)}</w:t></w:r></w:p>`;
             } else if (tag === 'h2') {
-                const runs = parseRuns(el, true, false, false, '1E293B', '28');
-                bodyXml += `<w:p><w:pPr><w:jc w:val="${align || 'center'}"/><w:spacing w:before="180" w:after="100" w:line="280" w:lineRule="auto"/></w:pPr>${runs || `<w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:b/><w:sz w:val="28"/><w:szCs w:val="28"/></w:rPr><w:t>${escapeXml(el.textContent)}</w:t></w:r>`}</w:p>`;
-            } else if (tag === 'h3' || tag === 'h4') {
-                const runs = parseRuns(el, true, false, false, '334155', '26');
-                bodyXml += `<w:p><w:pPr><w:jc w:val="${align || 'left'}"/><w:spacing w:before="140" w:after="80" w:line="260" w:lineRule="auto"/></w:pPr>${runs || `<w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:b/><w:sz w:val="26"/><w:szCs w:val="26"/></w:rPr><w:t>${escapeXml(el.textContent)}</w:t></w:r>`}</w:p>`;
+                bodyXml += `<w:p><w:pPr><w:spacing w:before="180" w:after="80"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="28"/><w:color w:val="1F2937"/></w:rPr><w:t>${escapeXml(el.textContent)}</w:t></w:r></w:p>`;
+            } else if (tag === 'h3') {
+                bodyXml += `<w:p><w:pPr><w:spacing w:before="140" w:after="60"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="24"/><w:color w:val="374151"/></w:rPr><w:t>${escapeXml(el.textContent)}</w:t></w:r></w:p>`;
             } else if (tag === 'p') {
-                const runs = parseRuns(el, false, false, false, null, '26');
-                bodyXml += `<w:p><w:pPr><w:jc w:val="${align}"/><w:spacing w:before="0" w:after="120" w:line="276" w:lineRule="auto"/></w:pPr>${runs || '<w:r><w:t></w:t></w:r>'}</w:p>`;
+                const runs = parseRuns(el);
+                bodyXml += `<w:p><w:pPr><w:spacing w:after="100"/></w:pPr>${runs || '<w:r><w:t></w:t></w:r>'}</w:p>`;
             } else if (tag === 'ul' || tag === 'ol') {
                 el.querySelectorAll('li').forEach(li => {
                     const bullet = tag === 'ul' ? '• ' : '';
-                    const runs = parseRuns(li, false, false, false, null, '26');
-                    bodyXml += `<w:p><w:pPr><w:ind w:left="480"/><w:spacing w:before="0" w:after="60" w:line="260" w:lineRule="auto"/></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:sz w:val="26"/><w:szCs w:val="26"/></w:rPr><w:t>${bullet}</w:t></w:r>${runs}</w:p>`;
+                    const runs = parseRuns(li);
+                    bodyXml += `<w:p><w:pPr><w:ind w:left="400"/><w:spacing w:after="60"/></w:pPr><w:r><w:t>${bullet}</w:t></w:r>${runs}</w:p>`;
                 });
             } else if (tag === 'table') {
-                const rows = Array.from(el.querySelectorAll('tr'));
-                if (rows.length === 0) return;
-
-                // Tính số cột tối đa của bảng
-                let maxCols = 1;
-                rows.forEach(r => {
-                    const cnt = r.querySelectorAll('th, td').length;
-                    if (cnt > maxCols) maxCols = cnt;
-                });
-
-                // Tổng chiều rộng vùng in chuẩn A4 = 9071 twips (11906 - 1701 - 1134)
-                const totalTableWidth = 9071;
-                const colWidth = Math.floor(totalTableWidth / maxCols);
-
-                let gridXml = '';
-                for (let c = 0; c < maxCols; c++) {
-                    gridXml += `<w:gridCol w:w="${colWidth}"/>`;
-                }
-
-                bodyXml += `<w:tbl>
-                    <w:tblPr>
-                        <w:tblW w:w="${totalTableWidth}" w:type="dxa"/>
-                        <w:jc w:val="center"/>
-                        <w:tblBorders>
-                            <w:top w:val="single" w:sz="6" w:space="0" w:color="94A3B8"/>
-                            <w:left w:val="single" w:sz="6" w:space="0" w:color="94A3B8"/>
-                            <w:bottom w:val="single" w:sz="6" w:space="0" w:color="94A3B8"/>
-                            <w:right w:val="single" w:sz="6" w:space="0" w:color="94A3B8"/>
-                            <w:insideH w:val="single" w:sz="4" w:space="0" w:color="CBD5E1"/>
-                            <w:insideV w:val="single" w:sz="4" w:space="0" w:color="CBD5E1"/>
-                        </w:tblBorders>
-                        <w:tblCellMar>
-                            <w:top w:w="120" w:type="dxa"/>
-                            <w:bottom w:w="120" w:type="dxa"/>
-                            <w:left w:w="160" w:type="dxa"/>
-                            <w:right w:w="160" w:type="dxa"/>
-                        </w:tblCellMar>
-                    </w:tblPr>
-                    <w:tblGrid>${gridXml}</w:tblGrid>`;
-
-                rows.forEach((tr, rIdx) => {
-                    const isHeaderRow = tr.closest('thead') !== null || (rIdx === 0 && tr.querySelector('th') !== null);
-                    const trPrXml = isHeaderRow 
-                        ? '<w:trPr><w:tblHeader/><w:cantSplit/></w:trPr>' 
-                        : '<w:trPr><w:cantSplit/></w:trPr>';
-
-                    bodyXml += `<w:tr>${trPrXml}`;
-
-                    const cells = Array.from(tr.querySelectorAll('th, td'));
-                    cells.forEach(cell => {
-                        const isTh = cell.tagName.toLowerCase() === 'th' || isHeaderRow;
-                        const cellAlign = getAlignment(cell) || (isTh ? 'center' : 'left');
-                        const runs = parseRuns(cell, isTh, false, false, null, isTh ? '24' : '24');
-                        const bgXml = isTh ? '<w:shd w:val="clear" w:color="auto" w:fill="F1F5F9"/>' : '';
-
-                        bodyXml += `<w:tc>
-                            <w:tcPr>
-                                <w:tcW w:w="${colWidth}" w:type="dxa"/>
-                                <w:tcMar>
-                                    <w:top w:w="120" w:type="dxa"/>
-                                    <w:bottom w:w="120" w:type="dxa"/>
-                                    <w:left w:w="160" w:type="dxa"/>
-                                    <w:right w:w="160" w:type="dxa"/>
-                                </w:tcMar>
-                                ${bgXml}
-                            </w:tcPr>
-                            <w:p>
-                                <w:pPr>
-                                    <w:jc w:val="${cellAlign}"/>
-                                    <w:spacing w:before="40" w:after="40" w:line="240" w:lineRule="auto"/>
-                                </w:pPr>
-                                ${runs || '<w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:sz w:val="24"/><w:szCs w:val="24"/></w:rPr><w:t></w:t></w:r>'}
-                            </w:p>
-                        </w:tc>`;
+                bodyXml += `<w:tbl><w:tblPr><w:tblW w:w="0" w:type="auto"/><w:tblBorders><w:top w:val="single" w:sz="4" w:space="0" w:color="CCCCCC"/><w:left w:val="single" w:sz="4" w:space="0" w:color="CCCCCC"/><w:bottom w:val="single" w:sz="4" w:space="0" w:color="CCCCCC"/><w:right w:val="single" w:sz="4" w:space="0" w:color="CCCCCC"/><w:insideH w:val="single" w:sz="4" w:space="0" w:color="E5E7EB"/><w:insideV w:val="single" w:sz="4" w:space="0" w:color="E5E7EB"/></w:tblBorders></w:tblPr>`;
+                el.querySelectorAll('tr').forEach(tr => {
+                    bodyXml += '<w:tr>';
+                    tr.querySelectorAll('th, td').forEach(cell => {
+                        const isTh = cell.tagName.toLowerCase() === 'th';
+                        const runs = parseRuns(cell, isTh);
+                        const bgXml = isTh ? '<w:shd w:val="clear" w:color="auto" w:fill="F3F4F6"/>' : '';
+                        bodyXml += `<w:tc><w:tcPr><w:tcMar><w:top w:w="120" w:type="dxa"/><w:bottom w:w="120" w:type="dxa"/><w:left w:w="160" w:type="dxa"/><w:right w:w="160" w:type="dxa"/></w:tcMar>${bgXml}</w:tcPr><w:p>${runs}</w:p></w:tc>`;
                     });
-
                     bodyXml += '</w:tr>';
                 });
-
                 bodyXml += '</w:tbl>';
-                bodyXml += '<w:p><w:pPr><w:spacing w:before="60" w:after="80"/></w:pPr></w:p>';
             } else {
                 if (el.children.length > 0) {
                     Array.from(el.children).forEach(processElement);
                 } else if (el.textContent.trim()) {
-                    bodyXml += `<w:p><w:pPr><w:spacing w:before="0" w:after="120" w:line="276" w:lineRule="auto"/></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:sz w:val="26"/><w:szCs w:val="26"/></w:rPr><w:t>${escapeXml(el.textContent)}</w:t></w:r></w:p>`;
+                    bodyXml += `<w:p><w:pPr><w:spacing w:after="100"/></w:pPr><w:r><w:t>${escapeXml(el.textContent)}</w:t></w:r></w:p>`;
                 }
             }
         }
 
         Array.from(doc.body.children[0].children).forEach(processElement);
         if (!bodyXml.trim()) {
-            bodyXml = `<w:p><w:pPr><w:spacing w:after="120"/></w:pPr><w:r><w:rPr><w:rFonts w:ascii="Times New Roman" w:hAnsi="Times New Roman"/><w:sz w:val="26"/><w:szCs w:val="26"/></w:rPr><w:t>${escapeXml(doc.body.textContent || '')}</w:t></w:r></w:p>`;
+            bodyXml = `<w:p><w:r><w:t>${escapeXml(doc.body.textContent || '')}</w:t></w:r></w:p>`;
         }
 
-        // Đóng gói Word OpenXML chuẩn kích thước trang giấy A4 và lề văn bản
         const documentXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
   <w:body>
     ${bodyXml}
-    <w:sectPr>
-      <w:pgSz w:w="11906" w:h="16838" w:code="9"/>
-      <w:pgMar w:top="1440" w:right="1134" w:bottom="1440" w:left="1701" w:header="720" w:footer="720" w:gutter="0"/>
-      <w:cols w:space="720"/>
-      <w:docGrid w:linePitch="360"/>
-    </w:sectPr>
   </w:body>
 </w:document>`;
 
@@ -6482,17 +5815,6 @@
                 window.loadStudioFile(files[0]);
             }
         }, false);
-
-        // [Zoom] Hỗ trợ Ctrl + Cuộn chuột để thu phóng
-        studioViewport.addEventListener('wheel', (e) => {
-            if (e.ctrlKey || e.metaKey) {
-                e.preventDefault();
-                e.stopPropagation();
-                // deltaY âm = cuộn lên = phóng to. deltaY dương = cuộn xuống = thu nhỏ
-                const zoomDelta = e.deltaY < 0 ? 0.1 : -0.1;
-                window.zoomStudioCanvas(zoomDelta);
-            }
-        }, { passive: false });
     }
 
 
@@ -6563,23 +5885,6 @@
         }
         if(e.key === 'Enter') {
             if (document.getElementById('editModal').classList.contains('show')) window.saveModal();
-        }
-
-        // Phím tắt Hoàn tác (Ctrl+Z) và Làm lại (Ctrl+Y hoặc Ctrl+Shift+Z) trong Studio
-        const studioEl = document.getElementById('studioWorkspaceView');
-        const isStudioVisible = studioEl && studioEl.style.display !== 'none';
-        const isTyping = e.target && (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA');
-        if (isStudioVisible && !isTyping) {
-            if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && !e.shiftKey) {
-                e.preventDefault();
-                window.studioUndo();
-                return;
-            }
-            if ((e.ctrlKey || e.metaKey) && (e.key.toLowerCase() === 'y' || (e.key.toLowerCase() === 'z' && e.shiftKey))) {
-                e.preventDefault();
-                window.studioRedo();
-                return;
-            }
         }
     });
 
