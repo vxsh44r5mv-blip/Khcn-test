@@ -2109,6 +2109,8 @@
     <!-- Thư viện nén ZIP client-side -->
     <!-- Thư viện nén ZIP cục bộ không dùng Cloudflare, tránh bị chặn ở mạng cơ quan -->
     <script src="jszip.min.js" defer></script>
+    <!-- Thư viện PDF.js client-side kết xuất trang PDF sang canvas cục bộ -->
+    <script src="pdf.min.js" defer></script>
 </head>
 <body>
 
@@ -2622,7 +2624,27 @@
                             <div>✓ Tải trực tiếp file .docx chuẩn mở bằng MS Word</div>
                         </div>
 
-                        <button type="button" id="btnConvertDocx" class="studio-btn-docx" onclick="window.executeConvertToDocx()">
+                        <!-- [ST-DOCX] Điều hướng trang & tùy chọn chuyển đổi cho PDF -->
+                        <div id="studioPdfPageNav" style="display: none; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 8px; padding: 10px; margin-top: 10px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <span style="font-size: 12px; font-weight: 600; color: #38bdf8;">Tài liệu PDF: <b id="pdfTotalPages">1</b> trang</span>
+                                <div style="display: flex; gap: 4px; align-items: center;">
+                                    <button type="button" class="studio-mini-btn" onclick="window.prevPdfPage()">◀ Trước</button>
+                                    <span id="pdfPageIndicator" style="font-size: 12px; font-weight: 700; color: #fff; min-width: 45px; text-align: center;">1 / 1</span>
+                                    <button type="button" class="studio-mini-btn" onclick="window.nextPdfPage()">Sau ▶</button>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 6px;">
+                                <button type="button" id="btnConvertCurrentPageDocx" class="studio-btn-docx" style="flex: 1; margin: 0; padding: 8px 6px; font-size: 11.5px;" onclick="window.executeConvertToDocx(false)">
+                                    📄 Trang hiện tại
+                                </button>
+                                <button type="button" id="btnConvertAllPagesDocx" class="studio-btn-docx" style="flex: 1; margin: 0; padding: 8px 6px; font-size: 11.5px; background: linear-gradient(135deg, #0284c7, #2563eb);" onclick="window.executeConvertToDocx(true)">
+                                    📑 Toàn bộ các trang
+                                </button>
+                            </div>
+                        </div>
+
+                        <button type="button" id="btnConvertDocx" class="studio-btn-docx" onclick="window.executeConvertToDocx(false)">
                             📄 Trích xuất & Tải file Word (.docx)
                         </button>
                     </div>
@@ -4507,6 +4529,10 @@
     let studioCurrentFileName = 'image.png';
     let studioCurrentMimeType = 'image/png';
     let studioCurrentPdfBase64 = null;
+    let studioPdfDoc = null;
+    let studioPdfNumPages = 0;
+    let studioPdfCurrentPage = 1;
+    let studioPdfArrayBuffer = null;
     let studioLastDocxHtml = '';
 
     // Các biến cho tính năng Crop (Cắt ảnh)
@@ -4867,6 +4893,137 @@
         }
     };
 
+    // Đảm bảo thư viện PDF.js luôn sẵn sàng (nạp từ local repo, fallback CDN)
+    async function ensurePdfJs() {
+        if (window.pdfjsLib) {
+            try {
+                if (!window.pdfjsLib.GlobalWorkerOptions.workerSrc) {
+                    window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.min.js';
+                }
+            } catch (e) {}
+            return true;
+        }
+        return new Promise((resolve) => {
+            const script = document.createElement('script');
+            script.src = 'pdf.min.js';
+            script.onload = () => {
+                if (window.pdfjsLib) {
+                    try {
+                        window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.min.js';
+                    } catch (e) {}
+                }
+                resolve(true);
+            };
+            script.onerror = () => {
+                console.warn('Không thể nạp pdf.min.js cục bộ, thử tải từ CDN...');
+                const cdnScript = document.createElement('script');
+                cdnScript.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+                cdnScript.onload = () => {
+                    if (window.pdfjsLib) {
+                        try {
+                            window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+                        } catch (e) {}
+                    }
+                    resolve(true);
+                };
+                cdnScript.onerror = () => resolve(false);
+                document.head.appendChild(cdnScript);
+            };
+            document.head.appendChild(script);
+        });
+    }
+
+    // Helper gọi Studio API an toàn tuyệt đối, bẫy lỗi 413, 504 và trả về JSON chuẩn
+    window.callStudioApi = async function(payload) {
+        const resp = await fetch('/api/studio', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const respText = await resp.text();
+        let data;
+        try {
+            data = JSON.parse(respText);
+        } catch (parseErr) {
+            if (resp.status === 413 || respText.includes('FUNCTION_PAYLOAD_TOO_LARGE') || respText.includes('Payload Too Large')) {
+                throw new Error('Dung lượng tệp tải lên quá lớn (vượt quá giới hạn 4.5MB của server). Vui lòng nạp từng trang PDF hoặc giảm dung lượng ảnh.');
+            }
+            if (resp.status === 504 || respText.includes('FUNCTION_INVOCATION_TIMEOUT') || respText.includes('Gateway Time-out')) {
+                throw new Error('Hết thời gian phản hồi máy chủ (Timeout do tài liệu phức tạp hoặc máy chủ quá tải). Vui lòng thử lại với model Gemini Flash.');
+            }
+            if (resp.status === 502 || resp.status === 503) {
+                throw new Error(`Máy chủ Google AI tạm thời bận (Mã ${resp.status}). Vui lòng thử lại sau vài giây.`);
+            }
+            throw new Error(`Phản hồi máy chủ không hợp lệ (${resp.status}): ${respText.slice(0, 100) || 'Dữ liệu rỗng'}`);
+        }
+
+        if (!resp.ok || data.status !== 'success') {
+            throw new Error(data.message || 'Lỗi xử lý từ Studio API');
+        }
+        return data;
+    };
+
+    // Render trang cụ thể của PDF lên Canvas của Studio
+    window.renderPdfPage = async function(pageNum) {
+        if (!studioPdfDoc || pageNum < 1 || pageNum > studioPdfNumPages) return;
+        studioPdfCurrentPage = pageNum;
+
+        const ind = document.getElementById('pdfPageIndicator');
+        if (ind) ind.textContent = `${pageNum} / ${studioPdfNumPages}`;
+
+        const page = await studioPdfDoc.getPage(pageNum);
+        // Render với tỉ lệ 2.0 để ảnh cực nét chuẩn OCR A4 (tương đương 150-200 DPI)
+        const viewport = page.getViewport({ scale: 2.0 });
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = viewport.width;
+        tempCanvas.height = viewport.height;
+        const ctx = tempCanvas.getContext('2d');
+        await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+
+        const dataUrl = tempCanvas.toDataURL('image/jpeg', 0.95);
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = function() {
+                studioRawImage = img;
+                studioInitialOriginalImage = img;
+                studioUndoStack = [];
+                studioRedoStack = [];
+                isComparingOriginal = false;
+                window.updateStudioHistoryButtons();
+                studioRotation = 0;
+                studioFineTilt = 0;
+                studioFlipH = 1;
+                studioFlipV = 1;
+                window.resetStudioFilters();
+                if (document.getElementById('sliderFineTilt')) document.getElementById('sliderFineTilt').value = 0;
+                if (document.getElementById('valFineTilt')) document.getElementById('valFineTilt').textContent = '0.0°';
+                if (document.getElementById('btnApplyFineTilt')) document.getElementById('btnApplyFineTilt').style.display = 'none';
+                document.getElementById('studioEmptyState').style.display = 'none';
+                document.getElementById('studioCanvasContainer').style.display = 'block';
+                if (document.getElementById('studioZoomController')) {
+                    document.getElementById('studioZoomController').style.display = 'flex';
+                }
+                document.getElementById('studioDownloadBtn').disabled = false;
+                window.renderStudioCanvas();
+                resolve(true);
+            };
+            img.src = dataUrl;
+        });
+    };
+
+    window.prevPdfPage = async function() {
+        if (studioPdfCurrentPage > 1) {
+            await window.renderPdfPage(studioPdfCurrentPage - 1);
+        }
+    };
+
+    window.nextPdfPage = async function() {
+        if (studioPdfCurrentPage < studioPdfNumPages) {
+            await window.renderPdfPage(studioPdfCurrentPage + 1);
+        }
+    };
+
     window.openImageStudio = function(optionalFile) {
         window.switchTab('Studio');
         window.initStudioModelUi();
@@ -4955,31 +5112,76 @@
         event.target.value = '';
     };
 
-    window.loadStudioFile = function(file) {
+    window.loadStudioFile = async function(file) {
         studioCurrentFileName = file.name || 'image.png';
         studioCurrentMimeType = file.type || 'image/png';
         document.getElementById('studioFileInfo').textContent = `${studioCurrentFileName} (${(file.size / 1024).toFixed(1)} KB)`;
 
-        if (file.type === 'application/pdf') {
-            // Đọc file PDF sang base64 để gửi OCR DOCX
+        const isPdf = file.type === 'application/pdf' || (file.name && file.name.toLowerCase().endsWith('.pdf'));
+        if (isPdf) {
+            studioCurrentMimeType = 'application/pdf';
+            const arrayBuffer = await file.arrayBuffer();
+            studioPdfArrayBuffer = arrayBuffer;
+
+            // Lưu base64 PDF dự phòng
             const reader = new FileReader();
             reader.onload = function(e) {
-                const b64 = e.target.result.split(',')[1];
-                studioCurrentPdfBase64 = b64;
-                window.switchStudioTab('docx');
-                window.showToast('📄 Đã tải file PDF. Bạn có thể bấm "Chuyển sang Word (.docx)"');
-                document.getElementById('studioEmptyState').innerHTML = `
-                    <span style="font-size: 3.5rem; margin-bottom: 10px;">📄</span>
-                    <div style="font-size: 1.1rem; font-weight: 700; color: #f8fafc;">Tệp PDF: ${studioCurrentFileName}</div>
-                    <div style="font-size: 0.85rem; color: #38bdf8; margin-top: 6px;">Sẵn sàng chuyển đổi cấu trúc sang Word (.docx)</div>
-                    <button type="button" class="studio-btn studio-btn-docx" style="margin-top: 16px; width: auto;" onclick="window.executeConvertToDocx()">
-                        📄 Trích xuất sang Word ngay
-                    </button>
-                `;
+                studioCurrentPdfBase64 = e.target.result.split(',')[1];
             };
             reader.readAsDataURL(file);
+
+            const hasPdfJs = await ensurePdfJs();
+            if (hasPdfJs && window.pdfjsLib) {
+                try {
+                    const loadingTask = window.pdfjsLib.getDocument({ data: arrayBuffer });
+                    studioPdfDoc = await loadingTask.promise;
+                    studioPdfNumPages = studioPdfDoc.numPages;
+                    studioPdfCurrentPage = 1;
+
+                    // Hiển thị thanh điều hướng trang PDF nếu có nhiều hơn 1 trang
+                    const pageNav = document.getElementById('studioPdfPageNav');
+                    if (pageNav) {
+                        pageNav.style.display = studioPdfNumPages > 1 ? 'block' : 'none';
+                        const totalEl = document.getElementById('pdfTotalPages');
+                        if (totalEl) totalEl.textContent = studioPdfNumPages;
+                    }
+
+                    // Render trang 1 trực tiếp lên canvas Studio
+                    await window.renderPdfPage(1);
+                    window.switchStudioTab('docx');
+                    window.showToast(`📄 Đã nạp tài liệu PDF (${studioPdfNumPages} trang). Xem và sẵn sàng chuyển đổi Word!`);
+                    return;
+                } catch (pdfErr) {
+                    console.warn('Lỗi phân tích PDF bằng PDF.js:', pdfErr);
+                }
+            }
+
+            // Fallback khi không tải được PDF.js
+            studioPdfDoc = null;
+            studioPdfNumPages = 0;
+            const pageNav = document.getElementById('studioPdfPageNav');
+            if (pageNav) pageNav.style.display = 'none';
+
+            window.switchStudioTab('docx');
+            window.showToast('📄 Đã nạp file PDF. Bạn có thể bấm "Chuyển sang Word (.docx)"');
+            document.getElementById('studioEmptyState').innerHTML = `
+                <span style="font-size: 3.5rem; margin-bottom: 10px;">📄</span>
+                <div style="font-size: 1.1rem; font-weight: 700; color: #f8fafc;">Tệp PDF: ${studioCurrentFileName}</div>
+                <div style="font-size: 0.85rem; color: #38bdf8; margin-top: 6px;">Sẵn sàng chuyển đổi cấu trúc sang Word (.docx)</div>
+                <button type="button" class="studio-btn studio-btn-docx" style="margin-top: 16px; width: auto;" onclick="window.executeConvertToDocx(false)">
+                    📄 Trích xuất sang Word ngay
+                </button>
+            `;
             return;
         }
+
+        // Với file ảnh thông thường
+        studioPdfDoc = null;
+        studioPdfNumPages = 0;
+        studioPdfCurrentPage = 1;
+        studioPdfArrayBuffer = null;
+        const pageNav = document.getElementById('studioPdfPageNav');
+        if (pageNav) pageNav.style.display = 'none';
 
         const reader = new FileReader();
         reader.onload = function(e) {
@@ -5667,22 +5869,13 @@
 
         try {
             const imageBase64 = canvas.toDataURL('image/jpeg', 0.9).split(',')[1];
-            const resp = await fetch('/api/studio', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: 'ai_auto_crop',
-                    imageBase64: imageBase64,
-                    mimeType: 'image/jpeg',
-                    selectedModel: window.getStudioSelectedModel(),
-                    customApiKey: window.getStudioCustomApiKey()
-                })
+            const data = await window.callStudioApi({
+                action: 'ai_auto_crop',
+                imageBase64: imageBase64,
+                mimeType: 'image/jpeg',
+                selectedModel: window.getStudioSelectedModel(),
+                customApiKey: window.getStudioCustomApiKey()
             });
-
-            const data = await resp.json();
-            if (!resp.ok || data.status !== 'success') {
-                throw new Error(data.message || 'Lỗi từ AI');
-            }
 
             const res = data.cropResult || {};
             const angle = parseFloat(res.deskew_angle) || 0;
@@ -5845,22 +6038,13 @@
 
         try {
             const imageBase64 = canvas.toDataURL('image/jpeg', 0.9).split(',')[1];
-            const resp = await fetch('/api/studio', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: 'ai_auto_rotate',
-                    imageBase64: imageBase64,
-                    mimeType: 'image/jpeg',
-                    selectedModel: window.getStudioSelectedModel(),
-                    customApiKey: window.getStudioCustomApiKey()
-                })
+            const data = await window.callStudioApi({
+                action: 'ai_auto_rotate',
+                imageBase64: imageBase64,
+                mimeType: 'image/jpeg',
+                selectedModel: window.getStudioSelectedModel(),
+                customApiKey: window.getStudioCustomApiKey()
             });
-
-            const data = await resp.json();
-            if (!resp.ok || data.status !== 'success') {
-                throw new Error(data.message || 'Lỗi từ AI');
-            }
 
             const rot = data.rotateResult || {};
             const totalAngle = parseFloat(rot.total_rotate_angle) || 0;
@@ -6059,30 +6243,21 @@
 
         try {
             const imageBase64 = canvas.toDataURL('image/jpeg', 0.9).split(',')[1];
-            const resp = await fetch('/api/studio', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: 'ai_edit_text',
-                    imageBase64: imageBase64,
-                    mimeType: 'image/jpeg',
-                    oldText: oldText,
-                    newText: newText,
-                    regionBox: (isAiRegionActive && aiRegionBox) ? [
-                        (aiRegionBox.y / canvas.height) * 1000,
-                        (aiRegionBox.x / canvas.width) * 1000,
-                        ((aiRegionBox.y + aiRegionBox.h) / canvas.height) * 1000,
-                        ((aiRegionBox.x + aiRegionBox.w) / canvas.width) * 1000
-                    ] : null,
-                    selectedModel: window.getStudioSelectedModel(),
-                    customApiKey: window.getStudioCustomApiKey()
-                })
+            const data = await window.callStudioApi({
+                action: 'ai_edit_text',
+                imageBase64: imageBase64,
+                mimeType: 'image/jpeg',
+                oldText: oldText,
+                newText: newText,
+                regionBox: (isAiRegionActive && aiRegionBox) ? [
+                    (aiRegionBox.y / canvas.height) * 1000,
+                    (aiRegionBox.x / canvas.width) * 1000,
+                    ((aiRegionBox.y + aiRegionBox.h) / canvas.height) * 1000,
+                    ((aiRegionBox.x + aiRegionBox.w) / canvas.width) * 1000
+                ] : null,
+                selectedModel: window.getStudioSelectedModel(),
+                customApiKey: window.getStudioCustomApiKey()
             });
-
-            const data = await resp.json();
-            if (!resp.ok || data.status !== 'success') {
-                throw new Error(data.message || 'Lỗi xử lý từ AI');
-            }
 
             const patch = data.patch;
             if (!patch.found) {
@@ -6132,23 +6307,14 @@
 
         try {
             const imageBase64 = canvas.toDataURL('image/jpeg', 0.9).split(',')[1];
-            const resp = await fetch('/api/studio', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    action: 'ai_prompt_edit',
-                    imageBase64: imageBase64,
-                    mimeType: 'image/jpeg',
-                    promptText: promptText,
-                    selectedModel: window.getStudioSelectedModel(),
-                    customApiKey: window.getStudioCustomApiKey()
-                })
+            const data = await window.callStudioApi({
+                action: 'ai_prompt_edit',
+                imageBase64: imageBase64,
+                mimeType: 'image/jpeg',
+                promptText: promptText,
+                selectedModel: window.getStudioSelectedModel(),
+                customApiKey: window.getStudioCustomApiKey()
             });
-
-            const data = await resp.json();
-            if (!resp.ok || data.status !== 'success') {
-                throw new Error(data.message || 'Lỗi xử lý từ AI');
-            }
 
             const aiEdit = data.aiEdit || {};
             const actions = aiEdit.actions || [];
@@ -6205,63 +6371,105 @@
     };
 
     // V2.1 CHUYỂN ĐỔI SANG MICROSOFT WORD (.DOCX)
-    window.executeConvertToDocx = async function() {
+    window.executeConvertToDocx = async function(convertAll = false) {
         const canvas = document.getElementById('studioMainCanvas');
-        if (!canvas && !studioCurrentPdfBase64) {
+        if (!canvas && !studioCurrentPdfBase64 && !studioPdfDoc) {
             return window.showToast('⚠️ Vui lòng mở ảnh hoặc file PDF trước khi chuyển đổi!');
         }
 
         const overlay = document.getElementById('studioLoadingOverlay');
         const loadText = document.getElementById('studioLoadingText');
         const btn = document.getElementById('btnConvertDocx');
+        const btnCurr = document.getElementById('btnConvertCurrentPageDocx');
+        const btnAll = document.getElementById('btnConvertAllPagesDocx');
 
         overlay.style.display = 'flex';
-        loadText.textContent = 'Gemini AI đang phân tích cấu trúc tài liệu, bảng biểu & định dạng...';
-        btn.disabled = true;
+        if (btn) btn.disabled = true;
+        if (btnCurr) btnCurr.disabled = true;
+        if (btnAll) btnAll.disabled = true;
 
         try {
-            let base64Data = studioCurrentPdfBase64;
-            let mimeType = 'application/pdf';
+            // Trường hợp 1: Chuyển toàn bộ các trang của tài liệu PDF đa trang
+            if (studioPdfDoc && convertAll && studioPdfNumPages > 1) {
+                const pageHtmls = [];
+                for (let p = 1; p <= studioPdfNumPages; p++) {
+                    loadText.textContent = `Gemini AI đang phân tích cấu trúc trang ${p}/${studioPdfNumPages}...`;
+                    const page = await studioPdfDoc.getPage(p);
+                    const viewport = page.getViewport({ scale: 2.0 });
+                    const tempCanvas = document.createElement('canvas');
+                    tempCanvas.width = viewport.width;
+                    tempCanvas.height = viewport.height;
+                    const ctx = tempCanvas.getContext('2d');
+                    await page.render({ canvasContext: ctx, viewport: viewport }).promise;
+                    const pageB64 = tempCanvas.toDataURL('image/jpeg', 0.95).split(',')[1];
 
-            if (!base64Data && canvas) {
-                base64Data = canvas.toDataURL('image/jpeg', 0.95).split(',')[1];
-                mimeType = 'image/jpeg';
-            }
+                    const data = await window.callStudioApi({
+                        action: 'ocr_docx',
+                        imageBase64: pageB64,
+                        mimeType: 'image/jpeg',
+                        selectedModel: window.getStudioSelectedModel(),
+                        customApiKey: window.getStudioCustomApiKey()
+                    });
 
-            const resp = await fetch('/api/studio', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
+                    if (data && data.html) {
+                        pageHtmls.push(data.html);
+                    }
+                }
+
+                if (pageHtmls.length === 0) {
+                    throw new Error('Không nhận diện được nội dung từ các trang PDF.');
+                }
+
+                studioLastDocxHtml = pageHtmls.join('<hr class="page-break" style="page-break-before: always;" />');
+
+            } else {
+                // Trường hợp 2: Chuyển ảnh hiện tại trên Canvas (hoặc trang PDF hiện tại)
+                let base64Data = null;
+                let mimeType = 'image/jpeg';
+
+                if (canvas && studioRawImage) {
+                    base64Data = canvas.toDataURL('image/jpeg', 0.95).split(',')[1];
+                    mimeType = 'image/jpeg';
+                } else if (studioCurrentPdfBase64) {
+                    base64Data = studioCurrentPdfBase64;
+                    mimeType = 'application/pdf';
+                }
+
+                if (!base64Data) {
+                    throw new Error('Không tìm thấy dữ liệu ảnh hoặc tài liệu để chuyển đổi.');
+                }
+
+                loadText.textContent = 'Gemini AI đang phân tích cấu trúc tài liệu, bảng biểu & định dạng...';
+
+                const data = await window.callStudioApi({
                     action: 'ocr_docx',
                     imageBase64: base64Data,
                     mimeType: mimeType,
                     selectedModel: window.getStudioSelectedModel(),
                     customApiKey: window.getStudioCustomApiKey()
-                })
-            });
+                });
 
-            const data = await resp.json();
-            if (!resp.ok || data.status !== 'success') {
-                throw new Error(data.message || 'Lỗi nhận diện tài liệu');
+                studioLastDocxHtml = data.html || '';
             }
-
-            studioLastDocxHtml = data.html || '';
 
             // Hiển thị preview
             const previewBox = document.getElementById('docxPreviewBox');
             const previewContent = document.getElementById('docxHtmlPreview');
-            previewBox.style.display = 'block';
-            previewContent.innerHTML = studioLastDocxHtml;
+            if (previewBox) previewBox.style.display = 'block';
+            if (previewContent) previewContent.innerHTML = studioLastDocxHtml;
 
             // Xuất file Word .docx thực thụ qua JSZip
             await window.downloadDocxFile();
             window.showToast('📄 Đã tạo và tải file Word (.docx) thành công!');
 
         } catch (err) {
+            console.error('Lỗi chuyển đổi DOCX:', err);
             window.showToast('⚠️ Lỗi chuyển đổi DOCX: ' + err.message);
         } finally {
             overlay.style.display = 'none';
-            btn.disabled = false;
+            if (btn) btn.disabled = false;
+            if (btnCurr) btnCurr.disabled = false;
+            if (btnAll) btnAll.disabled = false;
         }
     };
 
@@ -6345,6 +6553,11 @@
         function processElement(el) {
             const tag = el.tagName ? el.tagName.toLowerCase() : '';
             const align = getAlignment(el);
+
+            if (tag === 'hr' || (el.classList && el.classList.contains('page-break')) || (el.style && (el.style.pageBreakBefore === 'always' || el.style.pageBreakAfter === 'always'))) {
+                bodyXml += '<w:p><w:r><w:br w:type="page"/></w:r></w:p>';
+                return;
+            }
 
             if (tag === 'h1') {
                 const runs = parseRuns(el, true, false, false, '0F172A', '32');

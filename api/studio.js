@@ -219,11 +219,12 @@ Quy tắc định dạng bắt buộc:
             }];
 
             const { text, modelUsed } = await callGemini(contents, systemPrompt, 0.1, selectedModel, customApiKey);
-            let cleanedHtml = text.trim();
-            if (cleanedHtml.startsWith('```html')) {
-                cleanedHtml = cleanedHtml.replace(/^```html\s*/i, '').replace(/\s*```$/, '');
-            } else if (cleanedHtml.startsWith('```')) {
-                cleanedHtml = cleanedHtml.replace(/^```\s*/i, '').replace(/\s*```$/, '');
+            let cleanedHtml = (text || '').trim();
+            const htmlMatch = cleanedHtml.match(/```(?:html)?\s*([\s\S]*?)\s*```/i);
+            if (htmlMatch) {
+                cleanedHtml = htmlMatch[1].trim();
+            } else {
+                cleanedHtml = cleanedHtml.replace(/^```(?:html)?\s*/i, '').replace(/\s*```$/i, '').trim();
             }
 
             const result = { status: 'success', html: cleanedHtml, modelUsed };
