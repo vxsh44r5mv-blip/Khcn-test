@@ -2091,9 +2091,22 @@
                 right: -100% !important;
                 height: 100vh !important;
                 height: 100dvh !important;
-                padding-top: var(--safe-top) !important;
-                padding-bottom: var(--safe-bottom) !important;
+                top: 0 !important;
+                left: auto !important;
                 overscroll-behavior-y: contain !important;
+                z-index: 10001 !important;
+                transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            }
+            .chat-panel.open {
+                right: 0 !important;
+            }
+            .chat-header {
+                padding-top: calc(14px + var(--safe-top)) !important;
+            }
+            .chat-header .actions button {
+                width: 38px !important;
+                height: 38px !important;
+                font-size: 16px !important;
             }
             .chat-fab {
                 bottom: calc(16px + var(--safe-bottom)) !important;
@@ -2102,6 +2115,9 @@
                 padding: 0 16px !important;
                 width: auto !important;
                 font-size: 14px !important;
+                z-index: 9998 !important;
+                touch-action: manipulation;
+                -webkit-tap-highlight-color: transparent;
             }
             .chat-fab .pro-badge { padding: 2px 4px !important; font-size: 10px !important; }
         }
