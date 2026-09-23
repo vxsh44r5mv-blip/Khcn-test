@@ -1525,7 +1525,129 @@
         .crop-handle.se { bottom: -7px; right: -7px; cursor: nwse-resize; }
         .crop-handle.s  { bottom: -7px; left: calc(50% - 9px); cursor: ns-resize; border-radius: 3px; width: 18px; }
         .crop-handle.sw { bottom: -7px; left: -7px; cursor: nesw-resize; }
-        .crop-handle.w  { top: calc(50% - 9px); left: -7px; cursor: ew-resize; border-radius: 3px; height: 18px; }
+        /* Smart Scanner Quad Overlay & Loupe */
+        .scanner-quad-container {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 25;
+        }
+        #scannerOverlayCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        .scanner-corner-handle {
+            position: absolute;
+            width: 28px;
+            height: 28px;
+            margin-left: -14px;
+            margin-top: -14px;
+            background: #10b981;
+            border: 3px solid #ffffff;
+            border-radius: 50%;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.6), 0 0 12px rgba(16, 185, 129, 0.8);
+            cursor: grab;
+            pointer-events: all;
+            z-index: 30;
+            touch-action: none;
+            transition: transform 0.15s ease, background-color 0.15s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .scanner-corner-handle:active, .scanner-corner-handle.dragging {
+            cursor: grabbing;
+            transform: scale(1.25);
+            background: #059669;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.8), 0 0 20px rgba(16, 185, 129, 1);
+        }
+        .scanner-corner-handle::after {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #ffffff;
+            border-radius: 50%;
+        }
+        .scanner-corner-handle .scanner-handle-badge {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15, 23, 42, 0.9);
+            color: #10b981;
+            font-size: 10px;
+            font-weight: 800;
+            padding: 1px 5px;
+            border-radius: 4px;
+            border: 1px solid rgba(16, 185, 129, 0.4);
+            white-space: nowrap;
+            pointer-events: none;
+        }
+        /* Magnifier Loupe */
+        .scanner-magnifier-loupe {
+            position: absolute;
+            width: 130px;
+            height: 130px;
+            margin-left: -65px;
+            margin-top: -150px;
+            border-radius: 50%;
+            border: 3.5px solid #10b981;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.75), 0 0 20px rgba(16, 185, 129, 0.4);
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 60;
+            background: #0f172a;
+        }
+        #scannerLoupeCanvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        .scanner-loupe-crosshair {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 24px;
+            height: 24px;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+        }
+        .scanner-loupe-crosshair::before, .scanner-loupe-crosshair::after {
+            content: '';
+            position: absolute;
+            background: #ef4444;
+        }
+        .scanner-loupe-crosshair::before {
+            top: 11px;
+            left: 0;
+            width: 24px;
+            height: 2px;
+            box-shadow: 0 0 2px #fff;
+        }
+        .scanner-loupe-crosshair::after {
+            top: 0;
+            left: 11px;
+            width: 2px;
+            height: 24px;
+            box-shadow: 0 0 2px #fff;
+        }
+        .scanner-loupe-label {
+            position: absolute;
+            bottom: 6px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(16, 185, 129, 0.9);
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 8px;
+            letter-spacing: 0.5px;
+        }
 
         /* Loading Spinner */
         .studio-loading-overlay {
@@ -2358,6 +2480,7 @@
             
             <div class="studio-tabs">
                 <button type="button" class="studio-tab-btn active" id="tabBtnAdjust" onclick="window.switchStudioTab('adjust')">🎛️ Chỉnh màu & Cắt xoay</button>
+                <button type="button" class="studio-tab-btn" id="tabBtnScanner" onclick="window.switchStudioTab('scanner')">📑 Scan Tài Liệu</button>
                 <button type="button" class="studio-tab-btn" id="tabBtnAi" onclick="window.switchStudioTab('ai')">🤖 Chỉnh sửa AI</button>
                 <button type="button" class="studio-tab-btn" id="tabBtnDocx" onclick="window.switchStudioTab('docx')">📄 Chuyển sang Word (.docx)</button>
             </div>
@@ -2458,6 +2581,9 @@
                             Tự động phát hiện góc nghiêng của trang giấy/tài liệu, xoay thẳng ngay ngắn và xén sạch viền mặt bàn, bóng đổ xung quanh.
                         </p>
                         <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <button type="button" class="studio-btn-ai" style="background: linear-gradient(135deg, #10b981, #059669); padding: 9px;" onclick="window.switchStudioTab('scanner')">
+                                📑 Quét & Nắn Thẳng Phối Cảnh (Smart Scanner)
+                            </button>
                             <button type="button" class="studio-btn-ai" style="background: linear-gradient(135deg, #059669, #0284c7); padding: 9px;" onclick="window.executeAiAutoCrop()" id="btnAiAutoCrop">
                                 ✨ Tự động Crop & Căn chỉnh góc (AI)
                             </button>
@@ -2524,6 +2650,108 @@
                             <button type="button" class="studio-tool-btn" onclick="window.rotateStudioImage(90)">↻ Xoay phải 90°</button>
                             <button type="button" class="studio-tool-btn" onclick="window.flipStudioImage('horizontal')">⇆ Lật ngang</button>
                             <button type="button" class="studio-tool-btn" onclick="window.flipStudioImage('vertical')">⇅ Lật dọc</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panel: Smart Document Scanner -->
+                <div id="studioPanelScanner" class="studio-panel-tab">
+                    <!-- Stage 1: Quad Corner Adjustment -->
+                    <div id="scannerStepAdjustCorners">
+                        <div class="studio-control-group">
+                            <div class="studio-group-title">
+                                <span>Căn Chỉnh 4 Góc Phối Cảnh</span>
+                                <span class="studio-pill" style="background: linear-gradient(135deg, #10b981, #06b6d4);">AI Perspective</span>
+                            </div>
+                            <p style="font-size: 11.5px; color: #94a3b8; line-height: 1.4; margin: 0 0 8px 0;">
+                                Kéo 4 nút tròn ở 4 góc để xác định chính xác viền tài liệu/phong bì. Kính lúp sẽ tự động phóng to điểm đặt góc để đạt độ chuẩn xác từng pixel.
+                            </p>
+                            
+                            <div style="display: flex; flex-direction: column; gap: 8px;">
+                                <button type="button" class="studio-btn-ai" id="btnAiScanDetectCorners" onclick="window.executeAiScanDetectCorners()" style="background: linear-gradient(135deg, #059669, #0284c7); padding: 9px;" title="Gemini AI phát hiện chính xác 4 góc tài liệu kể cả chụp xiên">
+                                    ✨ AI Tự Động Nhận Diện 4 Góc (Gemini)
+                                </button>
+                                <div style="display: flex; gap: 6px;">
+                                    <button type="button" class="studio-tool-btn" style="flex: 1;" onclick="window.clientSideAutoDetectCorners()" title="Phát hiện viền cục bộ tức thì trong 10ms">
+                                        ⚡ Tìm nhanh (CV)
+                                    </button>
+                                    <button type="button" class="studio-tool-btn" style="flex: 1;" onclick="window.resetScannerCornersToFull()" title="Đặt lại 4 góc bao toàn bộ ảnh">
+                                        ↺ Toàn khung
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="studio-control-group">
+                            <button type="button" class="studio-btn-ai" id="btnRunPerspectiveScan" onclick="window.executePerspectiveScanAndWarp()" style="background: linear-gradient(135deg, #10b981, #059669); padding: 12px; font-size: 13.5px; font-weight: 700; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);">
+                                🚀 Nắn Thẳng & Quét Ngay (Scan & Deskew)
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Stage 2: Scanner Filters & Output -->
+                    <div id="scannerStepFilterPreview" style="display: none;">
+                        <div class="studio-control-group">
+                            <div class="studio-group-title">
+                                <span>Bộ Lọc Quét Tài Liệu</span>
+                                <span class="studio-pill" style="background: linear-gradient(135deg, #059669, #10b981);">CamScanner Style</span>
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-bottom: 8px;">
+                                <button type="button" class="studio-tool-btn active" id="btnScannerFilterMagic" onclick="window.applyScannerPreset('magic_color')">
+                                    ✨ Màu ma thuật
+                                </button>
+                                <button type="button" class="studio-tool-btn" id="btnScannerFilterBw" onclick="window.applyScannerPreset('bw')">
+                                    🖤 Trắng đen
+                                </button>
+                                <button type="button" class="studio-tool-btn" id="btnScannerFilterGray" onclick="window.applyScannerPreset('grayscale')">
+                                    📰 Ảnh xám
+                                </button>
+                                <button type="button" class="studio-tool-btn" id="btnScannerFilterSharpen" onclick="window.applyScannerPreset('sharpen')">
+                                    🔍 Tăng nét
+                                </button>
+                                <button type="button" class="studio-tool-btn" id="btnScannerFilterOriginal" onclick="window.applyScannerPreset('original')" style="grid-column: span 2;">
+                                    📷 Giữ màu gốc
+                                </button>
+                            </div>
+
+                            <div class="studio-slider-item">
+                                <div class="studio-slider-label">
+                                    <span>Độ sáng (Brightness)</span>
+                                    <span id="valScanBrightness">0</span>
+                                </div>
+                                <input type="range" id="sliderScanBrightness" min="-100" max="100" value="0" oninput="window.updateScannerFilterParams()">
+                            </div>
+
+                            <div class="studio-slider-item">
+                                <div class="studio-slider-label">
+                                    <span>Tương phản (Contrast)</span>
+                                    <span id="valScanContrast">0</span>
+                                </div>
+                                <input type="range" id="sliderScanContrast" min="-100" max="100" value="0" oninput="window.updateScannerFilterParams()">
+                            </div>
+
+                            <div class="studio-slider-item">
+                                <div class="studio-slider-label">
+                                    <span>Khử bóng & Trắng nền</span>
+                                    <span id="valScanWhiten">80%</span>
+                                </div>
+                                <input type="range" id="sliderScanWhiten" min="0" max="100" value="80" oninput="window.updateScannerFilterParams()">
+                            </div>
+                        </div>
+
+                        <div class="studio-control-group" style="display: flex; flex-direction: column; gap: 8px;">
+                            <button type="button" class="studio-btn-ai" onclick="window.commitScannedImageToStudio()" style="background: linear-gradient(135deg, #059669, #10b981); padding: 11px; font-size: 13px; font-weight: 700;">
+                                ✓ Áp Dụng Vào Studio (Sửa tiếp AI / DOCX)
+                            </button>
+                            <div style="display: flex; gap: 6px;">
+                                <button type="button" class="studio-tool-btn" style="flex: 1; background: #0284c7; color: white; border-color: #0284c7;" onclick="window.downloadScannedResult()">
+                                    💾 Tải ảnh Scan
+                                </button>
+                                <button type="button" class="studio-tool-btn" style="flex: 1;" onclick="window.returnToScannerCorners()">
+                                    ↩ Chỉnh lại góc
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -2716,6 +2944,28 @@
                         <div class="crop-handle s" data-handle="s" style="border-color: #3b82f6;"></div>
                         <div class="crop-handle sw" data-handle="sw" style="border-color: #3b82f6;"></div>
                         <div class="crop-handle w" data-handle="w" style="border-color: #3b82f6;"></div>
+                    </div>
+                    <!-- [SMART-SCANNER] Khung 4 góc nắn thẳng phối cảnh & Kính lúp -->
+                    <div id="scannerQuadOverlay" class="scanner-quad-container" style="display: none;">
+                        <canvas id="scannerOverlayCanvas"></canvas>
+                        <div class="scanner-corner-handle" id="scannerHandleTL" data-corner="tl">
+                            <span class="scanner-handle-badge">TL</span>
+                        </div>
+                        <div class="scanner-corner-handle" id="scannerHandleTR" data-corner="tr">
+                            <span class="scanner-handle-badge">TR</span>
+                        </div>
+                        <div class="scanner-corner-handle" id="scannerHandleBR" data-corner="br">
+                            <span class="scanner-handle-badge">BR</span>
+                        </div>
+                        <div class="scanner-corner-handle" id="scannerHandleBL" data-corner="bl">
+                            <span class="scanner-handle-badge">BL</span>
+                        </div>
+                        <!-- Kính lúp phóng to khi kéo đỉnh -->
+                        <div id="scannerMagnifierLoupe" class="scanner-magnifier-loupe" style="display: none;">
+                            <canvas id="scannerLoupeCanvas" width="130" height="130"></canvas>
+                            <div class="scanner-loupe-crosshair"></div>
+                            <div class="scanner-loupe-label" id="scannerLoupeLabel">TL</div>
+                        </div>
                     </div>
                 </div>
 
@@ -5067,16 +5317,25 @@
             if (activeBtn) activeBtn.classList.add('active');
             const p = document.getElementById('studioPanelAdjust');
             if (p) p.classList.add('active');
+            if (typeof window.hideScannerOverlay === 'function') window.hideScannerOverlay();
+        } else if (tabName === 'scanner') {
+            activeBtn = document.getElementById('tabBtnScanner');
+            if (activeBtn) activeBtn.classList.add('active');
+            const p = document.getElementById('studioPanelScanner');
+            if (p) p.classList.add('active');
+            if (typeof window.initScannerMode === 'function') window.initScannerMode();
         } else if (tabName === 'ai') {
             activeBtn = document.getElementById('tabBtnAi');
             if (activeBtn) activeBtn.classList.add('active');
             const p = document.getElementById('studioPanelAI');
             if (p) p.classList.add('active');
+            if (typeof window.hideScannerOverlay === 'function') window.hideScannerOverlay();
         } else if (tabName === 'docx') {
             activeBtn = document.getElementById('tabBtnDocx');
             if (activeBtn) activeBtn.classList.add('active');
             const p = document.getElementById('studioPanelDocx');
             if (p) p.classList.add('active');
+            if (typeof window.hideScannerOverlay === 'function') window.hideScannerOverlay();
         }
 
         // Quản lý hiển thị thanh Zoom: ẩn khi sang tab docx để không che nút tải word, hiện khi ở tab adjust/ai nếu đã có ảnh
@@ -6098,6 +6357,866 @@
         link.click();
         window.showToast('💾 Đã tải ảnh chỉnh sửa về máy!');
     };
+
+    // =========================================================================
+    // SMART DOCUMENT SCANNER ENGINE (PERSPECTIVE CORNERS, DESKEW & CAMSCANNER FILTERS)
+    // =========================================================================
+    let isScannerModeActive = false;
+    let scannerCorners = null; // { tl: {x, y}, tr: {x, y}, br: {x, y}, bl: {x, y} }
+    let scannerDraggingCorner = null; // 'tl' | 'tr' | 'br' | 'bl'
+    let scannerWarpedCanvas = null; // Offscreen canvas with unwarped raw image
+    let scannerActiveFilter = 'magic_color'; // 'magic_color' | 'bw' | 'grayscale' | 'sharpen' | 'original'
+    let scannerFilterParams = { brightness: 0, contrast: 0, whiten: 80 };
+
+    // 1. Ma trận Homography & Nắn thẳng phối cảnh (Perspective Transform)
+    function solveGaussianLinearSystem(A, b) {
+        const n = b.length;
+        for (let i = 0; i < n; i++) {
+            let maxRow = i;
+            for (let k = i + 1; k < n; k++) {
+                if (Math.abs(A[k][i]) > Math.abs(A[maxRow][i])) maxRow = k;
+            }
+            const tmpA = A[i]; A[i] = A[maxRow]; A[maxRow] = tmpA;
+            const tmpB = b[i]; b[i] = b[maxRow]; b[maxRow] = tmpB;
+
+            if (Math.abs(A[i][i]) < 1e-12) continue;
+
+            for (let k = i + 1; k < n; k++) {
+                const factor = A[k][i] / A[i][i];
+                b[k] -= factor * b[i];
+                for (let j = i; j < n; j++) {
+                    A[k][j] -= factor * A[i][j];
+                }
+            }
+        }
+
+        const x = new Array(n).fill(0);
+        for (let i = n - 1; i >= 0; i--) {
+            let sum = b[i];
+            for (let j = i + 1; j < n; j++) {
+                sum -= A[i][j] * x[j];
+            }
+            x[i] = Math.abs(A[i][i]) > 1e-12 ? sum / A[i][i] : 0;
+        }
+        return x;
+    }
+
+    function computeInverseHomography(srcPts, dstPts) {
+        const A = [];
+        const b = [];
+        for (let i = 0; i < 4; i++) {
+            const u = dstPts[i].x;
+            const v = dstPts[i].y;
+            const x = srcPts[i].x;
+            const y = srcPts[i].y;
+
+            A.push([u, v, 1, 0, 0, 0, -u * x, -v * x]);
+            b.push(x);
+
+            A.push([0, 0, 0, u, v, 1, -u * y, -v * y]);
+            b.push(y);
+        }
+        const h = solveGaussianLinearSystem(A, b);
+        return [
+            [h[0], h[1], h[2]],
+            [h[3], h[4], h[5]],
+            [h[6], h[7], 1.0]
+        ];
+    }
+
+    function warpPerspectiveBilinear(srcCanvas, corners, dstW, dstH) {
+        const srcCtx = srcCanvas.getContext('2d');
+        const srcImgData = srcCtx.getImageData(0, 0, srcCanvas.width, srcCanvas.height);
+        const srcData = srcImgData.data;
+        const sW = srcCanvas.width;
+        const sH = srcCanvas.height;
+
+        const dstCanvas = document.createElement('canvas');
+        dstCanvas.width = dstW;
+        dstCanvas.height = dstH;
+        const dstCtx = dstCanvas.getContext('2d');
+        const dstImgData = dstCtx.createImageData(dstW, dstH);
+        const dstData = dstImgData.data;
+
+        const srcPts = [corners.tl, corners.tr, corners.br, corners.bl];
+        const dstPts = [
+            { x: 0, y: 0 },
+            { x: dstW - 1, y: 0 },
+            { x: dstW - 1, y: dstH - 1 },
+            { x: 0, y: dstH - 1 }
+        ];
+
+        const Hinv = computeInverseHomography(srcPts, dstPts);
+        const h00 = Hinv[0][0], h01 = Hinv[0][1], h02 = Hinv[0][2];
+        const h10 = Hinv[1][0], h11 = Hinv[1][1], h12 = Hinv[1][2];
+        const h20 = Hinv[2][0], h21 = Hinv[2][1], h22 = Hinv[2][2];
+
+        for (let y = 0; y < dstH; y++) {
+            const rowIdx = y * dstW * 4;
+            for (let x = 0; x < dstW; x++) {
+                const denom = h20 * x + h21 * y + h22;
+                const sx = (h00 * x + h01 * y + h02) / denom;
+                const sy = (h10 * x + h11 * y + h12) / denom;
+
+                const idx = rowIdx + (x * 4);
+
+                if (sx < 0 || sx >= sW - 1 || sy < 0 || sy >= sH - 1) {
+                    const cx = Math.max(0, Math.min(sW - 1, Math.round(sx)));
+                    const cy = Math.max(0, Math.min(sH - 1, Math.round(sy)));
+                    const sIdx = (cy * sW + cx) * 4;
+                    dstData[idx] = srcData[sIdx];
+                    dstData[idx + 1] = srcData[sIdx + 1];
+                    dstData[idx + 2] = srcData[sIdx + 2];
+                    dstData[idx + 3] = 255;
+                    continue;
+                }
+
+                const x0 = Math.floor(sx);
+                const y0 = Math.floor(sy);
+                const x1 = x0 + 1;
+                const y1 = y0 + 1;
+
+                const dx = sx - x0;
+                const dy = sy - y0;
+                const w00 = (1 - dx) * (1 - dy);
+                const w10 = dx * (1 - dy);
+                const w01 = (1 - dx) * dy;
+                const w11 = dx * dy;
+
+                const i00 = (y0 * sW + x0) * 4;
+                const i10 = (y0 * sW + x1) * 4;
+                const i01 = (y1 * sW + x0) * 4;
+                const i11 = (y1 * sW + x1) * 4;
+
+                dstData[idx] = Math.round(w00 * srcData[i00] + w10 * srcData[i10] + w01 * srcData[i01] + w11 * srcData[i11]);
+                dstData[idx + 1] = Math.round(w00 * srcData[i00 + 1] + w10 * srcData[i10 + 1] + w01 * srcData[i01 + 1] + w11 * srcData[i11 + 1]);
+                dstData[idx + 2] = Math.round(w00 * srcData[i00 + 2] + w10 * srcData[i10 + 2] + w01 * srcData[i01 + 2] + w11 * srcData[i11 + 2]);
+                dstData[idx + 3] = 255;
+            }
+        }
+
+        dstCtx.putImageData(dstImgData, 0, 0);
+        return dstCanvas;
+    }
+
+    // 2. Bộ lọc tài liệu chuẩn CamScanner (Magic Color, B&W Adaptive Threshold, Grayscale, Sharpen)
+    function applyScannerFiltersToCanvas(srcCanvas, filterName, params) {
+        const W = srcCanvas.width;
+        const H = srcCanvas.height;
+        const outCanvas = document.createElement('canvas');
+        outCanvas.width = W;
+        outCanvas.height = H;
+        const outCtx = outCanvas.getContext('2d');
+
+        const imgData = srcCanvas.getContext('2d').getImageData(0, 0, W, H);
+        const data = imgData.data;
+
+        const brightness = params.brightness || 0;
+        const contrast = params.contrast || 0;
+        const whiten = (params.whiten !== undefined ? params.whiten : 80) / 100.0;
+        const contrastFactor = (259 * (contrast + 255)) / (255 * (259 - contrast));
+
+        if (filterName === 'original') {
+            if (brightness !== 0 || contrast !== 0) {
+                for (let i = 0; i < data.length; i += 4) {
+                    for (let c = 0; c < 3; c++) {
+                        let val = data[i + c];
+                        val = contrastFactor * (val - 128) + 128 + brightness;
+                        data[i + c] = Math.max(0, Math.min(255, val));
+                    }
+                }
+            }
+            outCtx.putImageData(imgData, 0, 0);
+            return outCanvas;
+        }
+
+        if (filterName === 'bw') {
+            // Adaptive Thresholding via Integral Image
+            const integral = new Float64Array((W + 1) * (H + 1));
+            for (let y = 0; y < H; y++) {
+                let sum = 0;
+                const rowIdx = y * W * 4;
+                const intRowNext = (y + 1) * (W + 1);
+                const intRowCurr = y * (W + 1);
+                for (let x = 0; x < W; x++) {
+                    const idx = rowIdx + x * 4;
+                    const luma = 0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2];
+                    sum += luma;
+                    integral[intRowNext + (x + 1)] = integral[intRowCurr + (x + 1)] + sum;
+                }
+            }
+
+            const S = Math.max(12, Math.round(W / 35));
+            const T = 0.12 + (brightness * 0.001);
+            for (let y = 0; y < H; y++) {
+                const y1 = Math.max(0, y - S);
+                const y2 = Math.min(H - 1, y + S);
+                const rowIdx = y * W * 4;
+                for (let x = 0; x < W; x++) {
+                    const x1 = Math.max(0, x - S);
+                    const x2 = Math.min(W - 1, x + S);
+                    const count = (x2 - x1 + 1) * (y2 - y1 + 1);
+
+                    const sum = integral[(y2 + 1) * (W + 1) + (x2 + 1)]
+                              - integral[y1 * (W + 1) + (x2 + 1)]
+                              - integral[(y2 + 1) * (W + 1) + x1]
+                              + integral[y1 * (W + 1) + x1];
+                    const avg = sum / count;
+
+                    const idx = rowIdx + x * 4;
+                    const luma = 0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2];
+                    const val = luma < avg * (1 - T) ? 0 : 255;
+                    data[idx] = val;
+                    data[idx + 1] = val;
+                    data[idx + 2] = val;
+                }
+            }
+            outCtx.putImageData(imgData, 0, 0);
+            return outCanvas;
+        }
+
+        // Magic Color / Grayscale: Background Illumination Flattening
+        const blockScale = Math.max(16, Math.round(W / 40));
+        const bW = Math.ceil(W / blockScale);
+        const bH = Math.ceil(H / blockScale);
+        const bgGrid = new Float32Array(bW * bH);
+
+        for (let by = 0; by < bH; by++) {
+            const startY = by * blockScale;
+            const endY = Math.min(H, startY + blockScale);
+            for (let bx = 0; bx < bW; bx++) {
+                const startX = bx * blockScale;
+                const endX = Math.min(W, startX + blockScale);
+                let maxLuma = 0;
+                for (let y = startY; y < endY; y += 2) {
+                    const rIdx = y * W * 4;
+                    for (let x = startX; x < endX; x += 2) {
+                        const idx = rIdx + x * 4;
+                        const luma = 0.299 * data[idx] + 0.587 * data[idx + 1] + 0.114 * data[idx + 2];
+                        if (luma > maxLuma) maxLuma = luma;
+                    }
+                }
+                bgGrid[by * bW + bx] = Math.max(40, maxLuma);
+            }
+        }
+
+        const bgSmooth = new Float32Array(bW * bH);
+        for (let by = 0; by < bH; by++) {
+            for (let bx = 0; bx < bW; bx++) {
+                let sum = 0, cnt = 0;
+                for (let dy = -1; dy <= 1; dy++) {
+                    const ny = by + dy;
+                    if (ny < 0 || ny >= bH) continue;
+                    for (let dx = -1; dx <= 1; dx++) {
+                        const nx = bx + dx;
+                        if (nx < 0 || nx >= bW) continue;
+                        sum += bgGrid[ny * bW + nx];
+                        cnt++;
+                    }
+                }
+                bgSmooth[by * bW + bx] = sum / cnt;
+            }
+        }
+
+        const isGray = filterName === 'grayscale';
+        const isSharpen = filterName === 'sharpen';
+
+        for (let y = 0; y < H; y++) {
+            const by = Math.min(bH - 1, Math.floor(y / blockScale));
+            const rowIdx = y * W * 4;
+            for (let x = 0; x < W; x++) {
+                const bx = Math.min(bW - 1, Math.floor(x / blockScale));
+                const bgLuma = bgSmooth[by * bW + bx];
+                const normRatio = 255.0 / Math.max(30, bgLuma);
+                const scale = 1.0 + (normRatio - 1.0) * whiten;
+
+                const idx = rowIdx + x * 4;
+                let r = data[idx];
+                let g = data[idx + 1];
+                let b = data[idx + 2];
+
+                if (isGray) {
+                    let luma = 0.299 * r + 0.587 * g + 0.114 * b;
+                    luma = luma * scale;
+                    luma = contrastFactor * (luma - 128) + 128 + brightness;
+                    const val = Math.max(0, Math.min(255, Math.round(luma)));
+                    data[idx] = val;
+                    data[idx + 1] = val;
+                    data[idx + 2] = val;
+                } else {
+                    // Magic Color
+                    r = Math.min(255, r * scale);
+                    g = Math.min(255, g * scale);
+                    b = Math.min(255, b * scale);
+
+                    // Contrast & Brightness
+                    r = contrastFactor * (r - 128) + 128 + brightness;
+                    g = contrastFactor * (g - 128) + 128 + brightness;
+                    b = contrastFactor * (b - 128) + 128 + brightness;
+
+                    // Boost saturation
+                    const luma = 0.299 * r + 0.587 * g + 0.114 * b;
+                    const satBoost = isSharpen ? 1.15 : 1.35;
+                    r = luma + (r - luma) * satBoost;
+                    g = luma + (g - luma) * satBoost;
+                    b = luma + (b - luma) * satBoost;
+
+                    data[idx] = Math.max(0, Math.min(255, Math.round(r)));
+                    data[idx + 1] = Math.max(0, Math.min(255, Math.round(g)));
+                    data[idx + 2] = Math.max(0, Math.min(255, Math.round(b)));
+                }
+            }
+        }
+
+        outCtx.putImageData(imgData, 0, 0);
+
+        if (isSharpen) {
+            const sharpCanvas = document.createElement('canvas');
+            sharpCanvas.width = W;
+            sharpCanvas.height = H;
+            const sCtx = sharpCanvas.getContext('2d');
+            const sImgData = outCtx.getImageData(0, 0, W, H);
+            const sData = sImgData.data;
+            const copyData = new Uint8ClampedArray(sData);
+
+            const kernel = [
+                0, -0.5, 0,
+                -0.5, 3.0, -0.5,
+                0, -0.5, 0
+            ];
+
+            for (let y = 1; y < H - 1; y++) {
+                const rIdx = y * W * 4;
+                for (let x = 1; x < W - 1; x++) {
+                    const idx = rIdx + x * 4;
+                    for (let c = 0; c < 3; c++) {
+                        let sum = 0;
+                        sum += copyData[((y - 1) * W + x) * 4 + c] * kernel[1];
+                        sum += copyData[(y * W + (x - 1)) * 4 + c] * kernel[3];
+                        sum += copyData[(y * W + x) * 4 + c] * kernel[4];
+                        sum += copyData[(y * W + (x + 1)) * 4 + c] * kernel[5];
+                        sum += copyData[((y + 1) * W + x) * 4 + c] * kernel[7];
+                        sData[idx + c] = Math.max(0, Math.min(255, Math.round(sum)));
+                    }
+                }
+            }
+            sCtx.putImageData(sImgData, 0, 0);
+            return sharpCanvas;
+        }
+
+        return outCanvas;
+    }
+
+    // 3. Quản lý chế độ Scan & UI Giao diện
+    window.initScannerMode = function() {
+        if (!studioRawImage) {
+            window.showToast('⚠️ Vui lòng mở ảnh trước khi sử dụng tính năng Scan tài liệu!');
+            window.switchStudioTab('adjust');
+            return;
+        }
+
+        isScannerModeActive = true;
+        const canvas = document.getElementById('studioMainCanvas');
+        if (!canvas) return;
+
+        // Tắt crop và AI region nếu đang mở
+        if (isStudioCropActive) window.toggleStudioCrop();
+        if (isAiRegionActive) window.toggleAiRegion();
+
+        const stepCorners = document.getElementById('scannerStepAdjustCorners');
+        const stepFilter = document.getElementById('scannerStepFilterPreview');
+        if (stepCorners) stepCorners.style.display = 'block';
+        if (stepFilter) stepFilter.style.display = 'none';
+
+        const overlay = document.getElementById('scannerQuadOverlay');
+        if (overlay) overlay.style.display = 'block';
+
+        if (!scannerCorners) {
+            window.clientSideAutoDetectCorners();
+        } else {
+            window.updateScannerCornersUI();
+        }
+
+        window.initScannerEventListeners();
+    };
+
+    window.hideScannerOverlay = function() {
+        isScannerModeActive = false;
+        scannerDraggingCorner = null;
+        const overlay = document.getElementById('scannerQuadOverlay');
+        if (overlay) overlay.style.display = 'none';
+        const loupe = document.getElementById('scannerMagnifierLoupe');
+        if (loupe) loupe.style.display = 'none';
+    };
+
+    window.updateScannerCornersUI = function() {
+        const canvas = document.getElementById('studioMainCanvas');
+        const overlayCanvas = document.getElementById('scannerOverlayCanvas');
+        const overlay = document.getElementById('scannerQuadOverlay');
+        if (!canvas || !overlayCanvas || !overlay || !scannerCorners) return;
+
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = rect.width / canvas.width;
+        const scaleY = rect.height / canvas.height;
+
+        overlayCanvas.width = canvas.width;
+        overlayCanvas.height = canvas.height;
+        const ctx = overlayCanvas.getContext('2d');
+        ctx.clearRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+
+        const tl = scannerCorners.tl;
+        const tr = scannerCorners.tr;
+        const br = scannerCorners.br;
+        const bl = scannerCorners.bl;
+
+        // 1. Vẽ màng đen phủ bên ngoài tứ giác
+        ctx.save();
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+        ctx.fillRect(0, 0, overlayCanvas.width, overlayCanvas.height);
+
+        // Khoét rỗng vùng bên trong tứ giác
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.beginPath();
+        ctx.moveTo(tl.x, tl.y);
+        ctx.lineTo(tr.x, tr.y);
+        ctx.lineTo(br.x, br.y);
+        ctx.lineTo(bl.x, bl.y);
+        ctx.closePath();
+        ctx.fill();
+
+        // Phủ màu xanh ngọc dịu bên trong vùng chọn
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.fillStyle = 'rgba(16, 185, 129, 0.12)';
+        ctx.beginPath();
+        ctx.moveTo(tl.x, tl.y);
+        ctx.lineTo(tr.x, tr.y);
+        ctx.lineTo(br.x, br.y);
+        ctx.lineTo(bl.x, bl.y);
+        ctx.closePath();
+        ctx.fill();
+
+        // 2. Vẽ viền đa giác nối 4 góc
+        ctx.strokeStyle = '#10b981';
+        ctx.lineWidth = Math.max(2, Math.round(canvas.width / 400));
+        ctx.setLineDash([]);
+        ctx.stroke();
+
+        // Đường chéo mờ hỗ trợ căn góc
+        ctx.strokeStyle = 'rgba(16, 185, 129, 0.25)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(tl.x, tl.y); ctx.lineTo(br.x, br.y);
+        ctx.moveTo(tr.x, tr.y); ctx.lineTo(bl.x, bl.y);
+        ctx.stroke();
+        ctx.restore();
+
+        // 3. Định vị 4 nút chốt điều khiển
+        function setHandlePos(id, pt) {
+            const h = document.getElementById(id);
+            if (h) {
+                h.style.left = (pt.x * scaleX) + 'px';
+                h.style.top = (pt.y * scaleY) + 'px';
+            }
+        }
+        setHandlePos('scannerHandleTL', tl);
+        setHandlePos('scannerHandleTR', tr);
+        setHandlePos('scannerHandleBR', br);
+        setHandlePos('scannerHandleBL', bl);
+    };
+
+    function updateScannerLoupe(cornerKey) {
+        const canvas = document.getElementById('studioMainCanvas');
+        const loupe = document.getElementById('scannerMagnifierLoupe');
+        const loupeCanvas = document.getElementById('scannerLoupeCanvas');
+        const loupeLabel = document.getElementById('scannerLoupeLabel');
+        if (!canvas || !loupe || !loupeCanvas || !scannerCorners || !cornerKey) return;
+
+        const pt = scannerCorners[cornerKey];
+        if (!pt) return;
+
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = rect.width / canvas.width;
+        const scaleY = rect.height / canvas.height;
+
+        const screenX = pt.x * scaleX;
+        const screenY = pt.y * scaleY;
+
+        loupe.style.display = 'block';
+        loupe.style.left = screenX + 'px';
+
+        // Đặt kính lúp phía trên chốt; nếu chạm mép trên thì đặt phía dưới
+        if (screenY - 150 < 10) {
+            loupe.style.top = (screenY + 45) + 'px';
+        } else {
+            loupe.style.top = (screenY - 150) + 'px';
+        }
+
+        if (loupeLabel) {
+            const names = { tl: 'Trái trên', tr: 'Phải trên', br: 'Phải dưới', bl: 'Trái dưới' };
+            loupeLabel.textContent = names[cornerKey] || cornerKey.toUpperCase();
+        }
+
+        // Vẽ ảnh phóng to 2.5x trong kính lúp
+        const lCtx = loupeCanvas.getContext('2d');
+        lCtx.clearRect(0, 0, loupeCanvas.width, loupeCanvas.height);
+
+        const zoomFactor = 2.5;
+        const patchW = loupeCanvas.width / zoomFactor;
+        const patchH = loupeCanvas.height / zoomFactor;
+        const srcX = Math.max(0, Math.min(canvas.width - patchW, pt.x - patchW / 2));
+        const srcY = Math.max(0, Math.min(canvas.height - patchH, pt.y - patchH / 2));
+
+        lCtx.drawImage(canvas, srcX, srcY, patchW, patchH, 0, 0, loupeCanvas.width, loupeCanvas.height);
+    }
+
+    // Lắng nghe sự kiện chuột/chạm ngón tay cho 4 góc
+    let isScannerEventsBound = false;
+    window.initScannerEventListeners = function() {
+        if (isScannerEventsBound) return;
+        isScannerEventsBound = true;
+
+        const overlay = document.getElementById('scannerQuadOverlay');
+        if (!overlay) return;
+
+        function getPointerPos(e) {
+            const canvas = document.getElementById('studioMainCanvas');
+            if (!canvas) return { x: 0, y: 0 };
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return {
+                x: Math.max(0, Math.min(canvas.width, (clientX - rect.left) * scaleX)),
+                y: Math.max(0, Math.min(canvas.height, (clientY - rect.top) * scaleY))
+            };
+        }
+
+        ['scannerHandleTL', 'scannerHandleTR', 'scannerHandleBR', 'scannerHandleBL'].forEach(id => {
+            const h = document.getElementById(id);
+            if (!h) return;
+            const corner = h.dataset.corner;
+
+            const onStart = (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                scannerDraggingCorner = corner;
+                h.classList.add('dragging');
+                updateScannerLoupe(corner);
+            };
+
+            h.addEventListener('mousedown', onStart);
+            h.addEventListener('touchstart', onStart, { passive: false });
+        });
+
+        const onMove = (e) => {
+            if (!isScannerModeActive || !scannerDraggingCorner || !scannerCorners) return;
+            e.preventDefault();
+            const pos = getPointerPos(e);
+            scannerCorners[scannerDraggingCorner] = { x: Math.round(pos.x), y: Math.round(pos.y) };
+            window.updateScannerCornersUI();
+            updateScannerLoupe(scannerDraggingCorner);
+        };
+
+        const onEnd = () => {
+            if (scannerDraggingCorner) {
+                document.querySelectorAll('.scanner-corner-handle').forEach(el => el.classList.remove('dragging'));
+                scannerDraggingCorner = null;
+                const loupe = document.getElementById('scannerMagnifierLoupe');
+                if (loupe) loupe.style.display = 'none';
+            }
+        };
+
+        window.addEventListener('mousemove', onMove);
+        window.addEventListener('touchmove', onMove, { passive: false });
+        window.addEventListener('mouseup', onEnd);
+        window.addEventListener('touchend', onEnd);
+        window.addEventListener('touchcancel', onEnd);
+
+        window.addEventListener('resize', () => {
+            if (isScannerModeActive && scannerCorners) {
+                window.updateScannerCornersUI();
+            }
+        });
+    };
+
+    // 4. Phát hiện góc: AI (Gemini) & Tự động tìm nhanh (CV)
+    window.executeAiScanDetectCorners = async function() {
+        const canvas = document.getElementById('studioMainCanvas');
+        if (!canvas || !studioRawImage) return window.showToast('⚠️ Vui lòng mở ảnh trước!');
+
+        const overlay = document.getElementById('studioLoadingOverlay');
+        const loadText = document.getElementById('studioLoadingText');
+        const btn = document.getElementById('btnAiScanDetectCorners');
+
+        overlay.style.display = 'flex';
+        loadText.textContent = 'Gemini AI đang phân tích và nhận diện 4 góc của tài liệu...';
+        if (btn) btn.disabled = true;
+
+        try {
+            const imageBase64 = canvas.toDataURL('image/jpeg', 0.9).split(',')[1];
+            const data = await window.callStudioApi({
+                action: 'ai_scan_corners',
+                imageBase64: imageBase64,
+                mimeType: 'image/jpeg',
+                selectedModel: window.getStudioSelectedModel(),
+                customApiKey: window.getStudioCustomApiKey()
+            });
+
+            const res = data.scanResult || {};
+            const c = res.corners || {};
+            if (c.topLeft && c.topRight && c.bottomRight && c.bottomLeft) {
+                const W = canvas.width;
+                const H = canvas.height;
+                scannerCorners = {
+                    tl: { x: Math.round((c.topLeft[0] * W) / 1000), y: Math.round((c.topLeft[1] * H) / 1000) },
+                    tr: { x: Math.round((c.topRight[0] * W) / 1000), y: Math.round((c.topRight[1] * H) / 1000) },
+                    br: { x: Math.round((c.bottomRight[0] * W) / 1000), y: Math.round((c.bottomRight[1] * H) / 1000) },
+                    bl: { x: Math.round((c.bottomLeft[0] * W) / 1000), y: Math.round((c.bottomLeft[1] * H) / 1000) }
+                };
+                window.updateScannerCornersUI();
+                const typeText = res.detected_type === 'envelope' ? 'phong bì' : 'tài liệu';
+                window.showToast(`✨ AI đã phát hiện chính xác 4 góc ${typeText}! Bấm "Nắn thẳng & Quét ngay" để tiến hành.`);
+            } else {
+                throw new Error('Dữ liệu tọa độ 4 góc không đầy đủ.');
+            }
+        } catch (err) {
+            console.error('Lỗi AI Scan Corners:', err);
+            window.showToast('⚠️ Lỗi nhận diện AI: ' + err.message);
+        } finally {
+            overlay.style.display = 'none';
+            if (btn) btn.disabled = false;
+        }
+    };
+
+    window.clientSideAutoDetectCorners = function() {
+        const canvas = document.getElementById('studioMainCanvas');
+        if (!canvas) return;
+
+        const W = canvas.width;
+        const H = canvas.height;
+
+        // Tìm kiếm đường bao phân cách màu giữa tài liệu và mặt bàn
+        try {
+            const ctx = canvas.getContext('2d');
+            const imgData = ctx.getImageData(0, 0, W, H).data;
+
+            function getLuma(x, y) {
+                const idx = (y * W + x) * 4;
+                return 0.299 * imgData[idx] + 0.587 * imgData[idx + 1] + 0.114 * imgData[idx + 2];
+            }
+
+            // Lấy mẫu độ sáng 4 góc ảnh làm nền
+            const bgLuma = (getLuma(4, 4) + getLuma(W - 5, 4) + getLuma(4, H - 5) + getLuma(W - 5, H - 5)) / 4;
+
+            let topY = Math.round(H * 0.1), bottomY = Math.round(H * 0.9);
+            let leftX = Math.round(W * 0.1), rightX = Math.round(W * 0.9);
+
+            // Quét từ trên xuống
+            for (let y = 0; y < H * 0.4; y += 4) {
+                let diffs = 0;
+                for (let x = Math.round(W * 0.2); x < W * 0.8; x += 10) {
+                    if (Math.abs(getLuma(x, y) - bgLuma) > 30) diffs++;
+                }
+                if (diffs > (W * 0.6 / 10) * 0.3) { topY = Math.max(0, y - 6); break; }
+            }
+
+            // Quét từ dưới lên
+            for (let y = H - 1; y > H * 0.6; y -= 4) {
+                let diffs = 0;
+                for (let x = Math.round(W * 0.2); x < W * 0.8; x += 10) {
+                    if (Math.abs(getLuma(x, y) - bgLuma) > 30) diffs++;
+                }
+                if (diffs > (W * 0.6 / 10) * 0.3) { bottomY = Math.min(H - 1, y + 6); break; }
+            }
+
+            // Quét từ trái sang
+            for (let x = 0; x < W * 0.4; x += 4) {
+                let diffs = 0;
+                for (let y = Math.round(H * 0.2); y < H * 0.8; y += 10) {
+                    if (Math.abs(getLuma(x, y) - bgLuma) > 30) diffs++;
+                }
+                if (diffs > (H * 0.6 / 10) * 0.3) { leftX = Math.max(0, x - 6); break; }
+            }
+
+            // Quét từ phải sang
+            for (let x = W - 1; x > W * 0.6; x -= 4) {
+                let diffs = 0;
+                for (let y = Math.round(H * 0.2); y < H * 0.8; y += 10) {
+                    if (Math.abs(getLuma(x, y) - bgLuma) > 30) diffs++;
+                }
+                if (diffs > (H * 0.6 / 10) * 0.3) { rightX = Math.min(W - 1, x + 6); break; }
+            }
+
+            scannerCorners = {
+                tl: { x: leftX, y: topY },
+                tr: { x: rightX, y: topY },
+                br: { x: rightX, y: bottomY },
+                bl: { x: leftX, y: bottomY }
+            };
+        } catch (e) {
+            scannerCorners = {
+                tl: { x: Math.round(W * 0.1), y: Math.round(H * 0.1) },
+                tr: { x: Math.round(W * 0.9), y: Math.round(H * 0.1) },
+                br: { x: Math.round(W * 0.9), y: Math.round(H * 0.9) },
+                bl: { x: Math.round(W * 0.1), y: Math.round(H * 0.9) }
+            };
+        }
+
+        window.updateScannerCornersUI();
+        window.showToast('⚡ Đã tìm nhanh viền tài liệu!');
+    };
+
+    window.resetScannerCornersToFull = function() {
+        const canvas = document.getElementById('studioMainCanvas');
+        if (!canvas) return;
+        scannerCorners = {
+            tl: { x: 0, y: 0 },
+            tr: { x: canvas.width, y: 0 },
+            br: { x: canvas.width, y: canvas.height },
+            bl: { x: 0, y: canvas.height }
+        };
+        window.updateScannerCornersUI();
+        window.showToast('↺ Đã đặt lại 4 góc bao toàn khung hình.');
+    };
+
+    // 5. Thực thi Nắn thẳng & Quét tài liệu (Scan & Deskew)
+    window.executePerspectiveScanAndWarp = function() {
+        const canvas = document.getElementById('studioMainCanvas');
+        if (!canvas || !scannerCorners) return;
+
+        const tl = scannerCorners.tl;
+        const tr = scannerCorners.tr;
+        const br = scannerCorners.br;
+        const bl = scannerCorners.bl;
+
+        const wTop = Math.hypot(tr.x - tl.x, tr.y - tl.y);
+        const wBottom = Math.hypot(br.x - bl.x, br.y - bl.y);
+        const dstW = Math.max(100, Math.round(Math.max(wTop, wBottom)));
+
+        const hLeft = Math.hypot(bl.x - tl.x, bl.y - bl.y);
+        const hRight = Math.hypot(br.x - tr.x, br.y - tr.y);
+        const dstH = Math.max(100, Math.round(Math.max(hLeft, hRight)));
+
+        // Nắn thẳng phối cảnh bằng nội suy song tuyến tính
+        scannerWarpedCanvas = warpPerspectiveBilinear(canvas, scannerCorners, dstW, dstH);
+
+        // Chuyển sang Bước 2: Xem trước bộ lọc & hoàn tất
+        const stepCorners = document.getElementById('scannerStepAdjustCorners');
+        const stepFilter = document.getElementById('scannerStepFilterPreview');
+        if (stepCorners) stepCorners.style.display = 'none';
+        if (stepFilter) stepFilter.style.display = 'block';
+
+        const overlay = document.getElementById('scannerQuadOverlay');
+        if (overlay) overlay.style.display = 'none';
+
+        // Áp dụng bộ lọc mặc định: Màu ma thuật (Magic Color)
+        window.applyScannerPreset(scannerActiveFilter || 'magic_color');
+        window.showToast('🚀 Đã nắn thẳng thành công! Hãy chọn bộ lọc làm sạch tài liệu phù hợp.');
+    };
+
+    window.applyScannerPreset = function(filterName) {
+        scannerActiveFilter = filterName;
+
+        document.querySelectorAll('#scannerStepFilterPreview .studio-tool-btn').forEach(btn => btn.classList.remove('active'));
+        const btnMap = {
+            'magic_color': 'btnScannerFilterMagic',
+            'bw': 'btnScannerFilterBw',
+            'grayscale': 'btnScannerFilterGray',
+            'sharpen': 'btnScannerFilterSharpen',
+            'original': 'btnScannerFilterOriginal'
+        };
+        const targetBtn = document.getElementById(btnMap[filterName]);
+        if (targetBtn) targetBtn.classList.add('active');
+
+        window.renderScannerFilteredPreview();
+    };
+
+    window.updateScannerFilterParams = function() {
+        const sB = document.getElementById('sliderScanBrightness');
+        const sC = document.getElementById('sliderScanContrast');
+        const sW = document.getElementById('sliderScanWhiten');
+
+        const vB = document.getElementById('valScanBrightness');
+        const vC = document.getElementById('valScanContrast');
+        const vW = document.getElementById('valScanWhiten');
+
+        scannerFilterParams.brightness = sB ? parseInt(sB.value, 10) : 0;
+        scannerFilterParams.contrast = sC ? parseInt(sC.value, 10) : 0;
+        scannerFilterParams.whiten = sW ? parseInt(sW.value, 10) : 80;
+
+        if (vB) vB.textContent = (scannerFilterParams.brightness > 0 ? '+' : '') + scannerFilterParams.brightness;
+        if (vC) vC.textContent = (scannerFilterParams.contrast > 0 ? '+' : '') + scannerFilterParams.contrast;
+        if (vW) vW.textContent = scannerFilterParams.whiten + '%';
+
+        window.renderScannerFilteredPreview();
+    };
+
+    window.renderScannerFilteredPreview = function() {
+        if (!scannerWarpedCanvas) return;
+        const mainCanvas = document.getElementById('studioMainCanvas');
+        if (!mainCanvas) return;
+
+        const filtered = applyScannerFiltersToCanvas(scannerWarpedCanvas, scannerActiveFilter, scannerFilterParams);
+
+        mainCanvas.width = filtered.width;
+        mainCanvas.height = filtered.height;
+        const ctx = mainCanvas.getContext('2d');
+        ctx.clearRect(0, 0, mainCanvas.width, mainCanvas.height);
+        ctx.drawImage(filtered, 0, 0);
+
+        if (typeof window.updateStudioCanvasZoom === 'function') {
+            window.resetStudioCanvasZoom();
+        }
+    };
+
+    window.commitScannedImageToStudio = async function() {
+        const canvas = document.getElementById('studioMainCanvas');
+        if (!canvas) return;
+
+        window.pushStudioState('Quét tài liệu thông minh (Smart Scan)');
+
+        const dataUrl = canvas.toDataURL('image/png');
+        const newImg = new Image();
+        await new Promise(res => {
+            newImg.onload = res;
+            newImg.src = dataUrl;
+        });
+
+        studioRawImage = newImg;
+        scannerWarpedCanvas = null;
+        scannerCorners = null;
+
+        window.switchStudioTab('adjust');
+        window.renderStudioCanvas();
+        window.showToast('✨ Đã áp dụng ảnh scan vào Studio thành công! Bạn có thể tiếp tục sửa chữ AI hoặc chuyển sang DOCX.');
+    };
+
+    window.downloadScannedResult = function() {
+        const canvas = document.getElementById('studioMainCanvas');
+        if (!canvas) return;
+        const link = document.createElement('a');
+        const baseName = studioCurrentFileName.replace(/\.[^/.]+$/, '');
+        link.download = `${baseName}_scan.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        window.showToast('💾 Đã tải ảnh Scan về máy tính!');
+    };
+
+    window.returnToScannerCorners = function() {
+        const stepCorners = document.getElementById('scannerStepAdjustCorners');
+        const stepFilter = document.getElementById('scannerStepFilterPreview');
+        if (stepCorners) stepCorners.style.display = 'block';
+        if (stepFilter) stepFilter.style.display = 'none';
+
+        const overlay = document.getElementById('scannerQuadOverlay');
+        if (overlay) overlay.style.display = 'block';
+
+        // Vẽ lại ảnh gốc lên canvas
+        window.renderStudioCanvas();
+        window.updateScannerCornersUI();
+    };
+
 
     // V2.1 AI EDITING LOGIC (GEMINI 3.1 PRO / VISION)
     window.applyAiCanvasPatch = async function(patch, canvas) {

@@ -503,6 +503,80 @@ Chỉ trả về DUY NHẤT 1 JSON hợp lệ (không bọc trong markdown \`\`\
             return res.end(JSON.stringify(result));
         }
 
+        // 6. ACTION: AI SCAN CORNERS (PHÁT HIỆN 4 GÓC TÀI LIỆU PHỐI CẢNH ĐỂ NẮN THẲNG)
+        if (action === 'ai_scan_corners') {
+            const systemPrompt = `Bạn là chuyên gia thị giác máy tính phát hiện tài liệu, văn bản, thiệp cưới, phong bì, trang giấy, hóa đơn trong ảnh để chuẩn bị nắn thẳng phối cảnh (document perspective scanning).
+Nhiệm vụ: Phát hiện chính xác 4 góc đỉnh (tứ giác) của đối tượng tài liệu/phong bì/trang giấy trong ảnh theo thứ tự chiều kim đồng hồ:
+- topLeft: [x, y] (góc trên - trái)
+- topRight: [x, y] (góc trên - phải)
+- bottomRight: [x, y] (góc dưới - phải)
+- bottomLeft: [x, y] (góc dưới - trái)
+
+Tọa độ chuẩn hóa từ 0 đến 1000:
+- x: từ 0 (mép trái) đến 1000 (mép phải)
+- y: từ 0 (mép trên) đến 1000 (mép dưới)
+
+LƯU Ý QUAN TRỌNG:
+1. 4 góc phải ôm sát 4 đỉnh góc thực tế của tài liệu/phong bì/trang giấy, loại bỏ toàn bộ phần mặt bàn, sàn nhà, bóng đổ bên ngoài.
+2. Nếu tài liệu bị chụp nghiêng/chụp phối cảnh (perspective), 4 đỉnh sẽ tạo thành hình tứ giác/hình thang, bạn phải bắt đúng 4 đỉnh đó.
+
+Chỉ trả về DUY NHẤT 1 JSON hợp lệ (không bọc trong markdown \`\`\`json, không thêm bất kỳ văn bản nào ngoài JSON):
+{
+  "corners": {
+    "topLeft": [x, y],
+    "topRight": [x, y],
+    "bottomRight": [x, y],
+    "bottomLeft": [x, y]
+  },
+  "confidence": 0.98,
+  "detected_type": "document"
+}`;
+
+            const contents = [{
+                role: 'user',
+                parts: [
+                    {
+                        inline_data: {
+                            mime_type: mimeType || 'image/jpeg',
+                            data: imageBase64
+                        }
+                    },
+                    {
+                        text: 'Phát hiện 4 góc tứ giác của tài liệu/phong bì trong ảnh để nắn thẳng phối cảnh.'
+                    }
+                ]
+            }];
+
+            const { text, modelUsed } = await callGemini(contents, systemPrompt, 0.1, selectedModel, customApiKey);
+            let cleanedJson = text.trim();
+            if (cleanedJson.startsWith('```json')) {
+                cleanedJson = cleanedJson.replace(/^```json\s*/i, '').replace(/\s*```$/, '');
+            } else if (cleanedJson.startsWith('```')) {
+                cleanedJson = cleanedJson.replace(/^```\s*/i, '').replace(/\s*```$/, '');
+            }
+
+            let scanData;
+            try {
+                scanData = JSON.parse(cleanedJson);
+            } catch (e) {
+                scanData = {
+                    corners: {
+                        topLeft: [50, 50],
+                        topRight: [950, 50],
+                        bottomRight: [950, 950],
+                        bottomLeft: [50, 950]
+                    },
+                    confidence: 0.5,
+                    detected_type: 'unknown'
+                };
+            }
+
+            const result = { status: 'success', scanResult: scanData, modelUsed };
+            if (res.status) return res.status(200).json(result);
+            res.writeHead(200, { 'Content-Type': 'application/json;charset=utf-8' });
+            return res.end(JSON.stringify(result));
+        }
+
         throw new Error('Hành động (action) không hợp lệ: ' + action);
 
     } catch (err) {
