@@ -21,7 +21,7 @@ function resolveApiKey() {
     return Buffer.from(enc, 'base64').toString('utf8');
 }
 
-const GEMINI_MODEL = 'gemini-2.5-flash';
+const GEMINI_MODELS = ['gemini-3.8-flash', 'gemini-3.7-flash', 'gemini-3.5-flash', 'gemini-2.5-flash'];
 
 module.exports = async function handler(req, res) {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -97,23 +97,38 @@ module.exports = async function handler(req, res) {
 
         contents.push({ role: 'user', parts: currentParts });
 
-        const geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/' + GEMINI_MODEL + ':generateContent?key=' + apiKey;
-        const response = await fetch(geminiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                system_instruction: systemInstruction,
-                contents: contents
-            })
-        });
+        let replyText = null;
+        let lastError = null;
 
-        if (!response.ok) {
-            const errData = await response.json();
-            throw new Error(errData.error?.message || ('Gemini API error ' + response.status));
+        for (const model of GEMINI_MODELS) {
+            try {
+                const geminiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + apiKey;
+                const response = await fetch(geminiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        system_instruction: systemInstruction,
+                        contents: contents
+                    })
+                });
+
+                if (!response.ok) {
+                    const errData = await response.json().catch(() => ({}));
+                    throw new Error(errData.error?.message || ('Gemini API error ' + response.status));
+                }
+
+                const data = await response.json();
+                replyText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                if (replyText) break;
+            } catch (err) {
+                lastError = err;
+                console.warn(`Thử model ${model} không thành công, chuyển fallback:`, err.message);
+            }
         }
 
-        const data = await response.json();
-        const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Không nhận được phản hồi từ AI.';
+        if (!replyText) {
+            throw (lastError || new Error('Không nhận được phản hồi từ AI.'));
+        }
 
         const result = { status: 'success', reply: replyText };
 
