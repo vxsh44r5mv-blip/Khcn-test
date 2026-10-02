@@ -3436,9 +3436,27 @@
             } catch(error) {
                 console.error("Auth Error:", error);
                 window.showToast("⚠️ Vui lòng bật 'Anonymous Login' trong Firebase Authentication!");
+                const dot = document.getElementById('syncDot');
+                const text = document.getElementById('syncText');
+                if (dot) dot.className = 'sync-dot error';
+                if (text) text.textContent = 'Ngoại tuyến';
+                isDataLoaded = true;
+                if (typeof filterData === 'function') filterData();
             }
         };
         initAuth();
+
+        // Tự động chuyển sang ngoại tuyến sau 4s nếu kết nối đám mây chậm để người dùng không bị treo
+        setTimeout(() => {
+            const text = document.getElementById('syncText');
+            if (text && text.textContent === 'Đang kết nối') {
+                const dot = document.getElementById('syncDot');
+                if (dot) dot.className = 'sync-dot';
+                text.textContent = 'Ngoại tuyến (Cache)';
+                isDataLoaded = true;
+                if (typeof filterData === 'function') filterData();
+            }
+        }, 4000);
 
         onAuthStateChanged(auth, (user) => {
             userAuth = user;
@@ -3455,7 +3473,9 @@
         const dot = document.getElementById('syncDot');
         const text = document.getElementById('syncText');
         if (dot) dot.className = 'sync-dot error';
-        if (text) text.textContent = 'Lỗi kết nối';
+        if (text) text.textContent = 'Ngoại tuyến';
+        isDataLoaded = true;
+        if (typeof filterData === 'function') filterData();
     }
 
     function setupRealtimeListener() {
@@ -5393,15 +5413,6 @@
     }
 
     let lastDiffResult = null;
-
-    function escapeHtml(str) {
-        return (str || '')
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
-    }
 
     window.runDocumentDiff = function() {
         const textA = (document.getElementById('diffTextA')?.value || '').trim();
