@@ -2518,6 +2518,35 @@
             <button type="button" id="btnTestPing" class="btn btn-outline" onclick="window.checkCloudPing(this)">🚀 Kiểm tra độ trễ ngay</button>
         </div>
 
+        <!-- Card: Đổi Số Thành Chữ Thông Minh -->
+        <div class="util-card" id="cardNumToWords">
+            <div class="util-card-header">
+                <span class="util-card-title">💰 Đổi Số Thành Chữ</span>
+                <span class="util-badge">Tài chính</span>
+            </div>
+            <p style="font-size: 12px; color: var(--gray-600); margin: 0;">Đọc số tiền hoặc số liệu thành chữ tiếng Việt chuẩn quy tắc ngân hàng & kế toán.</p>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <input type="text" id="numToWordsInput" class="smart-input-field" placeholder="Nhập số tiền (VD: 15,000,000 hoặc 2500000.5)..." oninput="window.handleNumToWordsInput(this)" style="font-size: 15px; font-weight: 700;">
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; font-size: 12px; color: var(--ink);">
+                    <label style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer;">
+                        <input type="checkbox" id="numOptCapital" checked onchange="window.updateNumToWords()"> Viết hoa đầu
+                    </label>
+                    <label style="display: inline-flex; align-items: center; gap: 4px; cursor: pointer;">
+                        <input type="checkbox" id="numOptChan" checked onchange="window.updateNumToWords()"> Đuôi "chẵn"
+                    </label>
+                    <select id="numCurrencySelect" onchange="window.updateNumToWords()" style="background: var(--surface-soft, #f8fafc); color: var(--ink, #0f172a); border: 1px solid var(--line, #e2e8f0); border-radius: 6px; padding: 3px 6px; font-size: 12px;">
+                        <option value="dong">Đơn vị: đồng</option>
+                        <option value="vnd">Đơn vị: Việt Nam Đồng</option>
+                        <option value="usd">Đơn vị: Đô la Mỹ</option>
+                        <option value="none">Không kèm đơn vị</option>
+                    </select>
+                </div>
+                <div id="numToWordsResultBox" style="background: var(--surface-soft, #f8fafc); border: 1px solid var(--line, #e2e8f0); border-radius: 10px; padding: 12px; min-height: 52px; font-size: 13.5px; font-weight: 600; color: #0284c7; line-height: 1.5; display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                    <span id="numToWordsResultText" style="color: var(--gray-400); font-style: italic; font-weight: 500;">Nhập số vào ô trên để đọc thành chữ...</span>
+                    <button type="button" class="util-btn primary" id="btnCopyNumWords" onclick="window.copyNumToWords(this)" style="display: none; padding: 5px 12px; font-size: 11px; white-space: nowrap;">📋 Sao chép</button>
+                </div>
+            </div>
+        </div>
         
         <!-- Card 5: Studio Chỉnh Sửa Ảnh & Chuyển Đổi DOCX -->
         <div class="util-card studio-card-feature" style="grid-column: 1 / -1; background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #fff; border: 1px solid #334155; position: relative; overflow: hidden; padding: 26px;">
@@ -2555,6 +2584,131 @@
             </div>
         </div>
 
+        <!-- Card: So Sánh 2 Văn Bản (Word .docx, PDF & Text) -->
+        <div class="util-card doc-diff-card" id="cardDocDiff" style="grid-column: 1 / -1; padding: 22px;">
+            <div class="util-card-header" style="margin-bottom: 14px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.5rem;">⚖️</span>
+                    <div>
+                        <div class="util-card-title" style="font-size: 1.15rem; font-weight: 800;">So Sánh & Đối Chiếu 2 Văn Bản (Word, PDF & Text)</div>
+                        <div style="font-size: 0.8rem; color: var(--gray-600); margin-top: 2px;">Tải tệp Word (.docx), PDF hoặc dán văn bản để đối chiếu thay đổi, các từ ngữ thêm mới và bị xóa.</div>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="util-badge" style="background: #e0f2fe; color: #0369a1;">100% Cục bộ & Bảo mật</span>
+                </div>
+            </div>
+
+            <!-- Khung nhập liệu 2 cột: Văn bản A vs Văn bản B -->
+            <div class="diff-inputs-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 14px;">
+                <!-- Cột A: Bản gốc -->
+                <div class="diff-input-pane" style="background: var(--surface-soft, #f8fafc); border: 1px solid var(--line, #e2e8f0); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-weight: 700; font-size: 13px; color: var(--ink);">📄 Văn bản A (Bản gốc)</span>
+                        <div style="display: flex; gap: 6px;">
+                            <label class="btn-tool" style="cursor: pointer; font-size: 11px; padding: 4px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px;" title="Tải tệp Word (.docx), PDF (.pdf) hoặc Text (.txt)">
+                                📁 Tải tệp
+                                <input type="file" id="diffFileInputA" accept=".docx,.pdf,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" style="display: none;" onchange="window.handleDiffFileUpload(event, 'A')">
+                            </label>
+                            <button type="button" class="btn-tool" onclick="window.clearDiffText('A')" style="font-size: 11px; padding: 4px 8px;" title="Xóa nội dung">✕ Xóa</button>
+                        </div>
+                    </div>
+                    <div id="diffFileBadgeA" style="display: none; font-size: 11px; padding: 4px 8px; background: #fff; border: 1px solid var(--line, #e2e8f0); border-radius: 6px; color: #0284c7; font-weight: 600;"></div>
+                    <textarea id="diffTextA" class="util-textarea" style="height: 150px; font-size: 13px; line-height: 1.5;" placeholder="Dán văn bản gốc vào đây hoặc bấm 'Tải tệp' (.docx, .pdf, .txt)..." oninput="window.updateDiffStats()"></textarea>
+                    <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--gray-400);">
+                        <span id="diffStatsA">0 từ · 0 ký tự</span>
+                    </div>
+                </div>
+
+                <!-- Cột B: Bản sửa đổi / đối chiếu -->
+                <div class="diff-input-pane" style="background: var(--surface-soft, #f8fafc); border: 1px solid var(--line, #e2e8f0); border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 8px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span style="font-weight: 700; font-size: 13px; color: var(--ink);">📝 Văn bản B (Bản đối chiếu)</span>
+                        <div style="display: flex; gap: 6px;">
+                            <label class="btn-tool" style="cursor: pointer; font-size: 11px; padding: 4px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px;" title="Tải tệp Word (.docx), PDF (.pdf) hoặc Text (.txt)">
+                                📁 Tải tệp
+                                <input type="file" id="diffFileInputB" accept=".docx,.pdf,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain" style="display: none;" onchange="window.handleDiffFileUpload(event, 'B')">
+                            </label>
+                            <button type="button" class="btn-tool" onclick="window.clearDiffText('B')" style="font-size: 11px; padding: 4px 8px;" title="Xóa nội dung">✕ Xóa</button>
+                        </div>
+                    </div>
+                    <div id="diffFileBadgeB" style="display: none; font-size: 11px; padding: 4px 8px; background: #fff; border: 1px solid var(--line, #e2e8f0); border-radius: 6px; color: #0284c7; font-weight: 600;"></div>
+                    <textarea id="diffTextB" class="util-textarea" style="height: 150px; font-size: 13px; line-height: 1.5;" placeholder="Dán văn bản đối chiếu vào đây hoặc bấm 'Tải tệp' (.docx, .pdf, .txt)..." oninput="window.updateDiffStats()"></textarea>
+                    <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--gray-400);">
+                        <span id="diffStatsB">0 từ · 0 ký tự</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Toolbar tùy chọn & Thực hiện so sánh -->
+            <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; padding: 10px 14px; background: var(--surface-soft, #f8fafc); border: 1px solid var(--line, #e2e8f0); border-radius: 10px;">
+                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 12px;">
+                    <label style="display: inline-flex; align-items: center; gap: 4px; font-weight: 600; color: var(--ink);">
+                        Chế độ:
+                        <select id="diffModeSelect" style="background: #fff; color: var(--ink); border: 1px solid var(--line, #e2e8f0); border-radius: 6px; padding: 3px 8px; font-size: 12px;" onchange="window.runDocumentDiff()">
+                            <option value="word">Theo từng từ (Chi tiết)</option>
+                            <option value="line">Theo từng dòng (Đoạn văn)</option>
+                        </select>
+                    </label>
+                    <label style="display: inline-flex; align-items: center; gap: 4px; color: var(--ink); cursor: pointer;">
+                        <input type="checkbox" id="diffOptIgnoreCase" onchange="window.runDocumentDiff()"> Bỏ qua hoa/thường
+                    </label>
+                    <label style="display: inline-flex; align-items: center; gap: 4px; color: var(--ink); cursor: pointer;">
+                        <input type="checkbox" id="diffOptTrimSpace" checked onchange="window.runDocumentDiff()"> Bỏ qua khoảng trắng thừa
+                    </label>
+                </div>
+                <div style="display: flex; gap: 8px;">
+                    <button type="button" class="btn-tool" onclick="window.swapDiffTexts()" title="Hoán đổi vị trí Văn bản A và B">⇄ Đổi A ⇋ B</button>
+                    <button type="button" class="btn btn-primary" onclick="window.runDocumentDiff()" style="padding: 7px 18px; font-size: 13px; font-weight: 700; width: auto;">
+                        🔍 Bắt đầu so sánh
+                    </button>
+                </div>
+            </div>
+
+            <!-- Kết quả so sánh -->
+            <div id="diffResultsContainer" style="display: none;">
+                <!-- Summary bar -->
+                <div id="diffSummaryBar" style="display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; background: #fff; border: 1px solid var(--line, #e2e8f0); border-radius: 10px; margin-bottom: 12px; flex-wrap: wrap;">
+                    <div style="display: flex; align-items: center; gap: 16px; font-size: 13px; font-weight: 600;">
+                        <span>📊 Tương đồng: <b id="diffSimScore" style="color: #0284c7; font-size: 16px;">100%</b></span>
+                        <span style="color: #16a34a;">🟢 Thêm mới: <b id="diffCountIns">+0</b></span>
+                        <span style="color: #dc2626;">🔴 Bị xóa: <b id="diffCountDel">-0</b></span>
+                        <span style="color: var(--gray-600);">⚪ Giống nhau: <b id="diffCountSame">0</b></span>
+                    </div>
+                    <div style="display: flex; gap: 6px;">
+                        <div class="image-mode-segmented" style="display: inline-flex;">
+                            <button type="button" class="seg-btn active" id="btnDiffViewSide" onclick="window.switchDiffView('side')">Song song</button>
+                            <button type="button" class="seg-btn" id="btnDiffViewInline" onclick="window.switchDiffView('inline')">Gộp dòng</button>
+                        </div>
+                        <button type="button" class="btn-tool" onclick="window.copyDiffReport(this)">📋 Sao chép báo cáo</button>
+                    </div>
+                </div>
+
+                <!-- 1. Side by side view -->
+                <div id="diffViewSide" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div style="border: 1px solid var(--line, #e2e8f0); border-radius: 10px; overflow: hidden; background: #fff;">
+                        <div style="padding: 8px 12px; background: var(--surface-soft, #f8fafc); border-bottom: 1px solid var(--line, #e2e8f0); font-weight: 700; font-size: 12px; color: var(--ink);">
+                            Văn bản A (Phần bị xóa / sửa đổi)
+                        </div>
+                        <div id="diffOutputA" style="padding: 14px; max-height: 420px; overflow-y: auto; font-size: 13px; line-height: 1.6; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; white-space: pre-wrap; word-break: break-word;"></div>
+                    </div>
+                    <div style="border: 1px solid var(--line, #e2e8f0); border-radius: 10px; overflow: hidden; background: #fff;">
+                        <div style="padding: 8px 12px; background: var(--surface-soft, #f8fafc); border-bottom: 1px solid var(--line, #e2e8f0); font-weight: 700; font-size: 12px; color: var(--ink);">
+                            Văn bản B (Phần thêm mới)
+                        </div>
+                        <div id="diffOutputB" style="padding: 14px; max-height: 420px; overflow-y: auto; font-size: 13px; line-height: 1.6; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; white-space: pre-wrap; word-break: break-word;"></div>
+                    </div>
+                </div>
+
+                <!-- 2. Inline/Unified view -->
+                <div id="diffViewInline" style="display: none; border: 1px solid var(--line, #e2e8f0); border-radius: 10px; overflow: hidden; background: #fff;">
+                    <div style="padding: 8px 12px; background: var(--surface-soft, #f8fafc); border-bottom: 1px solid var(--line, #e2e8f0); font-weight: 700; font-size: 12px; color: var(--ink);">
+                        Dòng văn bản gộp (Đánh dấu trực tiếp)
+                    </div>
+                    <div id="diffOutputInline" style="padding: 16px; max-height: 420px; overflow-y: auto; font-size: 13px; line-height: 1.7; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; white-space: pre-wrap; word-break: break-word;"></div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- V2.1 TAB STUDIO ẢNH & DOCX WORKSPACE -->
@@ -4873,6 +5027,482 @@
         } finally {
             if (btn) btn.disabled = false;
         }
+    };
+
+    /* ===================================================================
+       V3.3 TIỆN ÍCH 1: ĐỔI SỐ THÀNH CHỮ (CHUẨN NGÂN HÀNG & KẾ TOÁN)
+       =================================================================== */
+    function readVietnameseNumber(nStr, options = {}) {
+        if (!nStr && nStr !== 0) return '';
+        let str = nStr.toString().trim().replace(/,/g, '');
+        if (!str) return '';
+        let isNegative = false;
+        if (str.startsWith('-')) {
+            isNegative = true;
+            str = str.substring(1);
+        }
+        let [intPart, decPart] = str.split('.');
+        intPart = intPart ? intPart.replace(/\D/g, '') : '0';
+        intPart = intPart.replace(/^0+/, '') || '0';
+
+        const digits = ['không', 'một', 'hai', 'ba', 'bốn', 'năm', 'sáu', 'bảy', 'tám', 'chín'];
+        const scales = ['', 'nghìn', 'triệu', 'tỷ', 'nghìn tỷ', 'triệu tỷ', 'tỷ tỷ'];
+
+        if (intPart === '0' && (!decPart || decPart.replace(/\D/g, '') === '')) {
+            let res = 'không';
+            if (options.currency === 'dong') res += options.chan ? ' đồng chẵn' : ' đồng';
+            else if (options.currency === 'vnd') res += ' Việt Nam Đồng';
+            else if (options.currency === 'usd') res += ' Đô la Mỹ';
+            return options.capitalize !== false ? (res.charAt(0).toUpperCase() + res.slice(1)) : res;
+        }
+
+        function readGroup(group, isLeadingGroup) {
+            let a = Math.floor(group / 100);
+            let b = Math.floor((group % 100) / 10);
+            let c = group % 10;
+            let res = [];
+            if (!isLeadingGroup || a > 0) res.push(digits[a], 'trăm');
+            if (b > 1) {
+                res.push(digits[b], 'mươi');
+                if (c === 1) res.push('mốt');
+                else if (c === 5) res.push('lăm');
+                else if (c > 0) res.push(digits[c]);
+            } else if (b === 1) {
+                res.push('mười');
+                if (c === 5) res.push('lăm');
+                else if (c > 0) res.push(digits[c]);
+            } else {
+                if (a > 0 && c > 0) res.push('linh', digits[c]);
+                else if (c > 0) {
+                    if (!isLeadingGroup) res.push('linh', digits[c]);
+                    else res.push(digits[c]);
+                }
+            }
+            return res.join(' ');
+        }
+
+        let groups = [];
+        let temp = intPart;
+        while (temp.length > 0) {
+            groups.push(parseInt(temp.slice(-3), 10));
+            temp = temp.slice(0, -3);
+        }
+
+        let words = [];
+        let hasRead = false;
+        for (let i = groups.length - 1; i >= 0; i--) {
+            let g = groups[i];
+            if (g > 0) {
+                let isLeading = !hasRead;
+                let groupStr = readGroup(g, isLeading);
+                if (groupStr) {
+                    words.push(groupStr);
+                    let scale = scales[i % scales.length];
+                    if (scale) words.push(scale);
+                    hasRead = true;
+                }
+            }
+        }
+
+        let result = words.join(' ').replace(/\s+/g, ' ').trim();
+        if (!result) result = 'không';
+
+        if (decPart && decPart.replace(/\D/g, '').length > 0) {
+            let cleanDec = decPart.replace(/\D/g, '');
+            let decWords = [];
+            for (let char of cleanDec) decWords.push(digits[parseInt(char, 10)]);
+            result += ' phẩy ' + decWords.join(' ');
+        }
+
+        if (options.currency === 'dong') {
+            result += (!decPart && options.chan) ? ' đồng chẵn' : ' đồng';
+        } else if (options.currency === 'vnd') {
+            result += ' Việt Nam Đồng';
+        } else if (options.currency === 'usd') {
+            result += ' Đô la Mỹ';
+        }
+
+        if (isNegative) result = 'Âm ' + result;
+        return options.capitalize !== false ? (result.charAt(0).toUpperCase() + result.slice(1)) : result;
+    }
+
+    window.handleNumToWordsInput = function(input) {
+        if (!input) return;
+        let val = input.value.replace(/[^\d.,-]/g, '');
+        if (/^\d{4,}$/.test(val)) {
+            val = Number(val).toLocaleString('en-US');
+            input.value = val;
+        }
+        window.updateNumToWords();
+    };
+
+    window.updateNumToWords = function() {
+        const input = document.getElementById('numToWordsInput');
+        const box = document.getElementById('numToWordsResultText');
+        const copyBtn = document.getElementById('btnCopyNumWords');
+        if (!input || !box) return;
+
+        const raw = input.value.trim();
+        if (!raw) {
+            box.textContent = 'Nhập số vào ô trên để đọc thành chữ...';
+            box.style.color = 'var(--gray-400, #94a3b8)';
+            box.style.fontStyle = 'italic';
+            if (copyBtn) copyBtn.style.display = 'none';
+            return;
+        }
+
+        const capital = document.getElementById('numOptCapital') ? document.getElementById('numOptCapital').checked : true;
+        const chan = document.getElementById('numOptChan') ? document.getElementById('numOptChan').checked : true;
+        const currency = document.getElementById('numCurrencySelect') ? document.getElementById('numCurrencySelect').value : 'dong';
+
+        const words = readVietnameseNumber(raw, { capitalize: capital, chan, currency });
+        box.textContent = words;
+        box.style.color = 'var(--accent-ink, #0284c7)';
+        box.style.fontStyle = 'normal';
+        if (copyBtn) copyBtn.style.display = 'inline-flex';
+    };
+
+    window.copyNumToWords = function(btn) {
+        const box = document.getElementById('numToWordsResultText');
+        if (!box || !box.textContent || box.textContent.includes('Nhập số')) {
+            return window.showToast('⚠️ Chưa có kết quả để sao chép');
+        }
+        navigator.clipboard.writeText(box.textContent).then(() => {
+            const old = btn.textContent;
+            btn.textContent = '✓ Đã chép!';
+            setTimeout(() => btn.textContent = old, 2000);
+            window.showToast('📋 Đã sao chép chữ số thành công');
+        });
+    };
+
+    /* ===================================================================
+       V3.3 TIỆN ÍCH 2: SO SÁNH & ĐỐI CHIẾU 2 VĂN BẢN (WORD, PDF & TEXT)
+       =================================================================== */
+    async function extractTextFromDocx(arrayBuffer) {
+        if (!window.JSZip) {
+            throw new Error('Thư viện JSZip chưa sẵn sàng.');
+        }
+        const zip = await window.JSZip.loadAsync(arrayBuffer);
+        const docXmlFile = zip.file('word/document.xml');
+        if (!docXmlFile) {
+            throw new Error('Không tìm thấy nội dung document.xml trong file Word.');
+        }
+        const xmlText = await docXmlFile.async('text');
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+        const paragraphs = xmlDoc.getElementsByTagName('w:p');
+        const lines = [];
+        for (let i = 0; i < paragraphs.length; i++) {
+            const texts = paragraphs[i].getElementsByTagName('w:t');
+            let pText = '';
+            for (let j = 0; j < texts.length; j++) {
+                pText += texts[j].textContent || '';
+            }
+            if (pText.trim()) lines.push(pText);
+        }
+        return lines.join('\n');
+    }
+
+    async function extractTextFromPdf(arrayBuffer) {
+        if (typeof ensurePdfJs === 'function') await ensurePdfJs();
+        if (!window.pdfjsLib) {
+            throw new Error('Thư viện PDF.js chưa sẵn sàng.');
+        }
+        const loadingTask = window.pdfjsLib.getDocument({ data: arrayBuffer });
+        const pdf = await loadingTask.promise;
+        const pageTexts = [];
+        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+            const page = await pdf.getPage(pageNum);
+            const textContent = await page.getTextContent();
+            const pageStr = textContent.items.map(item => item.str).join(' ');
+            if (pageStr.trim()) pageTexts.push(`--- Trang ${pageNum} ---\n` + pageStr);
+        }
+        return pageTexts.join('\n\n');
+    }
+
+    window.handleDiffFileUpload = async function(event, target) {
+        const file = event.target.files && event.target.files[0];
+        if (!file) return;
+
+        const badge = document.getElementById('diffFileBadge' + target);
+        const textarea = document.getElementById('diffText' + target);
+        if (badge) {
+            badge.style.display = 'block';
+            badge.textContent = `⏳ Đang đọc tệp: ${file.name}...`;
+        }
+
+        try {
+            const fileName = file.name.toLowerCase();
+            const arrayBuffer = await file.arrayBuffer();
+            let extractedText = '';
+
+            if (fileName.endsWith('.docx')) {
+                extractedText = await extractTextFromDocx(arrayBuffer);
+            } else if (fileName.endsWith('.pdf')) {
+                extractedText = await extractTextFromPdf(arrayBuffer);
+            } else {
+                extractedText = new TextDecoder('utf-8').decode(arrayBuffer);
+            }
+
+            if (textarea) {
+                textarea.value = extractedText;
+                window.updateDiffStats();
+            }
+            if (badge) {
+                badge.textContent = `📎 Đã nạp: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+                badge.style.display = 'block';
+            }
+            window.showToast(`📄 Đã trích xuất nội dung từ ${file.name}`);
+        } catch (err) {
+            console.error('Lỗi đọc file so sánh:', err);
+            if (badge) badge.style.display = 'none';
+            window.showToast('⚠️ Không thể đọc tệp: ' + err.message);
+        } finally {
+            event.target.value = '';
+        }
+    };
+
+    window.clearDiffText = function(target) {
+        const textarea = document.getElementById('diffText' + target);
+        const badge = document.getElementById('diffFileBadge' + target);
+        if (textarea) textarea.value = '';
+        if (badge) badge.style.display = 'none';
+        window.updateDiffStats();
+        window.showToast(`🗑️ Đã xóa nội dung Văn bản ${target}`);
+    };
+
+    window.swapDiffTexts = function() {
+        const textA = document.getElementById('diffTextA');
+        const textB = document.getElementById('diffTextB');
+        const badgeA = document.getElementById('diffFileBadgeA');
+        const badgeB = document.getElementById('diffFileBadgeB');
+        if (!textA || !textB) return;
+
+        const tmpVal = textA.value;
+        textA.value = textB.value;
+        textB.value = tmpVal;
+
+        if (badgeA && badgeB) {
+            const tmpBadgeText = badgeA.textContent;
+            const tmpBadgeDisplay = badgeA.style.display;
+            badgeA.textContent = badgeB.textContent;
+            badgeA.style.display = badgeB.style.display;
+            badgeB.textContent = tmpBadgeText;
+            badgeB.style.display = tmpBadgeDisplay;
+        }
+
+        window.updateDiffStats();
+        window.runDocumentDiff();
+        window.showToast('⇄ Đã hoán đổi vị trí Văn bản A và B');
+    };
+
+    window.updateDiffStats = function() {
+        const textA = document.getElementById('diffTextA') ? document.getElementById('diffTextA').value : '';
+        const textB = document.getElementById('diffTextB') ? document.getElementById('diffTextB').value : '';
+
+        const wordsA = (textA.match(/\S+/g) || []).length;
+        const wordsB = (textB.match(/\S+/g) || []).length;
+
+        const statA = document.getElementById('diffStatsA');
+        const statB = document.getElementById('diffStatsB');
+        if (statA) statA.textContent = `${wordsA.toLocaleString()} từ · ${textA.length.toLocaleString()} ký tự`;
+        if (statB) statB.textContent = `${wordsB.toLocaleString()} từ · ${textB.length.toLocaleString()} ký tự`;
+    };
+
+    function computeDocumentDiff(textA, textB, options = {}) {
+        const mode = options.mode || 'word';
+        const ignoreCase = !!options.ignoreCase;
+        const trimSpace = !!options.trimSpace;
+
+        function cleanToken(t) {
+            let s = t;
+            if (trimSpace) s = s.trim();
+            if (ignoreCase) s = s.toLowerCase();
+            return s;
+        }
+
+        let tokensA = mode === 'line' ? textA.split('\n') : (textA.match(/\S+|\s+/g) || []);
+        let tokensB = mode === 'line' ? textB.split('\n') : (textB.match(/\S+|\s+/g) || []);
+
+        let start = 0;
+        while (start < tokensA.length && start < tokensB.length && cleanToken(tokensA[start]) === cleanToken(tokensB[start])) {
+            start++;
+        }
+
+        let endA = tokensA.length - 1;
+        let endB = tokensB.length - 1;
+        while (endA >= start && endB >= start && cleanToken(tokensA[endA]) === cleanToken(tokensB[endB])) {
+            endA--;
+            endB--;
+        }
+
+        const midA = tokensA.slice(start, endA + 1);
+        const midB = tokensB.slice(start, endB + 1);
+
+        const maxMatrixSize = 3500;
+        let midDiff = [];
+        if (midA.length > maxMatrixSize || midB.length > maxMatrixSize) {
+            midDiff.push({ type: 'del', text: midA.join(mode === 'line' ? '\n' : '') });
+            midDiff.push({ type: 'ins', text: midB.join(mode === 'line' ? '\n' : '') });
+        } else {
+            const dp = Array(midA.length + 1).fill(0).map(() => Array(midB.length + 1).fill(0));
+            for (let i = 1; i <= midA.length; i++) {
+                for (let j = 1; j <= midB.length; j++) {
+                    if (cleanToken(midA[i - 1]) === cleanToken(midB[j - 1])) {
+                        dp[i][j] = dp[i - 1][j - 1] + 1;
+                    } else {
+                        dp[i][j] = Math.max(dp[i - 1][j], dp[i][j - 1]);
+                    }
+                }
+            }
+
+            let i = midA.length, j = midB.length;
+            while (i > 0 || j > 0) {
+                if (i > 0 && j > 0 && cleanToken(midA[i - 1]) === cleanToken(midB[j - 1])) {
+                    midDiff.unshift({ type: 'same', text: midA[i - 1] });
+                    i--; j--;
+                } else if (j > 0 && (i === 0 || dp[i][j - 1] >= dp[i - 1][j])) {
+                    midDiff.unshift({ type: 'ins', text: midB[j - 1] });
+                    j--;
+                } else if (i > 0) {
+                    midDiff.unshift({ type: 'del', text: midA[i - 1] });
+                    i--;
+                }
+            }
+        }
+
+        const diff = [];
+        for (let k = 0; k < start; k++) diff.push({ type: 'same', text: tokensA[k] });
+        diff.push(...midDiff);
+        for (let k = endA + 1; k < tokensA.length; k++) diff.push({ type: 'same', text: tokensA[k] });
+
+        let countSame = 0, countIns = 0, countDel = 0;
+        diff.forEach(d => {
+            const isWord = /\S/.test(d.text);
+            if (isWord) {
+                if (d.type === 'same') countSame++;
+                else if (d.type === 'ins') countIns++;
+                else if (d.type === 'del') countDel++;
+            }
+        });
+
+        const totalWords = countSame * 2 + countIns + countDel;
+        const similarity = totalWords > 0 ? Math.round((2 * countSame / totalWords) * 1000) / 10 : 100;
+
+        return { diff, countSame, countIns, countDel, similarity, mode };
+    }
+
+    let lastDiffResult = null;
+
+    function escapeHtml(str) {
+        return (str || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    window.runDocumentDiff = function() {
+        const textA = (document.getElementById('diffTextA')?.value || '').trim();
+        const textB = (document.getElementById('diffTextB')?.value || '').trim();
+
+        if (!textA && !textB) {
+            return window.showToast('⚠️ Vui lòng nhập hoặc tải ít nhất một văn bản');
+        }
+
+        const mode = document.getElementById('diffModeSelect')?.value || 'word';
+        const ignoreCase = !!document.getElementById('diffOptIgnoreCase')?.checked;
+        const trimSpace = !!document.getElementById('diffOptTrimSpace')?.checked;
+
+        const res = computeDocumentDiff(textA, textB, { mode, ignoreCase, trimSpace });
+        lastDiffResult = res;
+
+        const simEl = document.getElementById('diffSimScore');
+        const insEl = document.getElementById('diffCountIns');
+        const delEl = document.getElementById('diffCountDel');
+        const sameEl = document.getElementById('diffCountSame');
+        if (simEl) simEl.textContent = res.similarity + '%';
+        if (insEl) insEl.textContent = '+' + res.countIns.toLocaleString();
+        if (delEl) delEl.textContent = '-' + res.countDel.toLocaleString();
+        if (sameEl) sameEl.textContent = res.countSame.toLocaleString();
+
+        const outA = document.getElementById('diffOutputA');
+        const outB = document.getElementById('diffOutputB');
+        const outInline = document.getElementById('diffOutputInline');
+
+        let htmlA = '';
+        let htmlB = '';
+        let htmlInline = '';
+
+        res.diff.forEach(item => {
+            const escaped = escapeHtml(item.text);
+            if (item.type === 'same') {
+                htmlA += escaped;
+                htmlB += escaped;
+                htmlInline += escaped;
+            } else if (item.type === 'del') {
+                htmlA += `<mark style="background:#fee2e2; color:#b91c1c; text-decoration:line-through; border-radius:3px; padding:1px 3px;">${escaped}</mark>`;
+                htmlInline += `<mark style="background:#fee2e2; color:#b91c1c; text-decoration:line-through; border-radius:3px; padding:1px 3px;">${escaped}</mark>`;
+            } else if (item.type === 'ins') {
+                htmlB += `<mark style="background:#dcfce7; color:#15803d; font-weight:600; border-radius:3px; padding:1px 3px;">${escaped}</mark>`;
+                htmlInline += `<mark style="background:#dcfce7; color:#15803d; font-weight:600; border-radius:3px; padding:1px 3px;">${escaped}</mark>`;
+            }
+        });
+
+        if (outA) outA.innerHTML = htmlA || '<i style="color:var(--gray-400);">Không có nội dung</i>';
+        if (outB) outB.innerHTML = htmlB || '<i style="color:var(--gray-400);">Không có nội dung</i>';
+        if (outInline) outInline.innerHTML = htmlInline || '<i style="color:var(--gray-400);">Không có nội dung</i>';
+
+        const container = document.getElementById('diffResultsContainer');
+        if (container) {
+            container.style.display = 'block';
+            container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        window.showToast(`📊 Đã so sánh xong! Độ tương đồng: ${res.similarity}%`);
+    };
+
+    window.switchDiffView = function(viewMode) {
+        const sideView = document.getElementById('diffViewSide');
+        const inlineView = document.getElementById('diffViewInline');
+        const btnSide = document.getElementById('btnDiffViewSide');
+        const btnInline = document.getElementById('btnDiffViewInline');
+
+        if (viewMode === 'side') {
+            if (sideView) sideView.style.display = 'grid';
+            if (inlineView) inlineView.style.display = 'none';
+            if (btnSide) btnSide.classList.add('active');
+            if (btnInline) btnInline.classList.remove('active');
+        } else {
+            if (sideView) sideView.style.display = 'none';
+            if (inlineView) inlineView.style.display = 'block';
+            if (btnSide) btnSide.classList.remove('active');
+            if (btnInline) btnInline.classList.add('active');
+        }
+    };
+
+    window.copyDiffReport = function(btn) {
+        if (!lastDiffResult) return window.showToast('⚠️ Chưa có kết quả so sánh để sao chép');
+        let report = `BÁO CÁO ĐỐI CHIẾU VĂN BẢN (KHCN WORKSPACE)\n`;
+        report += `=========================================\n`;
+        report += `Độ tương đồng: ${lastDiffResult.similarity}%\n`;
+        report += `Từ giống nhau: ${lastDiffResult.countSame}\n`;
+        report += `Từ thêm mới: +${lastDiffResult.countIns}\n`;
+        report += `Từ bị xóa: -${lastDiffResult.countDel}\n`;
+        report += `=========================================\n\n`;
+        report += `NỘI DUNG CHI TIẾT (ĐÁNH DẤU CHÊNH LỆCH):\n`;
+        lastDiffResult.diff.forEach(item => {
+            if (item.type === 'del') report += `[-${item.text}-]`;
+            else if (item.type === 'ins') report += `[+${item.text}+]`;
+            else report += item.text;
+        });
+
+        navigator.clipboard.writeText(report).then(() => {
+            const old = btn.textContent;
+            btn.textContent = '✓ Đã chép!';
+            setTimeout(() => btn.textContent = old, 2000);
+            window.showToast('📋 Đã sao chép báo cáo chênh lệch vào bộ nhớ tạm');
+        });
     };
 
     
